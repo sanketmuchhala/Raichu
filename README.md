@@ -2,6 +2,7 @@
 
 Grim is a 4-player partnership card game. This project provides a basic implementation using React 18, TypeScript, Zustand and Vite. The app now includes a minimal lobby, coin toss and playable table with simple bot opponents.
 
+
 ## Development
 ```bash
 npm install

@@ -30,6 +30,7 @@ interface AppState {
   tossCoin: () => void;
   startGame: () => void;
   playCard: (seat: Seat, card: Card) => void;
+
 }
 
 export const useAppStore = create<AppState>()(
@@ -95,6 +96,7 @@ export const useAppStore = create<AppState>()(
           const current = (((seat + 1) % 4) as Seat);
           return { hands, trick, current, trickLeader, lead };
         }),
+
     }),
     { name: 'grim-state' }
   )

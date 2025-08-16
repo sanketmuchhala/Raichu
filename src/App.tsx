@@ -3,7 +3,6 @@ import Lobby from './routes/Lobby';
 import Rules from './routes/Rules';
 import CoinToss from './routes/CoinToss';
 import Table from './routes/Table';
-
 export default function App() {
   return (
     <div className="min-h-screen bg-green-700 text-white">
