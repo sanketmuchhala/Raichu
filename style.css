@@ -606,11 +606,11 @@ body.dark-mode {
 }
 
 .dark-mode .cell.light {
-    background: #769656;
+    background: #2c2c2e;
 }
 
 .dark-mode .cell.dark {
-    background: #baca44;
+    background: #1d1d1f;
 }
 
 /* Selected Cell - Improved Visibility */
