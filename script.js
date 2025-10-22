@@ -559,8 +559,24 @@ document.getElementById('bot-move-btn').addEventListener('click', () => {
 
 document.getElementById('undo-btn').addEventListener('click', undoMove);
 
+// Dark mode toggle
+document.getElementById('dark-mode-toggle').addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    document.getElementById('dark-mode-toggle').textContent = isDark ? 'Light' : 'Dark';
+    // Save preference
+    localStorage.setItem('darkMode', isDark);
+});
+
 // Initialize game on load
 window.addEventListener('DOMContentLoaded', () => {
+    // Load dark mode preference
+    const darkMode = localStorage.getItem('darkMode') === 'true';
+    if (darkMode) {
+        document.body.classList.add('dark-mode');
+        document.getElementById('dark-mode-toggle').textContent = 'Light';
+    }
+
     initGame();
     showMessage('Welcome to Raichu! Click a white piece to start.');
 });

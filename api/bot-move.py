@@ -299,8 +299,8 @@ def find_best_move(board: str, N: int, player: str, timelimit: int) -> str:
 
     next_board = random.choice(fringe)
 
-    # Iterative deepening
-    for depth in range(2, 5):
+    # Iterative deepening - reduced depth for faster performance
+    for depth in range(1, 3):  # Reduced from range(2, 5) for speed
         max_depth[0] = depth
         recommended_board = alpha_beta_decision(board, player, N, ini_player)
 
