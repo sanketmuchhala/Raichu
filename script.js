@@ -6,7 +6,8 @@ let gameState = {
     possibleMoves: [],
     gameOver: false,
     moveHistory: [],
-    N: 8
+    N: 8,
+    gameMode: 'bot' // 'bot' or '2player'
 };
 
 // Piece mapping for display
@@ -50,12 +51,15 @@ function renderBoard() {
     const boardElement = document.getElementById('game-board');
     boardElement.innerHTML = '';
 
-    for (let row = 0; row < gameState.N; row++) {
+    // Render rows in reverse order (7 to 0) so white pieces appear at bottom
+    for (let row = gameState.N - 1; row >= 0; row--) {
         for (let col = 0; col < gameState.N; col++) {
             const index = row * gameState.N + col;
             const cell = document.createElement('div');
             cell.className = 'cell';
-            cell.classList.add((row + col) % 2 === 0 ? 'light' : 'dark');
+            // Adjust checkerboard pattern for flipped board
+            const visualRow = gameState.N - 1 - row;
+            cell.classList.add((visualRow + col) % 2 === 0 ? 'light' : 'dark');
             cell.dataset.index = index;
 
             const piece = gameState.board[index];
@@ -163,8 +167,8 @@ function makeMove(from, to) {
     renderBoard();
     updateGameInfo();
 
-    // If it's now black's turn, trigger bot move
-    if (gameState.currentPlayer === 'b') {
+    // If it's now black's turn and in bot mode, trigger bot move
+    if (gameState.currentPlayer === 'b' && gameState.gameMode === 'bot') {
         setTimeout(() => requestBotMove(), 500);
     }
 }
@@ -509,11 +513,19 @@ function showLoading(show) {
 
 // Update game info display
 function updateGameInfo() {
-    const playerIndicator = document.getElementById('current-player');
-    playerIndicator.textContent = gameState.currentPlayer === 'w' ? 'White' : 'Black';
-    playerIndicator.style.background = gameState.currentPlayer === 'w'
-        ? 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
-        : 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
+    if (gameState.gameOver) return;
+
+    if (gameState.gameMode === 'bot') {
+        if (gameState.currentPlayer === 'w') {
+            showMessage('Your move');
+        } else {
+            showMessage('Bot is thinking...');
+        }
+    } else {
+        // 2-player mode
+        const player = gameState.currentPlayer === 'w' ? 'White' : 'Black';
+        showMessage(`${player}'s turn`);
+    }
 }
 
 // Show message
@@ -545,11 +557,15 @@ function undoMove() {
 document.getElementById('new-game-btn').addEventListener('click', () => {
     if (confirm('Start a new game?')) {
         initGame();
-        showMessage('New game started! White goes first.');
+        showMessage(gameState.gameMode === 'bot' ? 'New game started! Your move.' : 'New game started! White goes first.');
     }
 });
 
 document.getElementById('bot-move-btn').addEventListener('click', () => {
+    if (gameState.gameMode === '2player') {
+        showMessage('Bot move is only available in vs Bot mode!');
+        return;
+    }
     if (gameState.currentPlayer === 'b') {
         showMessage('Bot is already thinking...');
     } else {
@@ -558,6 +574,31 @@ document.getElementById('bot-move-btn').addEventListener('click', () => {
 });
 
 document.getElementById('undo-btn').addEventListener('click', undoMove);
+
+// Game mode selector
+document.getElementById('mode-bot').addEventListener('click', () => {
+    gameState.gameMode = 'bot';
+    document.getElementById('mode-bot').classList.add('active');
+    document.getElementById('mode-2player').classList.remove('active');
+    document.getElementById('bot-move-btn').style.display = 'block';
+    initGame();
+    showMessage('Bot mode selected. Your move!');
+});
+
+document.getElementById('mode-2player').addEventListener('click', () => {
+    gameState.gameMode = '2player';
+    document.getElementById('mode-2player').classList.add('active');
+    document.getElementById('mode-bot').classList.remove('active');
+    document.getElementById('bot-move-btn').style.display = 'none';
+    initGame();
+    showMessage('2-player mode selected. White goes first!');
+});
+
+// Rules toggle
+document.getElementById('rules-toggle').addEventListener('click', () => {
+    const rulesSection = document.querySelector('.rules-section');
+    rulesSection.classList.toggle('collapsed');
+});
 
 // Dark mode toggle
 document.getElementById('dark-mode-toggle').addEventListener('click', () => {
@@ -570,11 +611,14 @@ document.getElementById('dark-mode-toggle').addEventListener('click', () => {
 
 // Initialize game on load
 window.addEventListener('DOMContentLoaded', () => {
-    // Load dark mode preference
+    // Load dark mode preference (default is light mode)
     const darkMode = localStorage.getItem('darkMode') === 'true';
     if (darkMode) {
         document.body.classList.add('dark-mode');
         document.getElementById('dark-mode-toggle').textContent = 'Light';
+    } else {
+        // Explicitly set light mode text
+        document.getElementById('dark-mode-toggle').textContent = 'Dark';
     }
 
     initGame();
