@@ -29,6 +29,15 @@
                     <button id="mode-2player" class="mode-btn">2 Players</button>
                 </div>
 
+                <div class="difficulty-selector" id="difficulty-selector">
+                    <label class="difficulty-label">Difficulty:</label>
+                    <div class="difficulty-buttons">
+                        <button id="diff-1" class="diff-btn">Easy</button>
+                        <button id="diff-2" class="diff-btn active">Medium</button>
+                        <button id="diff-3" class="diff-btn">Hard</button>
+                    </div>
+                </div>
+
                 <div class="game-status">
                     <div id="game-message" class="status-message">Your move</div>
                 </div>
@@ -80,6 +89,15 @@
         <footer>
             <p>AI powered by Minimax with Alpha-Beta Pruning</p>
         </footer>
+    </div>
+
+    <!-- Win/Lose Modal -->
+    <div class="game-modal" id="game-modal">
+        <div class="modal-content">
+            <h2 id="modal-title">Game Over</h2>
+            <p id="modal-message">You won!</p>
+            <button id="modal-new-game" class="btn btn-primary">Play Again</button>
+        </div>
     </div>
 
     <script src="script.js"></script>

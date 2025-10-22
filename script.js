@@ -7,7 +7,8 @@ let gameState = {
     gameOver: false,
     moveHistory: [],
     N: 8,
-    gameMode: 'bot' // 'bot' or '2player'
+    gameMode: 'bot', // 'bot' or '2player'
+    difficulty: 2 // 1=Easy, 2=Medium, 3=Hard
 };
 
 // Piece mapping for display
@@ -161,8 +162,10 @@ function makeMove(from, to) {
     // Check win condition
     if (checkWinCondition()) {
         gameState.gameOver = true;
-        showMessage(`🎉 ${gameState.currentPlayer === 'w' ? 'White' : 'Black'} wins!`);
+        const winner = gameState.currentPlayer === 'w' ? 'White' : 'Black';
+        showMessage(`${winner} wins!`);
         renderBoard();
+        showGameModal(winner === 'White' ? 'you' : 'bot');
         return;
     }
 
@@ -451,6 +454,10 @@ async function requestBotMove() {
     showMessage('Bot is thinking...');
 
     try {
+        // Set timelimit based on difficulty
+        const timelimits = { 1: 3, 2: 10, 3: 20 };
+        const timelimit = timelimits[gameState.difficulty] || 10;
+
         const response = await fetch('/api/bot-move', {
             method: 'POST',
             headers: {
@@ -459,7 +466,7 @@ async function requestBotMove() {
             body: JSON.stringify({
                 board: gameState.board.join(''),
                 player: gameState.currentPlayer,
-                timelimit: 10
+                timelimit: timelimit
             })
         });
 
@@ -482,10 +489,12 @@ async function requestBotMove() {
             // Check win condition
             if (checkWinCondition()) {
                 gameState.gameOver = true;
-                showMessage(`🎉 ${gameState.currentPlayer === 'w' ? 'White' : 'Black'} wins!`);
+                const winner = gameState.currentPlayer === 'w' ? 'White' : 'Black';
+                showMessage(`${winner} wins!`);
                 showLoading(false);
                 renderBoard();
                 updateGameInfo();
+                showGameModal(winner === 'White' ? 'you' : 'bot');
                 return;
             }
 
@@ -586,6 +595,7 @@ document.getElementById('mode-bot').addEventListener('click', () => {
     document.getElementById('mode-bot').classList.add('active');
     document.getElementById('mode-2player').classList.remove('active');
     document.getElementById('bot-move-btn').style.display = 'block';
+    document.getElementById('difficulty-selector').classList.remove('hidden');
     initGame();
     showMessage('Bot mode selected. Your move!');
 });
@@ -595,6 +605,7 @@ document.getElementById('mode-2player').addEventListener('click', () => {
     document.getElementById('mode-2player').classList.add('active');
     document.getElementById('mode-bot').classList.remove('active');
     document.getElementById('bot-move-btn').style.display = 'none';
+    document.getElementById('difficulty-selector').classList.add('hidden');
     initGame();
     showMessage('2-player mode selected. White goes first!');
 });
@@ -704,6 +715,56 @@ window.addEventListener('resize', () => {
     if (window.innerWidth > 1024 && sidebarState.isOpen) {
         closeSidebar();
     }
+});
+
+// Game Modal Functions
+function showGameModal(winner) {
+    const modal = document.getElementById('game-modal');
+    const title = document.getElementById('modal-title');
+    const message = document.getElementById('modal-message');
+
+    if (winner === 'you') {
+        title.textContent = 'Congratulations!';
+        message.textContent = 'You won the game!';
+    } else if (winner === 'bot') {
+        title.textContent = 'Game Over';
+        message.textContent = 'The bot won this time. Try again!';
+    } else {
+        title.textContent = 'Game Over';
+        message.textContent = winner === 'White' ? 'White wins!' : 'Black wins!';
+    }
+
+    modal.classList.add('active');
+}
+
+function hideGameModal() {
+    const modal = document.getElementById('game-modal');
+    modal.classList.remove('active');
+}
+
+document.getElementById('modal-new-game').addEventListener('click', () => {
+    hideGameModal();
+    initGame();
+    showMessage(gameState.gameMode === 'bot' ? 'New game started! Your move.' : 'New game started! White goes first.');
+});
+
+// Difficulty Selector
+document.getElementById('diff-1').addEventListener('click', () => {
+    gameState.difficulty = 1;
+    document.querySelectorAll('.diff-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('diff-1').classList.add('active');
+});
+
+document.getElementById('diff-2').addEventListener('click', () => {
+    gameState.difficulty = 2;
+    document.querySelectorAll('.diff-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('diff-2').classList.add('active');
+});
+
+document.getElementById('diff-3').addEventListener('click', () => {
+    gameState.difficulty = 3;
+    document.querySelectorAll('.diff-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('diff-3').classList.add('active');
 });
 
 // Initialize game on load
