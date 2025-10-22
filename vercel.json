@@ -1,7 +1,7 @@
 {
   "functions": {
-    "api/bot-move.py": {
-      "runtime": "python3.9"
+    "api/*.py": {
+      "runtime": "python@3.9"
     }
   }
 }
