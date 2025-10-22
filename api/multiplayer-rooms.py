@@ -3,7 +3,33 @@ API endpoint to list all available multiplayer game rooms
 """
 from http.server import BaseHTTPRequestHandler
 import json
-from room_utils import load_rooms, cleanup_old_rooms, save_rooms
+import os
+from datetime import datetime
+
+ROOMS_FILE = '/tmp/raichu_rooms.json'
+
+def load_rooms():
+    """Load all rooms from storage"""
+    if not os.path.exists(ROOMS_FILE):
+        return []
+    try:
+        with open(ROOMS_FILE, 'r') as f:
+            return json.load(f)
+    except:
+        return []
+
+def save_rooms(rooms):
+    """Save rooms to storage"""
+    try:
+        with open(ROOMS_FILE, 'w') as f:
+            json.dump(rooms, f)
+    except:
+        pass
+
+def cleanup_old_rooms(rooms):
+    """Remove rooms older than 2 hours"""
+    cutoff = datetime.now().timestamp() - (2 * 60 * 60)
+    return [r for r in rooms if r.get('lastActivity', 0) > cutoff]
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):

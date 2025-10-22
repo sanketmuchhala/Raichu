@@ -3,8 +3,28 @@ API endpoint to submit a move in a multiplayer game
 """
 from http.server import BaseHTTPRequestHandler
 import json
+import os
 from datetime import datetime
-from room_utils import load_rooms, save_rooms, get_room_by_id
+
+ROOMS_FILE = '/tmp/raichu_rooms.json'
+
+def load_rooms():
+    """Load all rooms from storage"""
+    if not os.path.exists(ROOMS_FILE):
+        return []
+    try:
+        with open(ROOMS_FILE, 'r') as f:
+            return json.load(f)
+    except:
+        return []
+
+def save_rooms(rooms):
+    """Save rooms to storage"""
+    try:
+        with open(ROOMS_FILE, 'w') as f:
+            json.dump(rooms, f)
+    except:
+        pass
 
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):

@@ -3,7 +3,33 @@ API endpoint to join an existing multiplayer game room
 """
 from http.server import BaseHTTPRequestHandler
 import json
-from room_utils import load_rooms, save_rooms, get_room_by_id, generate_room_code
+import os
+import random
+import string
+
+ROOMS_FILE = '/tmp/raichu_rooms.json'
+
+def generate_room_code():
+    """Generate a unique 6-character room code"""
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+
+def load_rooms():
+    """Load all rooms from storage"""
+    if not os.path.exists(ROOMS_FILE):
+        return []
+    try:
+        with open(ROOMS_FILE, 'r') as f:
+            return json.load(f)
+    except:
+        return []
+
+def save_rooms(rooms):
+    """Save rooms to storage"""
+    try:
+        with open(ROOMS_FILE, 'w') as f:
+            json.dump(rooms, f)
+    except:
+        pass
 
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):

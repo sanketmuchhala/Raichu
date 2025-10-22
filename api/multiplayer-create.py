@@ -3,7 +3,39 @@ API endpoint to create a new multiplayer game room
 """
 from http.server import BaseHTTPRequestHandler
 import json
-from room_utils import load_rooms, save_rooms, create_room_data, generate_room_code, cleanup_old_rooms
+import os
+from datetime import datetime
+import random
+import string
+
+ROOMS_FILE = '/tmp/raichu_rooms.json'
+
+def generate_room_code():
+    """Generate a unique 6-character room code"""
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+
+def load_rooms():
+    """Load all rooms from storage"""
+    if not os.path.exists(ROOMS_FILE):
+        return []
+    try:
+        with open(ROOMS_FILE, 'r') as f:
+            return json.load(f)
+    except:
+        return []
+
+def save_rooms(rooms):
+    """Save rooms to storage"""
+    try:
+        with open(ROOMS_FILE, 'w') as f:
+            json.dump(rooms, f)
+    except Exception as e:
+        print(f"Error saving rooms: {e}")
+
+def cleanup_old_rooms(rooms):
+    """Remove rooms older than 2 hours"""
+    cutoff = datetime.now().timestamp() - (2 * 60 * 60)
+    return [r for r in rooms if r.get('lastActivity', 0) > cutoff]
 
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
@@ -19,7 +51,26 @@ class handler(BaseHTTPRequestHandler):
             room_id = f"GAME-{generate_room_code()}"
 
             # Create room data
-            room = create_room_data(room_id, player_name)
+            room = {
+                'roomId': room_id,
+                'roomName': f"{player_name}'s Game",
+                'status': 'waiting',
+                'board': 'wwwwwwww' + '.' * 48 + 'bbbbbbbb',
+                'currentPlayer': 'w',
+                'players': {
+                    'white': {
+                        'id': generate_room_code(),
+                        'name': player_name,
+                        'connected': True
+                    },
+                    'black': None
+                },
+                'createdAt': datetime.now().timestamp(),
+                'lastActivity': datetime.now().timestamp(),
+                'gameOver': False,
+                'winner': None,
+                'moveHistory': []
+            }
 
             # Load existing rooms and cleanup old ones
             rooms = load_rooms()

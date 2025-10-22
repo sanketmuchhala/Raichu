@@ -82,8 +82,20 @@ function renderBoard() {
                 } else {
                     pieceSpan.classList.add('piece-black');
                 }
+
+                // Enable drag and drop for player's pieces
+                const canDrag = getPieceColor(piece) === gameState.currentPlayer && !gameState.gameOver;
+                if (canDrag && (gameState.gameMode !== 'online' || gameState.online.playerColor === gameState.currentPlayer)) {
+                    cell.setAttribute('draggable', 'true');
+                    cell.addEventListener('dragstart', handleDragStart);
+                }
+
                 cell.appendChild(pieceSpan);
             }
+
+            // Make cell a drop target
+            cell.addEventListener('dragover', handleDragOver);
+            cell.addEventListener('drop', handleDrop);
 
             // Highlight selected cell
             if (gameState.selectedCell === index) {
@@ -99,6 +111,40 @@ function renderBoard() {
             boardElement.appendChild(cell);
         }
     }
+}
+
+// Drag and Drop Handlers
+let draggedPieceIndex = null;
+
+function handleDragStart(e) {
+    const index = parseInt(e.currentTarget.dataset.index);
+    draggedPieceIndex = index;
+
+    // Select the piece and show possible moves
+    selectPiece(index);
+
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', index);
+
+    // Add visual feedback
+    e.currentTarget.style.opacity = '0.5';
+}
+
+function handleDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    const targetIndex = parseInt(e.currentTarget.dataset.index);
+
+    if (draggedPieceIndex !== null && gameState.possibleMoves.includes(targetIndex)) {
+        makeMove(draggedPieceIndex, targetIndex);
+    }
+
+    draggedPieceIndex = null;
+    renderBoard();
 }
 
 // Handle cell click

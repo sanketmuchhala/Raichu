@@ -838,6 +838,19 @@ body.dark-mode {
     }
 }
 
+/* Drag and Drop Styling */
+.cell[draggable="true"] {
+    cursor: grab;
+}
+
+.cell[draggable="true"]:active {
+    cursor: grabbing;
+}
+
+.cell.drag-over {
+    border: 2px dashed #646f40;
+}
+
 .cell.light {
     background: #f0d9b5;
 }

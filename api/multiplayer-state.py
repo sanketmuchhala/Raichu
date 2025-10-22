@@ -3,8 +3,20 @@ API endpoint to get current game state (polling endpoint)
 """
 from http.server import BaseHTTPRequestHandler
 import json
-from room_utils import get_room_by_id
+import os
 from urllib.parse import urlparse, parse_qs
+
+ROOMS_FILE = '/tmp/raichu_rooms.json'
+
+def load_rooms():
+    """Load all rooms from storage"""
+    if not os.path.exists(ROOMS_FILE):
+        return []
+    try:
+        with open(ROOMS_FILE, 'r') as f:
+            return json.load(f)
+    except:
+        return []
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -20,7 +32,12 @@ class handler(BaseHTTPRequestHandler):
                 raise ValueError('Room ID is required')
 
             # Get room
-            room = get_room_by_id(room_id)
+            rooms = load_rooms()
+            room = None
+            for r in rooms:
+                if r['roomId'] == room_id:
+                    room = r
+                    break
 
             if not room:
                 raise ValueError('Room not found')
