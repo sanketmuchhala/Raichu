@@ -588,9 +588,30 @@ body.dark-mode {
     text-shadow: none;
     pointer-events: none;
     display: inline-block;
-    /* Safari-specific fixes for color rendering */
-    -webkit-text-fill-color: inherit;
-    -webkit-text-stroke-width: 0;
+}
+
+/* Piece colors - Light mode */
+.piece-white {
+    color: #2c3e50;
+    -webkit-text-fill-color: #2c3e50;
+}
+
+.piece-black {
+    color: #e74c3c;
+    -webkit-text-fill-color: #e74c3c;
+}
+
+/* Piece colors - Dark mode (improved contrast) */
+.dark-mode .piece-white {
+    color: #e8e8ed;
+    -webkit-text-fill-color: #e8e8ed;
+    font-weight: 500;
+}
+
+.dark-mode .piece-black {
+    color: #ff6b6b;
+    -webkit-text-fill-color: #ff6b6b;
+    font-weight: 500;
 }
 
 /* Ensure piece colors are visible on all backgrounds */
@@ -602,7 +623,7 @@ body.dark-mode {
 /* Mobile: ensure pieces have proper contrast */
 @media (max-width: 1024px) {
     .piece {
-        font-weight: 500;
+        font-weight: 600;
     }
 }
 
