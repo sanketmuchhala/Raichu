@@ -1,23 +1,15 @@
 {
-  "name": "raichu-web-game",
+  "name": "grim-code",
   "version": "1.0.0",
-  "description": "A Pokemon-inspired strategy game with AI bot powered by minimax algorithm",
+  "description": "A strategy game with AI bot powered by minimax algorithm",
   "main": "index.html",
-  "scripts": {
-    "dev": "vercel dev",
-    "deploy": "vercel --prod"
-  },
   "keywords": [
     "raichu",
-    "pokemon",
     "game",
     "ai",
     "minimax",
     "alpha-beta-pruning"
   ],
-  "author": "Your Name",
-  "license": "MIT",
-  "devDependencies": {
-    "vercel": "^33.0.0"
-  }
+  "author": "Sanket Muchhala",
+  "license": "MIT"
 }
