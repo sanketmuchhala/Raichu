@@ -67,7 +67,10 @@ function renderBoard() {
                 const pieceSpan = document.createElement('span');
                 pieceSpan.className = 'piece';
                 pieceSpan.textContent = PIECE_DISPLAY[piece];
-                pieceSpan.style.color = isWhitePiece(piece) ? '#2c3e50' : '#e74c3c';
+                const color = isWhitePiece(piece) ? '#2c3e50' : '#e74c3c';
+                // Set color for Safari compatibility
+                pieceSpan.style.color = color;
+                pieceSpan.style.webkitTextFillColor = color;
                 cell.appendChild(pieceSpan);
             }
 

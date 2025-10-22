@@ -587,6 +587,23 @@ body.dark-mode {
 .piece {
     text-shadow: none;
     pointer-events: none;
+    display: inline-block;
+    /* Safari-specific fixes for color rendering */
+    -webkit-text-fill-color: inherit;
+    -webkit-text-stroke-width: 0;
+}
+
+/* Ensure piece colors are visible on all backgrounds */
+.cell .piece {
+    filter: none;
+    -webkit-filter: none;
+}
+
+/* Mobile: ensure pieces have proper contrast */
+@media (max-width: 1024px) {
+    .piece {
+        font-weight: 500;
+    }
 }
 
 /* Loading Indicator */
