@@ -7,549 +7,335 @@ import json
 import copy
 import math
 import random
+from typing import List, Tuple, Dict
 
+# Global variables for algorithm
 max_depth = [1]
-best_move_at_level = {}
-successor_table = {}
-max_player = ""
-infinity = 9999
 
-def board_to_string(board, N):
-    return "\n".join(board[i:i+N] for i in range(0, len(board), N))
+def swap(board_str: str, i: int, j: int) -> str:
+    """Swap characters at positions i and j in the board string."""
+    board_list = list(board_str)
+    board_list[i], board_list[j] = board_list[j], board_list[i]
+    return ''.join(board_list)
 
-def swap(str, i, j):
-    list1 = list(str)
-    list1[i], list1[j] = list1[j], list1[i]
-    return ''.join(list1)
+def remove(board_str: str, i: int) -> str:
+    """Remove piece at position i by replacing with empty space."""
+    board_list = list(board_str)
+    board_list[i] = "."
+    return ''.join(board_list)
 
-def remove(str, i):
-    ls = list(str)
-    ls[i] = "."
-    return ''.join(ls)
+def replace_raichu(board_str: str, i: int, color: str) -> str:
+    """Replace piece at position i with a Raichu of given color."""
+    board_list = list(board_str)
+    if color == "w":
+        board_list[i] = "@"
+    elif color == "b":
+        board_list[i] = "$"
+    return ''.join(board_list)
 
-def replace_raichu(str, i, color):
-    ls = list(str)
-    if(color == "w"):
-        ls[i] = "@"
-    elif(color == "b"):
-        ls[i] = "$"
-    return ''.join(ls)
-
-def move_pichu(pos, N, board, color):
+def move_pichu(pos: int, N: int, board: str, color: str) -> List[str]:
+    """Generate all possible moves for Pichu piece at given position."""
     list_of_boards = []
-    pichu = ""
+    pichu = "b" if color == "w" else "w"
 
-    if(color=="w"):
-        pichu = "b"
+    if color == "w":
+        # White Pichu moves down
+        if pos % N != 0 and pos + N - 1 < N * N:
+            if board[pos + N - 1] == ".":
+                board_copy = board
+                if N * N - N <= pos + N - 1:
+                    board_copy = replace_raichu(board_copy, pos, color)
+                list_of_boards.append(swap(board_copy, pos, pos + N - 1))
+            elif board[pos + N - 1] == pichu and (pos + N - 1) % N != 0 and pos + (N * 2) - 2 < N * N:
+                if board[pos + (N * 2) - 2] == ".":
+                    board_copy = board
+                    if N * N - N <= pos + (N * 2) - 2:
+                        board_copy = replace_raichu(board_copy, pos, color)
+                    board_copy = remove(board_copy, pos + N - 1)
+                    list_of_boards.append(swap(board_copy, pos, pos + (N * 2) - 2))
 
-        if(pos%N != 0 and pos+N-1 < N*N):
-            if(board[pos+N-1]=="."):
-                boardCopy = copy.deepcopy(board)
-                if(N*N-N <= pos+N-1):
-                    boardCopy = replace_raichu(boardCopy, pos, color)
-                list_of_boards.append(swap(boardCopy, pos, pos+N-1))
+        if (pos + 1) % N != 0 and pos + N + 1 < N * N:
+            if board[pos + N + 1] == ".":
+                board_copy = board
+                if N * N - N <= pos + N + 1:
+                    board_copy = replace_raichu(board_copy, pos, color)
+                list_of_boards.append(swap(board_copy, pos, pos + N + 1))
+            elif board[pos + N + 1] == pichu and (pos + N + 1) % N != 0 and pos + (N * 2) + 2 < N * N:
+                if board[pos + (N * 2) + 2] == ".":
+                    board_copy = board
+                    if N * N - N <= pos + (N * 2) + 2:
+                        board_copy = replace_raichu(board_copy, pos, color)
+                    board_copy = remove(board_copy, pos + N + 1)
+                    list_of_boards.append(swap(board_copy, pos, pos + (N * 2) + 2))
 
-            elif(board[pos+N-1]==pichu and (pos+N-1)%N !=0 and pos+(N*2)-2 < N*N):
-                if(board[pos+(N*2)-2]=="."):
-                    boardCopy = copy.deepcopy(board)
-                    if(N*N-N <=  pos+(N*2)-2):
-                        boardCopy = replace_raichu(boardCopy, pos, color)
-                    boardCopy = remove(boardCopy, pos+N-1)
-                    list_of_boards.append(swap(boardCopy, pos, pos+(N*2)-2))
+    elif color == "b":
+        # Black Pichu moves up
+        if pos % N != 0 and pos - N - 1 >= 0:
+            if board[pos - N - 1] == ".":
+                board_copy = board
+                if N > pos - N - 1:
+                    board_copy = replace_raichu(board_copy, pos, color)
+                list_of_boards.append(swap(board_copy, pos, pos - N - 1))
+            elif board[pos - N - 1] == pichu and (pos - N - 1) % N != 0 and pos - N * 2 - 2 >= 0:
+                if board[pos - (N * 2) - 2] == ".":
+                    board_copy = board
+                    if N > pos - N * 2 - 2:
+                        board_copy = replace_raichu(board_copy, pos, color)
+                    board_copy = remove(board_copy, pos - N - 1)
+                    list_of_boards.append(swap(board_copy, pos, pos - N * 2 - 2))
 
-        if((pos+1)%N != 0 and pos+N+1 < N*N):
-            if(board[pos+N+1]=="."):
-                boardCopy = copy.deepcopy(board)
-                if(N*N-N <= pos+N+1):
-                    boardCopy = replace_raichu(boardCopy, pos, color)
-                list_of_boards.append(swap(boardCopy, pos, pos+N+1))
-
-            elif(board[pos+N+1]==pichu and (pos+N+1)%N !=0 and pos+(N*2)+2 < N*N):
-                if(board[pos+(N*2)+2]=="."):
-                    boardCopy = copy.deepcopy(board)
-                    if(N*N-N <= pos+(N*2)+2):
-                        boardCopy = replace_raichu(boardCopy, pos, color)
-                    boardCopy = remove(boardCopy, pos+N+1)
-                    list_of_boards.append(swap(boardCopy, pos, pos+(N*2)+2))
-
-    elif(color=="b"):
-        pichu="w"
-
-        if(pos%N!=0 and pos-N-1 >= 0):
-            if(board[pos-N-1]=="."):
-                boardCopy = copy.deepcopy(board)
-                if(N > pos-N-1):
-                    boardCopy = replace_raichu(boardCopy, pos, color)
-                list_of_boards.append(swap(boardCopy, pos, pos-N-1))
-
-            elif(board[pos-N-1]==pichu and (pos-N-1)%N !=0 and pos-N*2-2 >= 0):
-                if(board[pos-(N*2)-2]=="."):
-                    boardCopy = copy.deepcopy(board)
-                    if(N > pos-N*2-2):
-                        boardCopy = replace_raichu(boardCopy, pos, color)
-                    boardCopy = remove(boardCopy, pos-N-1)
-                    list_of_boards.append(swap(boardCopy, pos, pos-N*2-2))
-
-        if((pos+1)%N != 0 and pos-N+1 >= 0):
-            if(board[pos-N+1]=="."):
-                boardCopy = copy.deepcopy(board)
-                if(N > pos-N+1):
-                    boardCopy = replace_raichu(boardCopy, pos, color)
-                list_of_boards.append(swap(boardCopy, pos, pos-N+1))
-
-            elif(board[pos-N+1]==pichu and (pos-N+1)%N !=0 and pos-N*2+2 >= 0):
-                if(board[pos-(N*2)+2]=="."):
-                    boardCopy = copy.deepcopy(board)
-                    if(N > pos-N*2+2):
-                        boardCopy = replace_raichu(boardCopy, pos, color)
-                    boardCopy = remove(boardCopy, pos-N+1)
-                    list_of_boards.append(swap(boardCopy, pos, pos-N*2+2))
+        if (pos + 1) % N != 0 and pos - N + 1 >= 0:
+            if board[pos - N + 1] == ".":
+                board_copy = board
+                if N > pos - N + 1:
+                    board_copy = replace_raichu(board_copy, pos, color)
+                list_of_boards.append(swap(board_copy, pos, pos - N + 1))
+            elif board[pos - N + 1] == pichu and (pos - N + 1) % N != 0 and pos - N * 2 + 2 >= 0:
+                if board[pos - (N * 2) + 2] == ".":
+                    board_copy = board
+                    if N > pos - N * 2 + 2:
+                        board_copy = replace_raichu(board_copy, pos, color)
+                    board_copy = remove(board_copy, pos - N + 1)
+                    list_of_boards.append(swap(board_copy, pos, pos - N * 2 + 2))
 
     return list_of_boards
 
-def move_pikachu(pos, N, board, color):
+def move_pikachu(pos: int, N: int, board: str, color: str) -> List[str]:
+    """Generate all possible moves for Pikachu piece at given position."""
     list_of_boards = []
-    pichu = ""
-    pikachu = ""
+    enemy_pichu = "b" if color == "w" else "w"
+    enemy_pikachu = "B" if color == "w" else "W"
 
-    if(color=="w"):
-        pichu = "b"
-        pikachu = "B"
+    # Left movement
+    if pos % N != 0:
+        if board[pos - 1] == ".":
+            list_of_boards.append(swap(board, pos, pos - 1))
+            if (pos - 1) % N != 0:
+                if board[pos - 2] == ".":
+                    list_of_boards.append(swap(board, pos, pos - 2))
+                elif (board[pos - 2] == enemy_pichu or board[pos - 2] == enemy_pikachu) and (pos - 2) % N != 0:
+                    if board[pos - 3] == ".":
+                        board_copy = remove(board, pos - 2)
+                        list_of_boards.append(swap(board_copy, pos, pos - 3))
+        elif (board[pos - 1] == enemy_pichu or board[pos - 1] == enemy_pikachu) and (pos - 1) % N != 0:
+            if board[pos - 2] == ".":
+                board_copy = remove(board, pos - 1)
+                list_of_boards.append(swap(board_copy, pos, pos - 2))
 
-        if(pos%N != 0):
-            if(board[pos-1]=="."):
-                boardCopy = copy.deepcopy(board)
-                list_of_boards.append(swap(boardCopy, pos, pos-1))
+    # Right movement
+    if (pos + 1) % N != 0:
+        if board[pos + 1] == ".":
+            list_of_boards.append(swap(board, pos, pos + 1))
+            if (pos + 2) % N != 0:
+                if board[pos + 2] == ".":
+                    list_of_boards.append(swap(board, pos, pos + 2))
+                elif (board[pos + 2] == enemy_pichu or board[pos + 2] == enemy_pikachu) and (pos + 3) % N != 0:
+                    if board[pos + 3] == ".":
+                        board_copy = remove(board, pos + 2)
+                        list_of_boards.append(swap(board_copy, pos, pos + 3))
+        elif (board[pos + 1] == enemy_pichu or board[pos + 1] == enemy_pikachu) and (pos + 2) % N != 0:
+            if board[pos + 2] == ".":
+                board_copy = remove(board, pos + 1)
+                list_of_boards.append(swap(board_copy, pos, pos + 2))
 
-                if((pos-1)%N != 0):
-                    if(board[pos-2]=="."):
-                        boardCopy = copy.deepcopy(board)
-                        list_of_boards.append(swap(boardCopy, pos, pos-2))
+    # Forward movement (direction depends on color)
+    forward_dir = N if color == "w" else -N
+    if 0 <= pos + forward_dir < N * N:
+        if board[pos + forward_dir] == ".":
+            board_copy = board
+            if (color == "w" and N * N - N <= pos + forward_dir) or (color == "b" and N > pos + forward_dir):
+                board_copy = replace_raichu(board_copy, pos, color)
+            list_of_boards.append(swap(board_copy, pos, pos + forward_dir))
 
-                    elif((board[pos-2]==pichu) or ((board[pos-2]==pikachu)) and (pos-2)%N != 0):
-                        if(board[pos-3]=="."):
-                            boardCopy = copy.deepcopy(board)
-                            boardCopy = remove(boardCopy, pos-2)
-                            list_of_boards.append(swap(boardCopy, pos, pos-3))
-
-            elif(((board[pos-1]==pichu) or (board[pos-1]==pikachu)) and (pos-1)%N != 0):
-                if(board[pos-2]=="."):
-                    boardCopy = copy.deepcopy(board)
-                    boardCopy = remove(boardCopy, pos-1)
-                    list_of_boards.append(swap(boardCopy, pos, pos-2))
-
-        if((pos+1)%N != 0):
-            if(board[pos+1]=="."):
-                boardCopy = copy.deepcopy(board)
-                list_of_boards.append(swap(boardCopy, pos, pos+1))
-
-                if((pos+2)%N != 0):
-                    if(board[pos+2]=="."):
-                        boardCopy = copy.deepcopy(board)
-                        list_of_boards.append(swap(boardCopy, pos, pos+2))
-
-                    elif(((board[pos+2]==pichu) or (board[pos+2]==pikachu)) and (pos+3)%N != 0):
-                        if(board[pos+3]=="."):
-                            boardCopy = copy.deepcopy(board)
-                            boardCopy = remove(boardCopy, pos+2)
-                            list_of_boards.append(swap(boardCopy, pos, pos+3))
-
-            elif(((board[pos+1]==pichu) or (board[pos+1]==pikachu)) and (pos+2)%N != 0):
-                if(board[pos+2]=="."):
-                    boardCopy = copy.deepcopy(board)
-                    boardCopy = remove(boardCopy, pos+1)
-                    list_of_boards.append(swap(boardCopy, pos, pos+2))
-
-        if(pos+N < N*N):
-            if(board[pos+N]=="."):
-                boardCopy = copy.deepcopy(board)
-                if(N*N-N <= pos+N):
-                    boardCopy = replace_raichu(boardCopy, pos, color)
-                list_of_boards.append(swap(boardCopy, pos, pos+N))
-
-                if(pos+N+N < N*N):
-                    if(board[pos+N+N]=="."):
-                        boardCopy = copy.deepcopy(board)
-                        if(N*N-N <= pos+N+N):
-                            boardCopy = replace_raichu(boardCopy, pos, color)
-                        list_of_boards.append(swap(boardCopy, pos, pos+N+N))
-
-                    elif(((board[pos+N+N]==pichu) or (board[pos+N+N]==pikachu)) and pos+N+N+N < N*N):
-                        if(board[pos+N+N+N]=="."):
-                            boardCopy = copy.deepcopy(board)
-                            if(N*N-N <= pos+N+N+N):
-                                boardCopy = replace_raichu(boardCopy, pos, color)
-                            boardCopy = remove(boardCopy, pos+N+N)
-                            list_of_boards.append(swap(boardCopy, pos, pos+N+N+N))
-
-                elif(((board[pos+N]==pichu) or (board[pos+N]==pikachu)) and pos+N+N < N*N):
-                    if(board[pos+N+N]=="."):
-                        boardCopy = copy.deepcopy(board)
-                        if(N*N-N <= pos+N+N):
-                            boardCopy = replace_raichu(boardCopy, pos, color)
-                        boardCopy = remove(boardCopy, pos+N)
-                        list_of_boards.append(swap(boardCopy, pos, pos+N+N))
-
-    elif(color=="b"):
-        pichu = "w"
-        pikachu = "W"
-
-        if(pos%N != 0):
-            if(board[pos-1]=="."):
-                boardCopy = copy.deepcopy(board)
-                list_of_boards.append(swap(boardCopy, pos, pos-1))
-
-                if((pos-1)%N != 0):
-                    if(board[pos-2]=="."):
-                        boardCopy = copy.deepcopy(board)
-                        list_of_boards.append(swap(boardCopy, pos, pos-2))
-
-                    elif(((board[pos-2]==pichu) or (board[pos-2]==pikachu)) and (pos-2)%N != 0):
-                        if(board[pos-3]=="."):
-                            boardCopy = copy.deepcopy(board)
-                            boardCopy = remove(boardCopy, pos-2)
-                            list_of_boards.append(swap(boardCopy, pos, pos-3))
-
-            elif(((board[pos-1]==pichu) or (board[pos-1]==pikachu)) and (pos-1)%N != 0):
-                if(board[pos-2]=="."):
-                    boardCopy = copy.deepcopy(board)
-                    boardCopy = remove(boardCopy, pos-1)
-                    list_of_boards.append(swap(boardCopy, pos, pos-2))
-
-        if((pos+1)%N != 0):
-            if(board[pos+1]=="."):
-                boardCopy = copy.deepcopy(board)
-                list_of_boards.append(swap(boardCopy, pos, pos+1))
-
-                if((pos+2)%N != 0):
-                    if(board[pos+2]=="."):
-                        boardCopy = copy.deepcopy(board)
-                        list_of_boards.append(swap(boardCopy, pos, pos+2))
-
-                    elif(((board[pos+2]==pichu) or (board[pos+2]==pikachu)) and (pos+3)%N != 0):
-                        if(board[pos+3]=="."):
-                            boardCopy = copy.deepcopy(board)
-                            boardCopy = remove(boardCopy, pos+2)
-                            list_of_boards.append(swap(boardCopy, pos, pos+3))
-
-            elif((board[pos+1]==pichu) or (board[pos+1]==pikachu) and (pos+1)%N != 0):
-                if(board[pos+2]=="."):
-                    boardCopy = copy.deepcopy(board)
-                    boardCopy = remove(boardCopy, pos+1)
-                    list_of_boards.append(swap(boardCopy, pos, pos+2))
-
-        if(pos-N >= 0):
-            if(board[pos-N]=="."):
-                boardCopy = copy.deepcopy(board)
-                if(N > pos-N):
-                    boardCopy = replace_raichu(boardCopy, pos, color)
-                list_of_boards.append(swap(boardCopy, pos, pos-N))
-
-                if(pos-N-N >= 0):
-                    if(board[pos-N-N]=="."):
-                        boardCopy = copy.deepcopy(board)
-                        if(N > pos-N-N):
-                            boardCopy = replace_raichu(boardCopy, pos, color)
-                        list_of_boards.append(swap(boardCopy, pos, pos-N-N))
-
-                    elif(((board[pos-N-N]==pichu) or (board[pos-N-N]==pikachu)) and pos-N-N-N >= 0):
-                        if(board[pos-N-N-N]=="."):
-                            boardCopy = copy.deepcopy(board)
-                            if(N > pos-N-N-N):
-                                boardCopy = replace_raichu(boardCopy, pos, color)
-                            boardCopy = remove(boardCopy, pos-N-N)
-                            list_of_boards.append(swap(boardCopy, pos, pos-N-N-N))
-
-                elif(((board[pos+N] == pichu) or (board[pos+N] == pikachu)) and pos+N+N >= 0):
-                    if(board[pos+N+N]=="."):
-                        boardCopy = copy.deepcopy(board)
-                        if(N > pos+N+N):
-                            boardCopy = replace_raichu(boardCopy, pos, color)
-                        boardCopy = remove(boardCopy, pos+N)
-                        list_of_boards.append(swap(boardCopy, pos, pos+N+N))
+            if 0 <= pos + forward_dir * 2 < N * N:
+                if board[pos + forward_dir * 2] == ".":
+                    board_copy = board
+                    if (color == "w" and N * N - N <= pos + forward_dir * 2) or (color == "b" and N > pos + forward_dir * 2):
+                        board_copy = replace_raichu(board_copy, pos, color)
+                    list_of_boards.append(swap(board_copy, pos, pos + forward_dir * 2))
+                elif (board[pos + forward_dir * 2] == enemy_pichu or board[pos + forward_dir * 2] == enemy_pikachu) and 0 <= pos + forward_dir * 3 < N * N:
+                    if board[pos + forward_dir * 3] == ".":
+                        board_copy = board
+                        if (color == "w" and N * N - N <= pos + forward_dir * 3) or (color == "b" and N > pos + forward_dir * 3):
+                            board_copy = replace_raichu(board_copy, pos, color)
+                        board_copy = remove(board_copy, pos + forward_dir * 2)
+                        list_of_boards.append(swap(board_copy, pos, pos + forward_dir * 3))
+        elif (board[pos + forward_dir] == enemy_pichu or board[pos + forward_dir] == enemy_pikachu) and 0 <= pos + forward_dir * 2 < N * N:
+            if board[pos + forward_dir * 2] == ".":
+                board_copy = board
+                if (color == "w" and N * N - N <= pos + forward_dir * 2) or (color == "b" and N > pos + forward_dir * 2):
+                    board_copy = replace_raichu(board_copy, pos, color)
+                board_copy = remove(board_copy, pos + forward_dir)
+                list_of_boards.append(swap(board_copy, pos, pos + forward_dir * 2))
 
     return list_of_boards
 
-def move_raichu(pos, N, board, color):
+def move_raichu(pos: int, N: int, board: str, color: str) -> List[str]:
+    """Generate all possible moves for Raichu piece at given position."""
     list_of_boards = []
-    pichu = ""
-    pikachu = ""
-    raichu = ""
+    enemy_pieces = {"b", "B", "$"} if color == "w" else {"w", "W", "@"}
 
-    if (color=="w"):
-        pichu = "b"
-        pikachu = "B"
-        raichu = "$"
-    elif(color=="b"):
-        pichu = "w"
-        pikachu = "W"
-        raichu = "@"
+    # 8 directions: up, down, left, right, and 4 diagonals
+    directions = [
+        (-N, lambda p: p >= 0),  # up
+        (N, lambda p: p < N * N),  # down
+        (-1, lambda p: (p + 1) % N != 0),  # left
+        (1, lambda p: p % N != 0),  # right
+        (1 - N, lambda p: p % N != 0 and p >= 0),  # diagonal right up
+        (-1 - N, lambda p: (p + 1) % N != 0 and p >= 0),  # diagonal left up
+        (1 + N, lambda p: p % N != 0 and p < N * N),  # diagonal right down
+        (-1 + N, lambda p: (p + 1) % N != 0 and p < N * N)  # diagonal left down
+    ]
 
-    # Up
-    piece_taken = False
-    tempPos = pos - N
-    tempBoard = copy.deepcopy(board)
-    while(tempPos >= 0):
-        if(board[tempPos]=="."):
-            boardCopy = copy.deepcopy(tempBoard)
-            list_of_boards.append(swap(boardCopy, pos, tempPos))
-            tempPos-=N
-        elif((board[tempPos] == pichu) or (board[tempPos] == pikachu) or (board[tempPos] == raichu)):
-            if(piece_taken):
-                break
+    for delta, is_valid in directions:
+        piece_taken = False
+        temp_pos = pos + delta
+        temp_board = board
+
+        while is_valid(temp_pos):
+            if board[temp_pos] == ".":
+                board_copy = temp_board
+                list_of_boards.append(swap(board_copy, pos, temp_pos))
+                temp_pos += delta
+            elif board[temp_pos] in enemy_pieces:
+                if piece_taken:
+                    break
+                else:
+                    temp_board = remove(temp_board, temp_pos)
+                    piece_taken = True
+                    temp_pos += delta
             else:
-                tempBoard = remove(tempBoard, tempPos)
-                piece_taken = True
-                tempPos-=N
-        else:
-            break
-
-    # Down
-    piece_taken = False
-    tempPos = pos + N
-    tempBoard = copy.deepcopy(board)
-    while(tempPos < N*N):
-        if(board[tempPos]=="."):
-            boardCopy = copy.deepcopy(tempBoard)
-            list_of_boards.append(swap(boardCopy, pos, tempPos))
-            tempPos+=N
-        elif((board[tempPos] == pichu) or (board[tempPos] == pikachu) or (board[tempPos] == raichu)):
-            if(piece_taken):
                 break
-            else:
-                tempBoard = remove(tempBoard, tempPos)
-                piece_taken = True
-                tempPos+=N
-        else:
-            break
-
-    # Left
-    piece_taken = False
-    tempPos = pos -1
-    tempBoard = copy.deepcopy(board)
-    while((tempPos+1)%N != 0):
-        if(board[tempPos]=="."):
-            boardCopy = copy.deepcopy(tempBoard)
-            list_of_boards.append(swap(boardCopy, pos, tempPos))
-            tempPos-=1
-        elif((board[tempPos] == pichu) or (board[tempPos] == pikachu) or (board[tempPos] == raichu)):
-            if(piece_taken):
-                break
-            else:
-                tempBoard = remove(tempBoard, tempPos)
-                piece_taken = True
-                tempPos-=1
-        else:
-            break
-
-    # Right
-    piece_taken = False
-    tempPos = pos + 1
-    tempBoard = copy.deepcopy(board)
-    while(tempPos%N != 0):
-        if(board[tempPos]=="."):
-            boardCopy = copy.deepcopy(tempBoard)
-            list_of_boards.append(swap(boardCopy, pos, tempPos))
-            tempPos+=1
-        elif((board[tempPos] == pichu) or (board[tempPos] == pikachu) or (board[tempPos] == raichu)):
-            if(piece_taken):
-                break
-            else:
-                tempBoard = remove(tempBoard, tempPos)
-                piece_taken = True
-                tempPos+=1
-        else:
-            break
-
-    # Diagonal right up
-    piece_taken = False
-    tempPos = pos + 1 - N
-    tempBoard = copy.deepcopy(board)
-    while(tempPos%N != 0 and tempPos >= 0):
-        if(board[tempPos]=="."):
-            boardCopy = copy.deepcopy(tempBoard)
-            list_of_boards.append(swap(boardCopy, pos, tempPos))
-            tempPos = tempPos + 1 - N
-        elif((board[tempPos] == pichu) or (board[tempPos] == pikachu) or (board[tempPos] == raichu)):
-            if(piece_taken):
-                break
-            else:
-                tempBoard = remove(tempBoard, tempPos)
-                piece_taken = True
-                tempPos = tempPos + 1 - N
-        else:
-            break
-
-    # Diagonal left up
-    piece_taken = False
-    tempPos = pos - 1 - N
-    tempBoard = copy.deepcopy(board)
-    while((tempPos+1)%N != 0 and tempPos >=0):
-        if(board[tempPos]=="."):
-            boardCopy = copy.deepcopy(tempBoard)
-            list_of_boards.append(swap(boardCopy, pos, tempPos))
-            tempPos = tempPos - 1 - N
-        elif((board[tempPos] == pichu) or (board[tempPos] == pikachu) or (board[tempPos] == raichu)):
-            if(piece_taken):
-                break
-            else:
-                tempBoard = remove(tempBoard, tempPos)
-                piece_taken = True
-                tempPos = tempPos - 1 - N
-        else:
-            break
-
-    # Diagonal right down
-    piece_taken = False
-    tempPos = pos + 1 + N
-    tempBoard = copy.deepcopy(board)
-    while(tempPos%N != 0 and tempPos < N*N):
-        if(board[tempPos]=="."):
-            boardCopy = copy.deepcopy(tempBoard)
-            list_of_boards.append(swap(boardCopy, pos, tempPos))
-            tempPos = tempPos + 1 + N
-        elif((board[tempPos] == pichu) or (board[tempPos] == pikachu) or (board[tempPos] == raichu)):
-            if(piece_taken):
-                break
-            else:
-                tempBoard = remove(tempBoard, tempPos)
-                piece_taken = True
-                tempPos = tempPos + 1 + N
-        else:
-            break
-
-    # Diagonal left down
-    piece_taken = False
-    tempPos = pos - 1 + N
-    tempBoard = copy.deepcopy(board)
-    while((tempPos+1)%N != 0 and tempPos < N*N):
-        if(board[tempPos]=="."):
-            boardCopy = copy.deepcopy(tempBoard)
-            list_of_boards.append(swap(boardCopy, pos, tempPos))
-            tempPos = tempPos - 1 + N
-        elif((board[tempPos] == pichu) or (board[tempPos] == pikachu) or (board[tempPos] == raichu)):
-            if(piece_taken):
-                break
-            else:
-                tempBoard = remove(tempBoard, tempPos)
-                piece_taken = True
-                tempPos = tempPos - 1 + N
-        else:
-            break
 
     return list_of_boards
 
-def get_fringe(board, N, color):
+def get_fringe(board: str, N: int, color: str) -> List[str]:
+    """Generate all possible successor states for the given player."""
     fringe = []
     for i in range(len(board)):
-        if board[i] == "w" and color=="w":
-            fringe += move_pichu(i, N, board, "w")
-        elif board[i] == "b" and color=="b":
-            fringe += move_pichu(i, N, board, "b")
-        elif board[i] == "W" and color=="w":
-            fringe += move_pikachu(i, N, board, "w")
-        elif board[i] == "B" and color=="b":
-            fringe += move_pikachu(i, N, board, "b")
-        elif board[i] == "@" and color=="w":
-            fringe += move_raichu(i, N, board, "w")
-        elif board[i] == "$" and color=="b":
-            fringe += move_raichu(i, N, board, "b")
+        if board[i] == "w" and color == "w":
+            fringe.extend(move_pichu(i, N, board, "w"))
+        elif board[i] == "b" and color == "b":
+            fringe.extend(move_pichu(i, N, board, "b"))
+        elif board[i] == "W" and color == "w":
+            fringe.extend(move_pikachu(i, N, board, "w"))
+        elif board[i] == "B" and color == "b":
+            fringe.extend(move_pikachu(i, N, board, "b"))
+        elif board[i] == "@" and color == "w":
+            fringe.extend(move_raichu(i, N, board, "w"))
+        elif board[i] == "$" and color == "b":
+            fringe.extend(move_raichu(i, N, board, "b"))
     return fringe
 
-def opponent(player):
-    if player=="b":
-        return "w"
-    elif player=="w":
-        return "b"
+def opponent(player: str) -> str:
+    """Return the opponent of the given player."""
+    return "w" if player == "b" else "b"
 
-def is_goal(board):
-    if(board.count("B")==0 and board.count("b")==0 and board.count("$")==0):
-        return True
-    if(board.count("W")==0 and board.count("w")==0 and board.count("@")==0):
-        return True
+def is_goal(board: str) -> bool:
+    """Check if the game has ended (one player has no pieces left)."""
+    black_pieces = board.count("B") + board.count("b") + board.count("$")
+    white_pieces = board.count("W") + board.count("w") + board.count("@")
+    return black_pieces == 0 or white_pieces == 0
+
+def eval_board(board: str, player: str, ini_player: str) -> int:
+    """Evaluate the board state for the given player."""
+    score_white = board.count("w") * 1 + board.count("W") * 3 + board.count("@") * 6
+    score_black = board.count("b") * 1 + board.count("B") * 3 + board.count("$") * 6
+
+    if player == ini_player:
+        return score_white - score_black if ini_player == "w" else score_black - score_white
     else:
-        return False
+        return score_black - score_white if ini_player == "w" else score_white - score_black
 
-def eval(board,player,N,ini_player):
-    board=list(board)
-    score=(board.count("w")*1)+(board.count("W")*3)+(board.count("@")*6)
-    score1=(board.count("b")*1)+(board.count("B")*3)+(board.count("$")*6)
-    if player==ini_player:
-        return score-score1
-    else:
-        return -1*(score1-score)
+def alpha_beta_decision(board: str, player: str, N: int, ini_player: str) -> str:
+    """Find the best move using alpha-beta pruning."""
+    fringe = get_fringe(board, N, player)
+    if not fringe:
+        return board
 
-def alpha_beta_decision(board, player,N,ini_player):
-    maximum_value={}
-    for s in get_fringe(board,N,player):
-        v=min_val(s, opponent(player), -math.inf, math.inf, 0,N,ini_player)
-        maximum_value[tuple(s)]=v
+    maximum_value: Dict[str, float] = {}
+    for successor in fringe:
+        value = min_val(successor, opponent(player), -math.inf, math.inf, 0, N, ini_player)
+        maximum_value[successor] = value
+
     if not maximum_value:
         return board
-    a = max(maximum_value, key=maximum_value.get)
-    return a
 
-def max_val(board, player, alpha, beta, depth,N,ini_player):
-    if is_goal(board) or depth>max_depth[0]:
-        return eval(board,player,N,ini_player)
-    alpha_dash=-math.inf
-    for s in get_fringe(board,N,player):
-        score_of_s=min_val(s, opponent(player), alpha, beta, depth + 1,N,ini_player)
-        alpha_dash=max(score_of_s, alpha_dash)
-        if alpha_dash>=beta:
+    return max(maximum_value, key=maximum_value.get)  # type: ignore
+
+def max_val(board: str, player: str, alpha: float, beta: float, depth: int, N: int, ini_player: str) -> float:
+    """Maximizing player in minimax algorithm."""
+    if is_goal(board) or depth > max_depth[0]:
+        return float(eval_board(board, player, ini_player))
+
+    alpha_dash = -math.inf
+    for successor in get_fringe(board, N, player):
+        score = min_val(successor, opponent(player), alpha, beta, depth + 1, N, ini_player)
+        alpha_dash = max(score, alpha_dash)
+        if alpha_dash >= beta:
             return alpha_dash
     return alpha_dash
 
-def min_val(board, player, alpha, beta, depth,N,ini_player):
-    if is_goal(board) or depth>max_depth[0]:
-        return eval(board,player,N,ini_player)
-    beta_dash=math.inf
-    for s in get_fringe(board,N,player):
-        score_of_s=max_val(s, opponent(player), alpha, beta, depth + 1,N,ini_player)
-        beta_dash = min(score_of_s, beta_dash)
-        if alpha>=beta_dash:
+def min_val(board: str, player: str, alpha: float, beta: float, depth: int, N: int, ini_player: str) -> float:
+    """Minimizing player in minimax algorithm."""
+    if is_goal(board) or depth > max_depth[0]:
+        return float(eval_board(board, player, ini_player))
+
+    beta_dash = math.inf
+    for successor in get_fringe(board, N, player):
+        score = max_val(successor, opponent(player), alpha, beta, depth + 1, N, ini_player)
+        beta_dash = min(score, beta_dash)
+        if alpha >= beta_dash:
             return beta_dash
     return beta_dash
 
-def find_best_move(board, N, player, timelimit):
-    ini_player=player
-    fringe = get_fringe(board,N,player)
+def find_best_move(board: str, N: int, player: str, timelimit: int) -> str:
+    """Find the best move using iterative deepening with alpha-beta pruning."""
+    ini_player = player
+    fringe = get_fringe(board, N, player)
+
     if not fringe:
         return board
 
     next_board = random.choice(fringe)
 
-    for depth in range(2,5):
-        max_depth[0]=depth
-        recommended_board = alpha_beta_decision(board,player,N,ini_player)
+    # Iterative deepening
+    for depth in range(2, 5):
+        max_depth[0] = depth
+        recommended_board = alpha_beta_decision(board, player, N, ini_player)
+
         if is_goal(recommended_board):
-            next_board = ''.join((item) for item in recommended_board)
+            next_board = recommended_board
             break
-        next_board = ''.join((item) for item in recommended_board)
+
+        next_board = recommended_board
 
     return next_board
 
 # Vercel serverless function handler
 class handler(BaseHTTPRequestHandler):
-    def do_POST(self):
+    """Handler for Vercel serverless function."""
+
+    def do_POST(self) -> None:
+        """Handle POST requests for bot moves."""
         try:
-            content_length = int(self.headers['Content-Length'])
+            content_length = int(self.headers.get('Content-Length', 0))
             body = self.rfile.read(content_length)
             data = json.loads(body.decode('utf-8'))
 
             board = data.get('board', '')
             player = data.get('player', 'b')
             timelimit = data.get('timelimit', 10)
-            N = 8  # Board size
+            N = 8  # Board size is fixed at 8x8
 
             # Validate input
-            if len(board) != N*N:
-                raise Exception("Invalid board size")
+            if len(board) != N * N:
+                raise ValueError(f"Invalid board size: {len(board)}, expected {N * N}")
 
             # Find best move
             best_board = find_best_move(board, N, player, timelimit)
 
-            # Send response
+            # Send success response
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
@@ -563,6 +349,7 @@ class handler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(response).encode('utf-8'))
 
         except Exception as e:
+            # Send error response
             self.send_response(500)
             self.send_header('Content-type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
@@ -574,7 +361,8 @@ class handler(BaseHTTPRequestHandler):
 
             self.wfile.write(json.dumps(error_response).encode('utf-8'))
 
-    def do_OPTIONS(self):
+    def do_OPTIONS(self) -> None:
+        """Handle OPTIONS requests for CORS preflight."""
         self.send_response(200)
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
