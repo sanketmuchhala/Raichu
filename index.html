@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raichu - Pokemon Chess Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Raichu</h1>
+            <p class="subtitle">A Strategy Game</p>
+        </header>
+
+        <div class="game-wrapper">
+            <div class="info-panel">
+                <div class="player-info">
+                    <h3>Current Player</h3>
+                    <div id="current-player" class="player-indicator">White</div>
+                </div>
+
+                <div class="game-status">
+                    <h3>Game Status</h3>
+                    <div id="game-message">Select a piece to move</div>
+                </div>
+
+                <div class="controls">
+                    <button id="new-game-btn" class="btn btn-primary">New Game</button>
+                    <button id="bot-move-btn" class="btn btn-secondary">Bot Move</button>
+                    <button id="undo-btn" class="btn btn-secondary">Undo</button>
+                </div>
+
+                <div class="rules-section">
+                    <h3>Game Rules</h3>
+                    <div class="rules-content">
+                        <h4>Pieces:</h4>
+                        <ul>
+                            <li><strong>w</strong> = White Pichu (Pawn)</li>
+                            <li><strong>W</strong> = White Pikachu (Knight)</li>
+                            <li><strong>@</strong> = White Raichu (Queen)</li>
+                            <li><strong>b</strong> = Black Pichu (Pawn)</li>
+                            <li><strong>B</strong> = Black Pikachu (Knight)</li>
+                            <li><strong>$</strong> = Black Raichu (Queen)</li>
+                        </ul>
+
+                        <h4>Movement:</h4>
+                        <ul>
+                            <li><strong>Pichu:</strong> Moves diagonally forward, captures diagonally</li>
+                            <li><strong>Pikachu:</strong> Moves 1-2 squares in any direction</li>
+                            <li><strong>Raichu:</strong> Moves any distance in any direction</li>
+                        </ul>
+
+                        <h4>Promotion:</h4>
+                        <p>Pichu promotes to Raichu when reaching the opposite end</p>
+
+                        <h4>Win Condition:</h4>
+                        <p>Capture all opponent pieces or leave them with no valid moves</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="board-container">
+                <div id="game-board" class="board"></div>
+                <div id="loading" class="loading hidden">
+                    <div class="spinner"></div>
+                    <p>Bot is thinking...</p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>AI powered by Minimax with Alpha-Beta Pruning</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
