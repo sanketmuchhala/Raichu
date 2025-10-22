@@ -609,6 +609,98 @@ document.getElementById('dark-mode-toggle').addEventListener('click', () => {
     localStorage.setItem('darkMode', isDark);
 });
 
+// Mobile Sidebar Management
+const sidebarState = {
+    isOpen: false,
+    touchStartX: 0,
+    touchStartY: 0,
+    touchEndX: 0,
+    touchEndY: 0
+};
+
+function openSidebar() {
+    const infoPanel = document.querySelector('.info-panel');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    const hamburger = document.getElementById('hamburger-menu');
+
+    infoPanel.classList.add('active');
+    backdrop.classList.add('active');
+    hamburger.classList.add('active');
+    sidebarState.isOpen = true;
+
+    // Prevent body scroll on mobile when sidebar is open
+    document.body.style.overflow = 'hidden';
+}
+
+function closeSidebar() {
+    const infoPanel = document.querySelector('.info-panel');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    const hamburger = document.getElementById('hamburger-menu');
+
+    infoPanel.classList.remove('active');
+    backdrop.classList.remove('active');
+    hamburger.classList.remove('active');
+    sidebarState.isOpen = false;
+
+    // Restore body scroll
+    document.body.style.overflow = '';
+}
+
+function toggleSidebar() {
+    if (sidebarState.isOpen) {
+        closeSidebar();
+    } else {
+        openSidebar();
+    }
+}
+
+// Handle swipe gestures
+function handleTouchStart(e) {
+    sidebarState.touchStartX = e.touches[0].clientX;
+    sidebarState.touchStartY = e.touches[0].clientY;
+}
+
+function handleTouchMove(e) {
+    sidebarState.touchEndX = e.touches[0].clientX;
+    sidebarState.touchEndY = e.touches[0].clientY;
+}
+
+function handleTouchEnd() {
+    const deltaX = sidebarState.touchEndX - sidebarState.touchStartX;
+    const deltaY = Math.abs(sidebarState.touchEndY - sidebarState.touchStartY);
+    const threshold = 50; // minimum swipe distance
+
+    // Only detect horizontal swipes (ignore mostly vertical swipes)
+    if (deltaY < threshold * 2) {
+        // Swipe from left edge to open
+        if (!sidebarState.isOpen && sidebarState.touchStartX < 50 && deltaX > threshold) {
+            openSidebar();
+        }
+        // Swipe left to close
+        else if (sidebarState.isOpen && deltaX < -threshold) {
+            closeSidebar();
+        }
+    }
+}
+
+// Hamburger menu click handler
+document.getElementById('hamburger-menu').addEventListener('click', toggleSidebar);
+
+// Backdrop click handler (close sidebar when clicking outside)
+document.getElementById('sidebar-backdrop').addEventListener('click', closeSidebar);
+
+// Touch gesture listeners for swipe
+document.addEventListener('touchstart', handleTouchStart, { passive: true });
+document.addEventListener('touchmove', handleTouchMove, { passive: true });
+document.addEventListener('touchend', handleTouchEnd);
+
+// Auto-close sidebar on mobile when screen is resized to desktop
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 1024 && sidebarState.isOpen) {
+        closeSidebar();
+    }
+});
+
 // Initialize game on load
 window.addEventListener('DOMContentLoaded', () => {
     // Load dark mode preference (default is light mode)
