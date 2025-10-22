@@ -1,35 +1,63 @@
 """
 API endpoint to join an existing multiplayer game room
+Uses Vercel KV (Redis) for shared storage
 """
 from http.server import BaseHTTPRequestHandler
 import json
 import os
 import random
 import string
-
-ROOMS_FILE = '/tmp/raichu_rooms.json'
+import urllib.request
+import urllib.error
 
 def generate_room_code():
     """Generate a unique 6-character room code"""
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
 def load_rooms():
-    """Load all rooms from storage"""
-    if not os.path.exists(ROOMS_FILE):
-        return []
-    try:
-        with open(ROOMS_FILE, 'r') as f:
-            return json.load(f)
-    except:
-        return []
+    """Load all rooms from Vercel KV"""
+    kv_url = os.environ.get('KV_REST_API_URL')
+    kv_token = os.environ.get('KV_REST_API_TOKEN')
+
+    if kv_url and kv_token:
+        try:
+            req = urllib.request.Request(
+                f"{kv_url}/get/raichu_rooms",
+                headers={"Authorization": f"Bearer {kv_token}"}
+            )
+            with urllib.request.urlopen(req) as response:
+                data = json.loads(response.read().decode())
+                result = data.get('result')
+                return json.loads(result) if result else []
+        except:
+            pass
+
+    return []
 
 def save_rooms(rooms):
-    """Save rooms to storage"""
-    try:
-        with open(ROOMS_FILE, 'w') as f:
-            json.dump(rooms, f)
-    except:
-        pass
+    """Save rooms to Vercel KV"""
+    kv_url = os.environ.get('KV_REST_API_URL')
+    kv_token = os.environ.get('KV_REST_API_TOKEN')
+
+    if kv_url and kv_token:
+        try:
+            data = json.dumps({"value": json.dumps(rooms)}).encode()
+            req = urllib.request.Request(
+                f"{kv_url}/set/raichu_rooms",
+                data=data,
+                headers={
+                    "Authorization": f"Bearer {kv_token}",
+                    "Content-Type": "application/json"
+                },
+                method='POST'
+            )
+            urllib.request.urlopen(req)
+            return True
+        except Exception as e:
+            print(f"KV save error: {e}")
+            return False
+
+    return False
 
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):

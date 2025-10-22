@@ -1,5 +1,6 @@
 """
 API endpoint to create a new multiplayer game room
+Uses Vercel KV (Redis) for shared storage across serverless functions
 """
 from http.server import BaseHTTPRequestHandler
 import json
@@ -7,30 +8,57 @@ import os
 from datetime import datetime
 import random
 import string
-
-ROOMS_FILE = '/tmp/raichu_rooms.json'
+import urllib.request
+import urllib.error
 
 def generate_room_code():
     """Generate a unique 6-character room code"""
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
 def load_rooms():
-    """Load all rooms from storage"""
-    if not os.path.exists(ROOMS_FILE):
-        return []
-    try:
-        with open(ROOMS_FILE, 'r') as f:
-            return json.load(f)
-    except:
-        return []
+    """Load all rooms from Vercel KV or fallback"""
+    # Try Vercel KV first
+    kv_url = os.environ.get('KV_REST_API_URL')
+    kv_token = os.environ.get('KV_REST_API_TOKEN')
+
+    if kv_url and kv_token:
+        try:
+            req = urllib.request.Request(
+                f"{kv_url}/get/raichu_rooms",
+                headers={"Authorization": f"Bearer {kv_token}"}
+            )
+            with urllib.request.urlopen(req) as response:
+                data = json.loads(response.read().decode())
+                return json.loads(data.get('result', '[]'))
+        except:
+            pass
+
+    return []
 
 def save_rooms(rooms):
-    """Save rooms to storage"""
-    try:
-        with open(ROOMS_FILE, 'w') as f:
-            json.dump(rooms, f)
-    except Exception as e:
-        print(f"Error saving rooms: {e}")
+    """Save rooms to Vercel KV or fallback"""
+    kv_url = os.environ.get('KV_REST_API_URL')
+    kv_token = os.environ.get('KV_REST_API_TOKEN')
+
+    if kv_url and kv_token:
+        try:
+            data = json.dumps({"value": json.dumps(rooms)}).encode()
+            req = urllib.request.Request(
+                f"{kv_url}/set/raichu_rooms",
+                data=data,
+                headers={
+                    "Authorization": f"Bearer {kv_token}",
+                    "Content-Type": "application/json"
+                },
+                method='POST'
+            )
+            urllib.request.urlopen(req)
+            return True
+        except Exception as e:
+            print(f"KV save error: {e}")
+            return False
+
+    return False
 
 def cleanup_old_rooms(rooms):
     """Remove rooms older than 2 hours"""
@@ -76,7 +104,9 @@ class handler(BaseHTTPRequestHandler):
             rooms = load_rooms()
             rooms = cleanup_old_rooms(rooms)
             rooms.append(room)
-            save_rooms(rooms)
+
+            if not save_rooms(rooms):
+                raise Exception("Storage not configured. Please set up Vercel KV in your dashboard.")
 
             # Return room info
             response = {

@@ -1,22 +1,33 @@
 """
 API endpoint to get current game state (polling endpoint)
+Uses Vercel KV (Redis) for shared storage
 """
 from http.server import BaseHTTPRequestHandler
 import json
 import os
 from urllib.parse import urlparse, parse_qs
-
-ROOMS_FILE = '/tmp/raichu_rooms.json'
+import urllib.request
+import urllib.error
 
 def load_rooms():
-    """Load all rooms from storage"""
-    if not os.path.exists(ROOMS_FILE):
-        return []
-    try:
-        with open(ROOMS_FILE, 'r') as f:
-            return json.load(f)
-    except:
-        return []
+    """Load all rooms from Vercel KV"""
+    kv_url = os.environ.get('KV_REST_API_URL')
+    kv_token = os.environ.get('KV_REST_API_TOKEN')
+
+    if kv_url and kv_token:
+        try:
+            req = urllib.request.Request(
+                f"{kv_url}/get/raichu_rooms",
+                headers={"Authorization": f"Bearer {kv_token}"}
+            )
+            with urllib.request.urlopen(req) as response:
+                data = json.loads(response.read().decode())
+                result = data.get('result')
+                return json.loads(result) if result else []
+        except:
+            pass
+
+    return []
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
