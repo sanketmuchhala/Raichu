@@ -1,6 +1,6 @@
 """
 API endpoint to submit a move in a multiplayer game
-Uses Vercel KV (Redis) for shared storage
+Uses Supabase (free, simple setup) or JSONBin.io as fallback
 """
 from http.server import BaseHTTPRequestHandler
 import json
@@ -9,48 +9,134 @@ from datetime import datetime
 import urllib.request
 import urllib.error
 
-def load_rooms():
-    """Load all rooms from Vercel KV"""
-    kv_url = os.environ.get('KV_REST_API_URL')
-    kv_token = os.environ.get('KV_REST_API_TOKEN')
+def load_rooms_supabase():
+    """Load rooms from Supabase"""
+    supabase_url = os.environ.get('SUPABASE_URL')
+    supabase_key = os.environ.get('SUPABASE_KEY')
 
-    if kv_url and kv_token:
+    if supabase_url and supabase_key:
         try:
             req = urllib.request.Request(
-                f"{kv_url}/get/raichu_rooms",
-                headers={"Authorization": f"Bearer {kv_token}"}
+                f"{supabase_url}/rest/v1/rooms?select=*",
+                headers={
+                    "apikey": supabase_key,
+                    "Authorization": f"Bearer {supabase_key}"
+                }
             )
             with urllib.request.urlopen(req) as response:
                 data = json.loads(response.read().decode())
-                result = data.get('result')
-                return json.loads(result) if result else []
+                rooms = [json.loads(row['data']) for row in data] if data else []
+                return rooms
+        except Exception as e:
+            print(f"Supabase error: {e}")
+    return None
+
+def load_rooms_jsonbin():
+    """Load rooms from JSONBin.io"""
+    bin_id = os.environ.get('JSONBIN_ID')
+    api_key = os.environ.get('JSONBIN_API_KEY', '$2a$10$samplekey')
+
+    if bin_id:
+        try:
+            req = urllib.request.Request(
+                f"https://api.jsonbin.io/v3/b/{bin_id}/latest",
+                headers={"X-Master-Key": api_key}
+            )
+            with urllib.request.urlopen(req) as response:
+                data = json.loads(response.read().decode())
+                return data.get('record', {}).get('rooms', [])
         except:
             pass
+    return None
+
+def load_rooms():
+    """Load all rooms with fallback chain"""
+    rooms = load_rooms_supabase()
+    if rooms is not None:
+        return rooms
+
+    rooms = load_rooms_jsonbin()
+    if rooms is not None:
+        return rooms
 
     return []
 
-def save_rooms(rooms):
-    """Save rooms to Vercel KV"""
-    kv_url = os.environ.get('KV_REST_API_URL')
-    kv_token = os.environ.get('KV_REST_API_TOKEN')
+def save_rooms_supabase(rooms):
+    """Save rooms to Supabase"""
+    supabase_url = os.environ.get('SUPABASE_URL')
+    supabase_key = os.environ.get('SUPABASE_KEY')
 
-    if kv_url and kv_token:
+    if supabase_url and supabase_key:
         try:
-            data = json.dumps({"value": json.dumps(rooms)}).encode()
+            # Delete all existing rooms
             req = urllib.request.Request(
-                f"{kv_url}/set/raichu_rooms",
+                f"{supabase_url}/rest/v1/rooms?select=*",
+                headers={
+                    "apikey": supabase_key,
+                    "Authorization": f"Bearer {supabase_key}",
+                    "Prefer": "return=minimal"
+                },
+                method='DELETE'
+            )
+            try:
+                urllib.request.urlopen(req)
+            except:
+                pass
+
+            # Insert new rooms
+            for room in rooms:
+                data = json.dumps({
+                    "room_id": room['roomId'],
+                    "data": json.dumps(room)
+                }).encode()
+
+                req = urllib.request.Request(
+                    f"{supabase_url}/rest/v1/rooms",
+                    data=data,
+                    headers={
+                        "apikey": supabase_key,
+                        "Authorization": f"Bearer {supabase_key}",
+                        "Content-Type": "application/json",
+                        "Prefer": "return=minimal"
+                    },
+                    method='POST'
+                )
+                urllib.request.urlopen(req)
+            return True
+        except Exception as e:
+            print(f"Supabase save error: {e}")
+    return False
+
+def save_rooms_jsonbin(rooms):
+    """Save rooms to JSONBin"""
+    bin_id = os.environ.get('JSONBIN_ID')
+    api_key = os.environ.get('JSONBIN_API_KEY')
+
+    if bin_id and api_key:
+        try:
+            data = json.dumps({"rooms": rooms}).encode()
+            req = urllib.request.Request(
+                f"https://api.jsonbin.io/v3/b/{bin_id}",
                 data=data,
                 headers={
-                    "Authorization": f"Bearer {kv_token}",
+                    "X-Master-Key": api_key,
                     "Content-Type": "application/json"
                 },
-                method='POST'
+                method='PUT'
             )
             urllib.request.urlopen(req)
             return True
         except Exception as e:
-            print(f"KV save error: {e}")
-            return False
+            print(f"JSONBin save error: {e}")
+    return False
+
+def save_rooms(rooms):
+    """Save rooms with fallback chain"""
+    if save_rooms_supabase(rooms):
+        return True
+
+    if save_rooms_jsonbin(rooms):
+        return True
 
     return False
 

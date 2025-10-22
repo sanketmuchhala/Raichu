@@ -1,6 +1,6 @@
 """
 API endpoint to get current game state (polling endpoint)
-Uses Vercel KV (Redis) for shared storage
+Uses Supabase (free, simple setup) or JSONBin.io as fallback
 """
 from http.server import BaseHTTPRequestHandler
 import json
@@ -9,23 +9,55 @@ from urllib.parse import urlparse, parse_qs
 import urllib.request
 import urllib.error
 
-def load_rooms():
-    """Load all rooms from Vercel KV"""
-    kv_url = os.environ.get('KV_REST_API_URL')
-    kv_token = os.environ.get('KV_REST_API_TOKEN')
+def load_rooms_supabase():
+    """Load rooms from Supabase"""
+    supabase_url = os.environ.get('SUPABASE_URL')
+    supabase_key = os.environ.get('SUPABASE_KEY')
 
-    if kv_url and kv_token:
+    if supabase_url and supabase_key:
         try:
             req = urllib.request.Request(
-                f"{kv_url}/get/raichu_rooms",
-                headers={"Authorization": f"Bearer {kv_token}"}
+                f"{supabase_url}/rest/v1/rooms?select=*",
+                headers={
+                    "apikey": supabase_key,
+                    "Authorization": f"Bearer {supabase_key}"
+                }
             )
             with urllib.request.urlopen(req) as response:
                 data = json.loads(response.read().decode())
-                result = data.get('result')
-                return json.loads(result) if result else []
+                rooms = [json.loads(row['data']) for row in data] if data else []
+                return rooms
+        except Exception as e:
+            print(f"Supabase error: {e}")
+    return None
+
+def load_rooms_jsonbin():
+    """Load rooms from JSONBin.io"""
+    bin_id = os.environ.get('JSONBIN_ID')
+    api_key = os.environ.get('JSONBIN_API_KEY', '$2a$10$samplekey')
+
+    if bin_id:
+        try:
+            req = urllib.request.Request(
+                f"https://api.jsonbin.io/v3/b/{bin_id}/latest",
+                headers={"X-Master-Key": api_key}
+            )
+            with urllib.request.urlopen(req) as response:
+                data = json.loads(response.read().decode())
+                return data.get('record', {}).get('rooms', [])
         except:
             pass
+    return None
+
+def load_rooms():
+    """Load all rooms with fallback chain"""
+    rooms = load_rooms_supabase()
+    if rooms is not None:
+        return rooms
+
+    rooms = load_rooms_jsonbin()
+    if rooms is not None:
+        return rooms
 
     return []
 

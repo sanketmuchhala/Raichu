@@ -1,86 +1,147 @@
-# Multiplayer Setup for Vercel
+# Multiplayer Setup (2 Minutes)
 
-## Problem
-The multiplayer feature requires shared storage across serverless function invocations. `/tmp` storage doesn't work because each Vercel function instance has its own isolated `/tmp` directory.
+The multiplayer feature needs shared storage. Choose **ONE** option below:
 
-## Solution: Vercel KV (Redis)
+---
+
+## ⚡ Option 1: Supabase (RECOMMENDED - Easiest)
+
+### Why Supabase?
+- ✅ **Free forever** (500MB database, 50,000 requests/month)
+- ✅ **2-minute setup**
+- ✅ **No credit card required**
+- ✅ **Works immediately**
 
 ### Setup Steps:
 
-1. **Go to Vercel Dashboard**
-   - Open https://vercel.com/dashboard
-   - Select your Raichu project
+**1. Create Supabase Account**
+- Go to https://supabase.com
+- Click "Start your project"
+- Sign up with GitHub (instant)
 
-2. **Create KV Database**
-   - Click on the "Storage" tab
-   - Click "Create Database"
-   - Select "KV (Durable Redis)"
-   - Choose a name (e.g., "raichu-storage")
-   - Click "Create"
+**2. Create New Project**
+- Click "New Project"
+- Name it: `raichu`
+- Create a password (save it somewhere)
+- Choose region closest to you
+- Click "Create new project" (wait ~2 minutes for setup)
 
-3. **Connect to Project**
-   - After creation, click "Connect to Project"
-   - Select your Raichu project
-   - Click "Connect"
+**3. Create Table**
+- In Supabase dashboard, click "Table Editor"
+- Click "Create a new table"
+- Table name: `rooms`
+- Add these columns:
+  - `id` (int8, primary key, auto-increment) ← Already there
+  - `room_id` (text)
+  - `data` (jsonb)
+  - `created_at` (timestamptz) ← Already there
+- Click "Save"
 
-4. **Environment Variables (Auto-Added)**
-   Vercel automatically adds these variables:
-   - `KV_REST_API_URL`
-   - `KV_REST_API_TOKEN`
-   - `KV_REST_API_READ_ONLY_TOKEN`
-   - `KV_URL`
+**4. Get API Credentials**
+- Click "Settings" (gear icon)
+- Click "API"
+- Copy these two values:
+  - **Project URL** (looks like: `https://xxx.supabase.co`)
+  - **anon public** key (long string starting with `eyJ...`)
 
-5. **Redeploy**
-   - Go to "Deployments" tab
-   - Click "Redeploy" on the latest deployment
-   - Or push a new commit to trigger deployment
+**5. Add to Vercel**
+- Go to https://vercel.com/dashboard
+- Open your Raichu project
+- Go to "Settings" → "Environment Variables"
+- Add these two variables:
+  ```
+  SUPABASE_URL = https://xxx.supabase.co
+  SUPABASE_KEY = eyJhbGciOiJ...your-key...
+  ```
+- Click "Save"
 
-### How It Works
+**6. Redeploy**
+- Go to "Deployments" tab
+- Click "..." on latest deployment → "Redeploy"
+- Wait 30 seconds
 
-The multiplayer API endpoints now use Vercel KV REST API:
-- `load_rooms()` - Fetches rooms from Redis
-- `save_rooms()` - Saves rooms to Redis
-- Automatic cleanup of rooms older than 2 hours
+**DONE!** Your multiplayer now works across all devices!
 
-### Testing
+---
 
-After setup:
-1. Open app on Device A → Create Room
-2. Open app on Device B → Browse Rooms
-3. You should see the room from Device A!
+## Option 2: JSONBin.io (Alternative)
 
-### Free Tier
+If you don't want Supabase:
 
-Vercel KV Free Tier includes:
-- 30,000 commands/month
-- 256 MB storage
-- Perfect for this game!
+**1. Create JSONBin Account**
+- Go to https://jsonbin.io
+- Sign up (free)
 
-### Alternative: Upstash Redis (No Vercel KV needed)
+**2. Create Bin**
+- Click "Create Bin"
+- Paste this: `{"rooms":[]}`
+- Click "Create"
+- Copy the **Bin ID** (looks like: `65abc123def456789`)
+- Copy your **API Key** from dashboard
 
-If you don't want to use Vercel KV:
+**3. Add to Vercel**
+```
+JSONBIN_ID = 65abc123def456789
+JSONBIN_API_KEY = $2a$10$your.api.key.here
+```
 
-1. Go to https://upstash.com
-2. Create free account
-3. Create Redis database
-4. Get REST API URL and token
-5. Add to Vercel environment variables:
-   - `KV_REST_API_URL` = Your Upstash REST URL
-   - `KV_REST_API_TOKEN` = Your Upstash token
+**4. Redeploy**
+
+---
+
+## Testing After Setup
+
+1. Open app on Device A
+2. Click "Online" → "Create Room"
+3. Copy room code
+4. Open app on Device B (different browser/device)
+5. Click "Online" → "Browse Rooms"
+6. You should see the room from Device A!
+7. Click "Join Game" and play!
+
+---
 
 ## Troubleshooting
 
 **Error: "Storage not configured"**
-- Make sure KV is connected to your project
-- Check environment variables are set
-- Redeploy after adding KV
+- Double-check environment variables are set in Vercel
+- Make sure you redeployed after adding variables
+- Check variable names match exactly (case-sensitive)
 
-**Rooms not showing across devices**
-- Verify KV is set up
+**Rooms not showing on other devices**
+- Verify table is created in Supabase
 - Check Vercel logs for errors
-- Make sure you redeployed after adding KV
+- Make sure both variables are set
 
-**Performance issues**
-- KV has very low latency (<1ms)
-- Polling happens every 1.5 seconds
-- Should feel instant!
+**Supabase table creation failed**
+- Make sure column names are exact: `room_id` and `data`
+- `data` type must be `jsonb` not `json`
+- Enable RLS (Row Level Security) if asked, then click "Add policy" → "Enable access to all"
+
+---
+
+## Which Storage Am I Using?
+
+The app will try in this order:
+1. **Supabase** (if SUPABASE_URL and SUPABASE_KEY are set)
+2. **JSONBin** (if JSONBIN_ID and JSONBIN_API_KEY are set)
+3. **Error** (if none configured)
+
+You only need to set up ONE of them!
+
+---
+
+## Free Tier Limits
+
+### Supabase Free Tier:
+- 500MB database
+- 50,000 monthly active users
+- 2GB bandwidth
+- **Perfect for this game!**
+
+### JSONBin Free Tier:
+- 50,000 requests/month
+- Unlimited bins
+- **Also perfect!**
+
+Both are more than enough for a chess game!
