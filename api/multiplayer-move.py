@@ -80,8 +80,8 @@ def save_rooms_supabase(rooms):
             )
             try:
                 urllib.request.urlopen(req)
-            except:
-                pass
+            except Exception as del_err:
+                print(f"Supabase delete warning: {del_err}")
 
             # Insert new rooms
             for room in rooms:
@@ -101,10 +101,16 @@ def save_rooms_supabase(rooms):
                     },
                     method='POST'
                 )
-                urllib.request.urlopen(req)
+                response = urllib.request.urlopen(req)
+                print(f"Supabase move save success: {response.status}")
             return True
+        except urllib.error.HTTPError as e:
+            error_body = e.read().decode() if e.fp else "No error body"
+            print(f"Supabase move HTTP error {e.code}: {error_body}")
+            return False
         except Exception as e:
-            print(f"Supabase save error: {e}")
+            print(f"Supabase move save error: {type(e).__name__}: {e}")
+            return False
     return False
 
 def save_rooms_jsonbin(rooms):
@@ -199,7 +205,8 @@ class handler(BaseHTTPRequestHandler):
 
             # Save updated room
             rooms[room_index] = room
-            save_rooms(rooms)
+            if not save_rooms(rooms):
+                raise Exception("Failed to save room after move")
 
             response = {
                 'success': True,
