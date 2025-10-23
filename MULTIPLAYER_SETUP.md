@@ -30,12 +30,27 @@ The multiplayer feature needs shared storage. Choose **ONE** option below:
 - In Supabase dashboard, click "Table Editor"
 - Click "Create a new table"
 - Table name: `rooms`
+- **IMPORTANT**: Uncheck "Enable Row Level Security (RLS)" (or disable it after creation)
 - Add these columns:
   - `id` (int8, primary key, auto-increment) ← Already there
   - `room_id` (text)
   - `data` (jsonb)
   - `created_at` (timestamptz) ← Already there
 - Click "Save"
+
+**3b. Disable RLS (CRITICAL)**
+- If RLS is enabled, your app won't work
+- In Table Editor, click on the `rooms` table
+- Click the shield icon or go to "Authentication" → "Policies"
+- If you see "Row Level Security enabled for this table", click "Disable RLS"
+- **OR** if you want RLS enabled, add this policy:
+  - Click "New Policy" → "Create policy from scratch"
+  - Policy name: `Allow all`
+  - Target roles: `public`
+  - Policy command: `ALL`
+  - Using expression: `true`
+  - With check expression: `true`
+  - Click "Review" → "Save policy"
 
 **4. Get API Credentials**
 - Click "Settings" (gear icon)
