@@ -33,10 +33,18 @@ The multiplayer feature needs shared storage. Choose **ONE** option below:
 - **IMPORTANT**: Uncheck "Enable Row Level Security (RLS)" (or disable it after creation)
 - Add these columns:
   - `id` (int8, primary key, auto-increment) ← Already there
-  - `room_id` (text)
+  - `room_id` (text, UNIQUE) ← **Must be unique!**
   - `data` (jsonb)
   - `created_at` (timestamptz) ← Already there
 - Click "Save"
+
+**3a. Add UNIQUE constraint on room_id (CRITICAL)**
+- After creating the table, go to the SQL Editor (click "SQL Editor" in sidebar)
+- Run this command:
+  ```sql
+  ALTER TABLE rooms ADD CONSTRAINT rooms_room_id_key UNIQUE (room_id);
+  ```
+- This allows the app to update existing rooms instead of creating duplicates
 
 **3b. Disable RLS (CRITICAL)**
 - If RLS is enabled, your app won't work

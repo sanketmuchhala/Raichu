@@ -79,22 +79,7 @@ def save_rooms_supabase(rooms):
 
     if supabase_url and supabase_key:
         try:
-            # First, delete all existing rooms
-            req = urllib.request.Request(
-                f"{supabase_url}/rest/v1/rooms?select=*",
-                headers={
-                    "apikey": supabase_key,
-                    "Authorization": f"Bearer {supabase_key}",
-                    "Prefer": "return=minimal"
-                },
-                method='DELETE'
-            )
-            try:
-                urllib.request.urlopen(req)
-            except Exception as del_err:
-                print(f"Supabase delete warning (ok if table empty): {del_err}")
-
-            # Insert new rooms
+            # Insert or update each room using upsert
             for room in rooms:
                 data = json.dumps({
                     "room_id": room['roomId'],
@@ -108,12 +93,12 @@ def save_rooms_supabase(rooms):
                         "apikey": supabase_key,
                         "Authorization": f"Bearer {supabase_key}",
                         "Content-Type": "application/json",
-                        "Prefer": "return=minimal"
+                        "Prefer": "resolution=merge-duplicates,return=minimal"
                     },
                     method='POST'
                 )
                 response = urllib.request.urlopen(req)
-                print(f"Supabase insert success: {response.status}")
+                print(f"Supabase upsert success for room {room['roomId']}: {response.status}")
             return True
         except urllib.error.HTTPError as e:
             error_body = e.read().decode() if e.fp else "No error body"
