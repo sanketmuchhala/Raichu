@@ -66,8 +66,43 @@ def load_rooms():
 
     return []
 
+def update_room_supabase(room):
+    """Update a single room in Supabase"""
+    supabase_url = os.environ.get('SUPABASE_URL')
+    supabase_key = os.environ.get('SUPABASE_KEY')
+
+    if supabase_url and supabase_key:
+        try:
+            data = json.dumps({
+                "data": json.dumps(room)
+            }).encode()
+
+            req = urllib.request.Request(
+                f"{supabase_url}/rest/v1/rooms?room_id=eq.{room['roomId']}",
+                data=data,
+                headers={
+                    "apikey": supabase_key,
+                    "Authorization": f"Bearer {supabase_key}",
+                    "Content-Type": "application/json",
+                    "Prefer": "return=minimal"
+                },
+                method='PATCH'
+            )
+            response = urllib.request.urlopen(req)
+            print(f"Supabase update success for room {room['roomId']}: {response.status}")
+            return True
+        except urllib.error.HTTPError as e:
+            error_body = e.read().decode() if e.fp else "No error body"
+            print(f"Supabase join update HTTP error {e.code}: {error_body}")
+            print(f"Error details: status={e.code}, reason={e.reason}")
+            return False
+        except Exception as e:
+            print(f"Supabase join update error: {type(e).__name__}: {e}")
+            return False
+    return False
+
 def save_rooms_supabase(rooms):
-    """Save rooms to Supabase"""
+    """Save rooms to Supabase - fallback for compatibility"""
     supabase_url = os.environ.get('SUPABASE_URL')
     supabase_key = os.environ.get('SUPABASE_KEY')
 
@@ -97,6 +132,7 @@ def save_rooms_supabase(rooms):
         except urllib.error.HTTPError as e:
             error_body = e.read().decode() if e.fp else "No error body"
             print(f"Supabase join save HTTP error {e.code}: {error_body}")
+            print(f"Error details: status={e.code}, reason={e.reason}")
             return False
         except Exception as e:
             print(f"Supabase join save error: {type(e).__name__}: {e}")
@@ -179,10 +215,16 @@ class handler(BaseHTTPRequestHandler):
             }
             room['status'] = 'playing'
 
-            # Save updated room
+            # Update just this room (more efficient than saving all rooms)
             rooms[room_index] = room
-            if not save_rooms(rooms):
-                raise Exception("Failed to save room after join")
+
+            # Try to update the specific room first
+            if update_room_supabase(room):
+                pass  # Success
+            elif save_rooms(rooms):  # Fallback to full save
+                pass  # Success
+            else:
+                raise Exception("Failed to save room after join - check Supabase configuration")
 
             response = {
                 'success': True,
