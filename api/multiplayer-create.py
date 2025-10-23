@@ -91,8 +91,8 @@ def save_rooms_supabase(rooms):
             )
             try:
                 urllib.request.urlopen(req)
-            except:
-                pass  # Table might be empty
+            except Exception as del_err:
+                print(f"Supabase delete warning (ok if table empty): {del_err}")
 
             # Insert new rooms
             for room in rooms:
@@ -112,10 +112,16 @@ def save_rooms_supabase(rooms):
                     },
                     method='POST'
                 )
-                urllib.request.urlopen(req)
+                response = urllib.request.urlopen(req)
+                print(f"Supabase insert success: {response.status}")
             return True
+        except urllib.error.HTTPError as e:
+            error_body = e.read().decode() if e.fp else "No error body"
+            print(f"Supabase HTTP error {e.code}: {error_body}")
+            return False
         except Exception as e:
-            print(f"Supabase save error: {e}")
+            print(f"Supabase save error: {type(e).__name__}: {e}")
+            return False
     return False
 
 def save_rooms_jsonbin(rooms):
@@ -198,8 +204,29 @@ class handler(BaseHTTPRequestHandler):
             rooms = cleanup_old_rooms(rooms)
             rooms.append(room)
 
+            # Try to save with detailed error reporting
+            supabase_url = os.environ.get('SUPABASE_URL')
+            supabase_key = os.environ.get('SUPABASE_KEY')
+            jsonbin_id = os.environ.get('JSONBIN_ID')
+            jsonbin_key = os.environ.get('JSONBIN_API_KEY')
+
             if not save_rooms(rooms):
-                raise Exception("Storage not configured. See MULTIPLAYER_SETUP.md for 2-minute setup instructions.")
+                # Build detailed error message
+                error_parts = []
+                if supabase_url and supabase_key:
+                    error_parts.append(f"Supabase configured but save failed (URL: {supabase_url[:30]}...)")
+                elif supabase_url or supabase_key:
+                    error_parts.append("Supabase partially configured (missing URL or KEY)")
+
+                if jsonbin_id and jsonbin_key:
+                    error_parts.append(f"JSONBin configured but save failed (ID: {jsonbin_id})")
+                elif jsonbin_id or jsonbin_key:
+                    error_parts.append("JSONBin partially configured (missing ID or KEY)")
+
+                if not error_parts:
+                    error_parts.append("No storage configured")
+
+                raise Exception(" | ".join(error_parts) + ". Check Vercel environment variables and logs.")
 
             # Return room info
             response = {
