@@ -76,6 +76,9 @@ def update_room_supabase(room):
             data = json.dumps({
                 "data": json.dumps(room)
             }).encode()
+            
+            # Debug: Print what we are trying to update
+            print(f"DEBUG: Attempting PATCH to {supabase_url} for room {room.get('roomId')}")
 
             req = urllib.request.Request(
                 f"{supabase_url}/rest/v1/rooms?room_id=eq.{room['roomId']}",
