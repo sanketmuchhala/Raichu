@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Raichu - Pokemon Chess Game</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div class="container">
         <button class="hamburger-menu" id="hamburger-menu" aria-label="Toggle menu">
@@ -33,7 +35,8 @@
                 <!-- Online Multiplayer Menu -->
                 <div class="online-menu hidden" id="online-menu">
                     <button id="create-room-btn" class="btn btn-primary">Create Room</button>
-                    <button id="refresh-rooms-btn" class="btn btn-secondary" style="display:none;">Refresh</button> <!-- Hidden refresh for menu -->
+                    <button id="refresh-rooms-btn" class="btn btn-secondary" style="display:none;">Refresh</button>
+                    <!-- Hidden refresh for menu -->
                     <button id="browse-rooms-btn" class="btn btn-secondary">Browse Rooms</button>
                 </div>
 
@@ -70,7 +73,7 @@
                     </div>
                 </div>
 
-                <div class="game-status">
+                <div class="game-status" id="game-status">
                     <div id="game-message" class="status-message">Your move</div>
                 </div>
 
@@ -134,4 +137,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>
