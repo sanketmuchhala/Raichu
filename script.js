@@ -380,8 +380,8 @@ function getPikachuMoves(index, piece) {
 
     const directions = [
         [-1, -1], [-1, 0], [-1, 1],
-        [0, -1],           [0, 1],
-        [1, -1],  [1, 0],  [1, 1]
+        [0, -1], [0, 1],
+        [1, -1], [1, 0], [1, 1]
     ];
 
     for (const [dRow, dCol] of directions) {
@@ -431,8 +431,8 @@ function getRaichuMoves(index, piece) {
 
     const directions = [
         [-1, -1], [-1, 0], [-1, 1],
-        [0, -1],           [0, 1],
-        [1, -1],  [1, 0],  [1, 1]
+        [0, -1], [0, 1],
+        [1, -1], [1, 0], [1, 1]
     ];
 
     for (const [dRow, dCol] of directions) {
@@ -1090,7 +1090,7 @@ function stopOnlineGamePolling() {
 
 // Override makeMove for online mode
 const originalMakeMove = makeMove;
-makeMove = function(from, to) {
+makeMove = function (from, to) {
     if (gameState.gameMode === 'online') {
         // Check if it's player's turn
         if (gameState.online.playerColor !== gameState.currentPlayer) {
@@ -1159,7 +1159,13 @@ document.getElementById('copy-code-btn').addEventListener('click', () => {
 });
 
 // Initialize game on load
-window.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+    initializeApp();
+}
+
+function initializeApp() {
     // Load dark mode preference (default is light mode)
     const darkMode = localStorage.getItem('darkMode') === 'true';
     if (darkMode) {
@@ -1172,4 +1178,4 @@ window.addEventListener('DOMContentLoaded', () => {
 
     initGame();
     showMessage('Welcome to Raichu! Click a white piece to start.');
-});
+}
