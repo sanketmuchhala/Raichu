@@ -154,10 +154,12 @@ def cleanup_old_rooms(rooms):
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
-            # Load and cleanup rooms
+            # Load rooms
             rooms = load_rooms()
+            
+            # Filter for display (in-memory only, don't delete from DB on GET)
             rooms = cleanup_old_rooms(rooms)
-            save_rooms(rooms)
+            # save_rooms(rooms)  <-- REMOVED: potentially destructive operation
 
             # Filter and format rooms for display
             available_rooms = []

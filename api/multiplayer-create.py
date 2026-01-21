@@ -149,6 +149,41 @@ def cleanup_old_rooms(rooms):
     cutoff = datetime.now().timestamp() - (2 * 60 * 60)
     return [r for r in rooms if r.get('lastActivity', 0) > cutoff]
 
+def insert_room_supabase(room):
+    """Insert a single room to Supabase"""
+    supabase_url = os.environ.get('SUPABASE_URL')
+    supabase_key = os.environ.get('SUPABASE_KEY')
+
+    if supabase_url and supabase_key:
+        try:
+            data = json.dumps({
+                "room_id": room['roomId'],
+                "data": json.dumps(room)
+            }).encode()
+
+            req = urllib.request.Request(
+                f"{supabase_url}/rest/v1/rooms",
+                data=data,
+                headers={
+                    "apikey": supabase_key,
+                    "Authorization": f"Bearer {supabase_key}",
+                    "Content-Type": "application/json",
+                    "Prefer": "return=minimal"
+                },
+                method='POST'
+            )
+            try:
+                urllib.request.urlopen(req)
+                return True
+            except urllib.error.HTTPError as e:
+                # If room exists (unlikely with random ID), this might fail
+                print(f"Supabase insert error: {e}")
+                return False
+        except Exception as e:
+            print(f"Supabase insert exception: {e}")
+            return False
+    return False
+
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
         try:
@@ -184,12 +219,29 @@ class handler(BaseHTTPRequestHandler):
                 'moveHistory': []
             }
 
-            # Load existing rooms and cleanup old ones
+            # FAST PATH: Try to insert directly to Supabase first
+            if insert_room_supabase(room):
+                # Success! No need to load old rooms or use fallbacks
+                response = {
+                    'success': True,
+                    'roomId': room_id,
+                    'playerId': room['players']['white']['id'],
+                    'playerColor': 'white',
+                    'room': room
+                }
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps(response).encode())
+                return
+
+            # SLOW PATH / FALLBACK: Load all rooms (only needed for JSONBin or Supabase failure)
             rooms = load_rooms()
             rooms = cleanup_old_rooms(rooms)
             rooms.append(room)
 
-            # Try to save with detailed error reporting
+            # Try to save with detailed error reporting for fallback
             supabase_url = os.environ.get('SUPABASE_URL')
             supabase_key = os.environ.get('SUPABASE_KEY')
             jsonbin_id = os.environ.get('JSONBIN_ID')
@@ -199,19 +251,16 @@ class handler(BaseHTTPRequestHandler):
                 # Build detailed error message
                 error_parts = []
                 if supabase_url and supabase_key:
-                    error_parts.append(f"Supabase configured but save failed (URL: {supabase_url[:30]}...)")
+                    error_parts.append(f"Supabase connection failed (URL: {supabase_url[:30]}...)")
                 elif supabase_url or supabase_key:
-                    error_parts.append("Supabase partially configured (missing URL or KEY)")
+                    error_parts.append("Supabase partially configured")
 
                 if jsonbin_id and jsonbin_key:
-                    error_parts.append(f"JSONBin configured but save failed (ID: {jsonbin_id})")
-                elif jsonbin_id or jsonbin_key:
-                    error_parts.append("JSONBin partially configured (missing ID or KEY)")
-
-                if not error_parts:
+                    error_parts.append("JSONBin save failed")
+                else:
                     error_parts.append("No storage configured")
 
-                raise Exception(" | ".join(error_parts) + ". Check Vercel environment variables and logs.")
+                raise Exception(" | ".join(error_parts))
 
             # Return room info
             response = {

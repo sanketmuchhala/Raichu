@@ -165,6 +165,28 @@ def save_rooms(rooms):
 
     return False
 
+def load_single_room_supabase(room_id):
+    """Load a single room by ID from Supabase"""
+    supabase_url = os.environ.get('SUPABASE_URL')
+    supabase_key = os.environ.get('SUPABASE_KEY')
+
+    if supabase_url and supabase_key:
+        try:
+            req = urllib.request.Request(
+                f"{supabase_url}/rest/v1/rooms?room_id=eq.{room_id}&select=data",
+                headers={
+                    "apikey": supabase_key,
+                    "Authorization": f"Bearer {supabase_key}"
+                }
+            )
+            with urllib.request.urlopen(req) as response:
+                data = json.loads(response.read().decode())
+                if data and len(data) > 0:
+                    return json.loads(data[0]['data'])
+        except Exception as e:
+            print(f"Supabase single load error: {e}")
+    return None
+
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
         try:
@@ -181,16 +203,20 @@ class handler(BaseHTTPRequestHandler):
             if not all([room_id, player_id, new_board]):
                 raise ValueError('Missing required fields')
 
-            # Get rooms
-            rooms = load_rooms()
-            room = None
+            # FAST PATH: Try to load specific room from Supabase
+            room = load_single_room_supabase(room_id)
+            
+            # Fallback to loading all rooms if single load failed
+            rooms = None
             room_index = None
-
-            for i, r in enumerate(rooms):
-                if r['roomId'] == room_id:
-                    room = r
-                    room_index = i
-                    break
+            
+            if not room:
+                rooms = load_rooms()
+                for i, r in enumerate(rooms):
+                    if r['roomId'] == room_id:
+                        room = r
+                        room_index = i
+                        break
 
             if not room:
                 raise ValueError('Room not found')
@@ -222,16 +248,19 @@ class handler(BaseHTTPRequestHandler):
                     'timestamp': datetime.now().timestamp()
                 })
 
-            # Update just this room (more efficient than saving all rooms)
-            rooms[room_index] = room
-
-            # Try to update the specific room first
+            # Try to update (Fast path -> Supabase PATCH, Slow path -> JSONBin Save All)
+            success = False
+            
             if update_room_supabase(room):
-                pass  # Success
-            elif save_rooms(rooms):  # Fallback to full save
-                pass  # Success
-            else:
-                raise Exception("Failed to save room after move")
+                success = True
+            elif rooms is not None and room_index is not None:
+                # If we loaded from legacy/JSONBin, update list and save back
+                rooms[room_index] = room
+                if save_rooms(rooms):
+                     success = True
+            
+            if not success:
+                 raise Exception("Failed to save room after move")
 
             response = {
                 'success': True,
