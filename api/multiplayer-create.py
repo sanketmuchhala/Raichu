@@ -73,40 +73,14 @@ def load_rooms():
     return []
 
 def save_rooms_supabase(rooms):
-    """Save rooms to Supabase"""
-    supabase_url = os.environ.get('SUPABASE_URL')
-    supabase_key = os.environ.get('SUPABASE_KEY')
-
-    if supabase_url and supabase_key:
-        try:
-            # Insert or update each room using upsert
-            for room in rooms:
-                data = json.dumps({
-                    "room_id": room['roomId'],
-                    "data": json.dumps(room)
-                }).encode()
-
-                req = urllib.request.Request(
-                    f"{supabase_url}/rest/v1/rooms",
-                    data=data,
-                    headers={
-                        "apikey": supabase_key,
-                        "Authorization": f"Bearer {supabase_key}",
-                        "Content-Type": "application/json",
-                        "Prefer": "resolution=merge-duplicates,return=minimal"
-                    },
-                    method='POST'
-                )
-                response = urllib.request.urlopen(req)
-                print(f"Supabase upsert success for room {room['roomId']}: {response.status}")
-            return True
-        except urllib.error.HTTPError as e:
-            error_body = e.read().decode() if e.fp else "No error body"
-            print(f"Supabase HTTP error {e.code}: {error_body}")
-            return False
-        except Exception as e:
-            print(f"Supabase save error: {type(e).__name__}: {e}")
-            return False
+    """
+    DEPRECATED/REMOVED: This function used to save all rooms at once.
+    This caused massive duplication bugs because Supabase Upsert requires 
+    unique constraints which might not be set, and rewriting the whole DB is bad.
+    
+    We now ONLY use atomic inserts/updates.
+    """
+    # Safety: Return False to force usage of atomic methods or fallback to JSONBin
     return False
 
 def save_rooms_jsonbin(rooms):
