@@ -142,8 +142,10 @@ def load_single_room_supabase(room_id):
 
     if supabase_url and supabase_key:
         try:
+            # URL encode the room_id just in case
+            safe_room_id = urllib.parse.quote(room_id)
             req = urllib.request.Request(
-                f"{supabase_url}/rest/v1/rooms?room_id=eq.{room_id}&select=data",
+                f"{supabase_url}/rest/v1/rooms?room_id=eq.{safe_room_id}&select=data",
                 headers={
                     "apikey": supabase_key,
                     "Authorization": f"Bearer {supabase_key}"
@@ -152,7 +154,11 @@ def load_single_room_supabase(room_id):
             with urllib.request.urlopen(req) as response:
                 data = json.loads(response.read().decode())
                 if data and len(data) > 0:
-                    return json.loads(data[0]['data'])
+                    raw_data = data[0]['data']
+                    # Handle case where Supabase returns dict (jsonb) or string (double-encoded)
+                    if isinstance(raw_data, str):
+                        return json.loads(raw_data)
+                    return raw_data
         except Exception as e:
             print(f"Supabase single load error: {e}")
     return None
