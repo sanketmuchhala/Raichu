@@ -983,15 +983,27 @@ function createRoomCard(room) {
 async function handleJoinRoom(roomId) {
     try {
         const playerName = prompt('Enter your name:') || 'Player 2';
+        console.log("Attempting to join room:", roomId); // Debug log
+
         const result = await MultiplayerAPI.joinRoom(roomId, playerName);
+        console.log("Join Room Result:", result); // Debug log (CRITICAL)
 
         if (result.success) {
             gameState.online.roomId = result.room.roomId;
             gameState.online.playerId = result.playerId;
             gameState.online.playerColor = 'b';
 
-            // Update game board
-            gameState.board = result.room.board.split('');
+            // Robust Board Handling: Handle String OR Array
+            let boardData = result.room.board;
+            if (typeof boardData === 'string') {
+                gameState.board = boardData.split('');
+            } else if (Array.isArray(boardData)) {
+                gameState.board = boardData;
+            } else {
+                console.error("Invalid board format:", boardData);
+                gameState.board = new Array(64).fill('.'); // Fallback to empty to prevent crash
+            }
+
             gameState.currentPlayer = result.room.currentPlayer;
 
             document.getElementById('room-browser').classList.add('hidden');
@@ -1004,11 +1016,12 @@ async function handleJoinRoom(roomId) {
 
             showMessage(gameState.online.playerColor === gameState.currentPlayer ? 'Your turn!' : "Opponent's turn");
         } else {
-            alert('Failed to join room: ' + result.error);
+            console.error("Join failed with API error:", result.error);
+            alert('Server Refused Join: ' + result.error);
         }
     } catch (error) {
-        console.error('Error joining room:', error);
-        alert('Failed to join room');
+        console.error('CRITICAL Error joining room:', error);
+        alert('App Logic Error: ' + error.message);
     }
 }
 
