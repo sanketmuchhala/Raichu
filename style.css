@@ -898,15 +898,52 @@ body.dark-mode {
     display: inline-block;
 }
 
+/* SVG Piece Styling - Uniform sizing across all browsers */
+.piece-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.piece-svg {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+    /* Preserve aspect ratio */
+    image-rendering: auto;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Last move highlighting */
+.cell.last-move {
+    background-color: rgba(186, 202, 68, 0.4) !important;
+}
+
+.dark-mode .cell.last-move {
+    background-color: rgba(186, 202, 68, 0.3) !important;
+}
+
+/* Flying piece animation */
+.flying-piece {
+    position: fixed;
+    pointer-events: none;
+    z-index: 1000;
+    will-change: transform;
+}
+
 /* Piece colors - Light mode */
 .piece-white {
-    color: #2c3e50;
-    -webkit-text-fill-color: #2c3e50;
+    color: #ffffff;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
 }
 
 .piece-black {
-    color: #e74c3c;
-    -webkit-text-fill-color: #e74c3c;
+    color: #000000;
+    filter: drop-shadow(0 1px 2px rgba(255, 255, 255, 0.3));
 }
 
 /* Piece colors - Dark mode (improved contrast) */

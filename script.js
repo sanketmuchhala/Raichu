@@ -73,14 +73,31 @@ function renderBoard() {
 
             const piece = gameState.board[index];
             if (piece !== '.') {
-                const pieceSpan = document.createElement('span');
-                pieceSpan.className = 'piece';
-                pieceSpan.textContent = PIECE_DISPLAY[piece];
-                // Add class for color styling
-                if (isWhitePiece(piece)) {
-                    pieceSpan.classList.add('piece-white');
+                // Use SVG pieces if feature flag is enabled
+                if (typeof FEATURE_FLAGS !== 'undefined' && FEATURE_FLAGS.USE_SVG_PIECES) {
+                    const pieceContainer = document.createElement('div');
+                    pieceContainer.className = 'piece-container';
+
+                    const img = document.createElement('img');
+                    img.src = `assets/pieces/${PIECE_SVG[piece]}`;
+                    img.className = 'piece piece-svg';
+                    img.alt = piece;
+                    img.draggable = false; // Prevent image drag
+
+                    pieceContainer.appendChild(img);
+                    cell.appendChild(pieceContainer);
                 } else {
-                    pieceSpan.classList.add('piece-black');
+                    // Fallback to Unicode
+                    const pieceSpan = document.createElement('span');
+                    pieceSpan.className = 'piece';
+                    pieceSpan.textContent = PIECE_DISPLAY[piece];
+                    // Add class for color styling
+                    if (isWhitePiece(piece)) {
+                        pieceSpan.classList.add('piece-white');
+                    } else {
+                        pieceSpan.classList.add('piece-black');
+                    }
+                    cell.appendChild(pieceSpan);
                 }
 
                 // Enable drag and drop for player's pieces
@@ -89,8 +106,6 @@ function renderBoard() {
                     cell.setAttribute('draggable', 'true');
                     cell.addEventListener('dragstart', handleDragStart);
                 }
-
-                cell.appendChild(pieceSpan);
             }
 
             // Make cell a drop target
@@ -110,6 +125,11 @@ function renderBoard() {
             cell.addEventListener('click', () => handleCellClick(index));
             boardElement.appendChild(cell);
         }
+    }
+
+    // Validate sync in dev mode
+    if (typeof validateBoardSync !== 'undefined') {
+        validateBoardSync();
     }
 }
 
@@ -198,6 +218,32 @@ function makeMove(from, to) {
 
     // Handle captures (check if jumping over opponent piece)
     const capturedPiece = detectCapture(from, to);
+
+    // Check if animations are enabled
+    const useAnimations = typeof FEATURE_FLAGS !== 'undefined' &&
+        FEATURE_FLAGS.ENABLE_ANIMATIONS &&
+        typeof animatePieceMove !== 'undefined';
+
+    if (useAnimations) {
+        // Animate the move, then update state
+        animatePieceMove(from, to, piece, () => {
+            // Complete the move after animation
+            completeMoveLogic(from, to, piece, capturedPiece);
+        });
+
+        // Optionally animate capture
+        if (capturedPiece !== null && typeof animatePieceCapture !== 'undefined') {
+            animatePieceCapture(capturedPiece, () => { });
+        }
+    } else {
+        // Instant move (legacy behavior)
+        completeMoveLogic(from, to, piece, capturedPiece);
+    }
+}
+
+// Complete move logic (separated for animation callback)
+function completeMoveLogic(from, to, piece, capturedPiece) {
+    // Apply capture
     if (capturedPiece !== null) {
         gameState.board[capturedPiece] = '.';
     }
@@ -212,6 +258,11 @@ function makeMove(from, to) {
     // Clear selection
     gameState.selectedCell = null;
     gameState.possibleMoves = [];
+
+    // Highlight last move
+    if (typeof highlightLastMove !== 'undefined') {
+        highlightLastMove(from, to);
+    }
 
     // Check win condition
     if (checkWinCondition()) {
@@ -230,8 +281,9 @@ function makeMove(from, to) {
     updateGameInfo();
 
     // If it's now black's turn and in bot mode, trigger bot move
+    // REMOVED 500ms artificial delay - bot thinks immediately
     if (gameState.currentPlayer === 'b' && gameState.gameMode === 'bot') {
-        setTimeout(() => requestBotMove(), 500);
+        requestBotMove();
     }
 }
 
