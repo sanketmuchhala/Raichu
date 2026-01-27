@@ -6,8 +6,8 @@ let gameState = {
     possibleMoves: [],
     gameOver: false,
     moveHistory: [],
-    moveHistoryNotation: [], // Algebraic notation: [{white: 'e2-e4', black: 'e7-e5'}]
-    capturedPieces: { white: [], black: [] }, // Track captured pieces
+    moveHistoryNotation: [], // NEW: Algebraic notation for display
+    capturedPieces: { white: [], black: [] }, // NEW: Track captured pieces
     N: 8,
     gameMode: 'bot', // 'bot', '2player', or 'online'
     difficulty: 2, // 1=Easy, 2=Medium, 3=Hard
@@ -31,105 +31,6 @@ const PIECE_DISPLAY = {
     '$': '♛', // Black Raichu
     '.': ''
 };
-
-// Sound effects
-const SOUNDS = {
-    move: null,
-    capture: null,
-    check: null,
-    gameStart: null,
-    gameEnd: null,
-    enabled: localStorage.getItem('sounds_enabled') !== 'false', // Default ON
-    initialized: false,
-    audioContext: null
-};
-
-// Initialize sounds (deferred until first user interaction)
-function initSounds() {
-    if (!SOUNDS.enabled || SOUNDS.initialized) return;
-
-    try {
-        // Create AudioContext on first call (after user interaction)
-        if (!SOUNDS.audioContext) {
-            SOUNDS.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        }
-
-        const audioContext = SOUNDS.audioContext;
-
-        SOUNDS.playMove = () => {
-            if (!SOUNDS.enabled || !audioContext) return;
-            try {
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                oscillator.frequency.value = 400;
-                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.1);
-            } catch (e) {
-                console.warn('Sound playback failed:', e);
-            }
-        };
-
-        SOUNDS.playCapture = () => {
-            if (!SOUNDS.enabled || !audioContext) return;
-            try {
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                oscillator.frequency.value = 300;
-                gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.15);
-            } catch (e) {
-                console.warn('Sound playback failed:', e);
-            }
-        };
-
-        SOUNDS.playGameEnd = () => {
-            if (!SOUNDS.enabled || !audioContext) return;
-            try {
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                oscillator.frequency.value = 600;
-                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.3);
-            } catch (e) {
-                console.warn('Sound playback failed:', e);
-            }
-        };
-
-        SOUNDS.initialized = true;
-    } catch (e) {
-        console.warn('Failed to initialize sounds:', e);
-        // Don't block game initialization if sounds fail
-    }
-}
-
-// Helper: Convert index to algebraic notation (0 -> a8, 7 -> h8, 56 -> a1, 63 -> h1)
-function indexToAlgebraic(index) {
-    const row = Math.floor(index / 8);
-    const col = index % 8;
-    const file = String.fromCharCode(97 + col); // 'a' to 'h'
-    const rank = 8 - row; // 8 to 1 (flipped)
-    return file + rank;
-}
-
-// Helper: Get move notation
-function getMoveNotation(from, to, piece, captured) {
-    const fromSquare = indexToAlgebraic(from);
-    const toSquare = indexToAlgebraic(to);
-    const captureSymbol = captured ? 'x' : '-';
-    return `${fromSquare}${captureSymbol}${toSquare}`;
-}
 
 // Initialize game
 function initGame() {
@@ -157,12 +58,17 @@ function initGame() {
     renderBoard();
     updateGameInfo();
 
-    // Initialize UI displays
+    // Update move history and captured pieces displays
     if (typeof updateMoveHistoryDisplay !== 'undefined') {
         updateMoveHistoryDisplay();
     }
     if (typeof updateCapturedPiecesDisplay !== 'undefined') {
         updateCapturedPiecesDisplay();
+    }
+
+    // Play game start sound
+    if (typeof SoundManager !== 'undefined') {
+        SoundManager.play('gameStart');
     }
 }
 
@@ -354,31 +260,17 @@ function makeMove(from, to) {
 
 // Complete move logic (separated for animation callback)
 function completeMoveLogic(from, to, piece, capturedPiece) {
-    // Lazy initialize sounds on first move (browser requires user interaction)
-    if (!SOUNDS.initialized && typeof initSounds !== 'undefined') {
-        initSounds();
-    }
-
-    // Track captured piece before applying
-    const capturedPieceChar = capturedPiece !== null ? gameState.board[capturedPiece] : null;
-
-    // Apply capture
+    // Track captured piece
+    let capturedPieceChar = null;
     if (capturedPiece !== null) {
+        capturedPieceChar = gameState.board[capturedPiece];
         gameState.board[capturedPiece] = '.';
 
-        // Add to captured pieces tracker
-        if (typeof addCapturedPiece !== 'undefined') {
-            addCapturedPiece(capturedPieceChar);
-        }
-
-        // Play capture sound
-        if (SOUNDS && SOUNDS.playCapture) {
-            SOUNDS.playCapture();
-        }
-    } else {
-        // Play move sound
-        if (SOUNDS && SOUNDS.playMove) {
-            SOUNDS.playMove();
+        // Add to captured pieces list
+        if (isWhitePiece(capturedPieceChar)) {
+            gameState.capturedPieces.white.push(capturedPieceChar);
+        } else {
+            gameState.capturedPieces.black.push(capturedPieceChar);
         }
     }
 
@@ -389,9 +281,29 @@ function completeMoveLogic(from, to, piece, capturedPiece) {
     // Check for promotion
     handlePromotion(to);
 
-    // Add move to history (before switching player)
-    if (typeof addMoveToHistory !== 'undefined') {
-        addMoveToHistory(from, to, piece, capturedPiece);
+    // Add move to history notation
+    if (typeof getMoveNotation !== 'undefined') {
+        const notation = getMoveNotation(from, to, piece, capturedPieceChar);
+        gameState.moveHistoryNotation.push(notation);
+
+        // Update display
+        if (typeof updateMoveHistoryDisplay !== 'undefined') {
+            updateMoveHistoryDisplay();
+        }
+    }
+
+    // Update captured pieces display
+    if (typeof updateCapturedPiecesDisplay !== 'undefined') {
+        updateCapturedPiecesDisplay();
+    }
+
+    // Play sound effect
+    if (typeof SoundManager !== 'undefined') {
+        if (capturedPieceChar) {
+            SoundManager.play('capture');
+        } else {
+            SoundManager.play('move');
+        }
     }
 
     // Clear selection
@@ -409,12 +321,13 @@ function completeMoveLogic(from, to, piece, capturedPiece) {
         const winner = gameState.currentPlayer === 'w' ? 'White' : 'Black';
         showMessage(`${winner} wins!`);
         renderBoard();
-        showGameModal(winner === 'White' ? 'you' : 'bot');
 
-        // Play game end sound
-        if (SOUNDS && SOUNDS.playGameEnd) {
-            SOUNDS.playGameEnd();
+        // Play win sound
+        if (typeof SoundManager !== 'undefined') {
+            SoundManager.play('gameEnd');
         }
+
+        showGameModal(winner === 'White' ? 'you' : 'bot');
         return;
     }
 
@@ -1382,6 +1295,16 @@ document.getElementById('copy-code-btn').addEventListener('click', () => {
         }, 2000);
     });
 });
+
+// Clear move history button
+const clearHistoryBtn = document.getElementById('clear-history-btn');
+if (clearHistoryBtn) {
+    clearHistoryBtn.addEventListener('click', () => {
+        if (typeof clearMoveHistory !== 'undefined') {
+            clearMoveHistory();
+        }
+    });
+}
 
 // Initialize game on load
 if (document.readyState === 'loading') {
