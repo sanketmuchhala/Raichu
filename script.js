@@ -6,6 +6,8 @@ let gameState = {
     possibleMoves: [],
     gameOver: false,
     moveHistory: [],
+    moveHistoryNotation: [], // Algebraic notation: [{white: 'e2-e4', black: 'e7-e5'}]
+    capturedPieces: { white: [], black: [] }, // Track captured pieces
     N: 8,
     gameMode: 'bot', // 'bot', '2player', or 'online'
     difficulty: 2, // 1=Easy, 2=Medium, 3=Hard
@@ -30,6 +32,80 @@ const PIECE_DISPLAY = {
     '.': ''
 };
 
+// Sound effects
+const SOUNDS = {
+    move: null,
+    capture: null,
+    check: null,
+    gameStart: null,
+    gameEnd: null,
+    enabled: localStorage.getItem('sounds_enabled') !== 'false' // Default ON
+};
+
+// Initialize sounds (will be loaded when needed)
+function initSounds() {
+    if (!SOUNDS.enabled) return;
+
+    // Using simple beep sounds via Web Audio API (no external files needed)
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+    SOUNDS.playMove = () => {
+        if (!SOUNDS.enabled) return;
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        oscillator.frequency.value = 400;
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.1);
+    };
+
+    SOUNDS.playCapture = () => {
+        if (!SOUNDS.enabled) return;
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        oscillator.frequency.value = 300;
+        gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.15);
+    };
+
+    SOUNDS.playGameEnd = () => {
+        if (!SOUNDS.enabled) return;
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        oscillator.frequency.value = 600;
+        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.3);
+    };
+}
+
+// Helper: Convert index to algebraic notation (0 -> a8, 7 -> h8, 56 -> a1, 63 -> h1)
+function indexToAlgebraic(index) {
+    const row = Math.floor(index / 8);
+    const col = index % 8;
+    const file = String.fromCharCode(97 + col); // 'a' to 'h'
+    const rank = 8 - row; // 8 to 1 (flipped)
+    return file + rank;
+}
+
+// Helper: Get move notation
+function getMoveNotation(from, to, piece, captured) {
+    const fromSquare = indexToAlgebraic(from);
+    const toSquare = indexToAlgebraic(to);
+    const captureSymbol = captured ? 'x' : '-';
+    return `${fromSquare}${captureSymbol}${toSquare}`;
+}
+
 // Initialize game
 function initGame() {
     // Standard Raichu starting position
@@ -50,9 +126,24 @@ function initGame() {
     gameState.possibleMoves = [];
     gameState.gameOver = false;
     gameState.moveHistory = [];
+    gameState.moveHistoryNotation = [];
+    gameState.capturedPieces = { white: [], black: [] };
 
     renderBoard();
     updateGameInfo();
+
+    // Initialize UI displays
+    if (typeof updateMoveHistoryDisplay !== 'undefined') {
+        updateMoveHistoryDisplay();
+    }
+    if (typeof updateCapturedPiecesDisplay !== 'undefined') {
+        updateCapturedPiecesDisplay();
+    }
+
+    // Initialize sounds
+    if (typeof initSounds !== 'undefined') {
+        initSounds();
+    }
 }
 
 // Render the game board
@@ -243,9 +334,27 @@ function makeMove(from, to) {
 
 // Complete move logic (separated for animation callback)
 function completeMoveLogic(from, to, piece, capturedPiece) {
+    // Track captured piece before applying
+    const capturedPieceChar = capturedPiece !== null ? gameState.board[capturedPiece] : null;
+
     // Apply capture
     if (capturedPiece !== null) {
         gameState.board[capturedPiece] = '.';
+
+        // Add to captured pieces tracker
+        if (typeof addCapturedPiece !== 'undefined') {
+            addCapturedPiece(capturedPieceChar);
+        }
+
+        // Play capture sound
+        if (SOUNDS && SOUNDS.playCapture) {
+            SOUNDS.playCapture();
+        }
+    } else {
+        // Play move sound
+        if (SOUNDS && SOUNDS.playMove) {
+            SOUNDS.playMove();
+        }
     }
 
     // Move the piece
@@ -254,6 +363,11 @@ function completeMoveLogic(from, to, piece, capturedPiece) {
 
     // Check for promotion
     handlePromotion(to);
+
+    // Add move to history (before switching player)
+    if (typeof addMoveToHistory !== 'undefined') {
+        addMoveToHistory(from, to, piece, capturedPiece);
+    }
 
     // Clear selection
     gameState.selectedCell = null;
@@ -271,6 +385,11 @@ function completeMoveLogic(from, to, piece, capturedPiece) {
         showMessage(`${winner} wins!`);
         renderBoard();
         showGameModal(winner === 'White' ? 'you' : 'bot');
+
+        // Play game end sound
+        if (SOUNDS && SOUNDS.playGameEnd) {
+            SOUNDS.playGameEnd();
+        }
         return;
     }
 

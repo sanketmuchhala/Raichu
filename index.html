@@ -77,10 +77,32 @@
                     <div id="game-message" class="status-message">Your move</div>
                 </div>
 
-                <div class="controls">
-                    <button id="new-game-btn" class="btn btn-primary">New Game</button>
-                    <button id="bot-move-btn" class="btn btn-secondary">Bot Move</button>
-                    <button id="undo-btn" class="btn btn-secondary">Undo</button>
+                <!-- Captured Pieces Display -->
+                <div class="captured-pieces-section" id="captured-pieces-section">
+                    <h4 class="section-title">Material</h4>
+                    <div class="captured-container">
+                        <div class="captured-row">
+                            <span class="player-label">White:</span>
+                            <div class="captured-pieces" id="captured-white"></div>
+                        </div>
+                        <div class="captured-row">
+                            <span class="player-label">Black:</span>
+                            <div class="captured-pieces" id="captured-black"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Move History Panel -->
+                <div class="move-history-section" id="move-history-section">
+                    <h4 class="section-title">Move History</h4>
+                    <div class="move-history-container" id="move-history-container">
+                        <div class="no-moves">No moves yet</div>
+                    </div>
+                </div>
+
+                <div class="controls" id="game-controls">
+                    <button class="btn btn-primary" id="new-game-btn">New Game</button>
+                    <button class="btn" id="undo-btn">Undo Move</button>
                 </div>
 
                 <div class="rules-section">
@@ -138,6 +160,7 @@
     <!-- Scripts: Load feature flags first, then animations, then main logic -->
     <script src="feature-flags.js"></script>
     <script src="animations.js"></script>
+    <script src="ui-updates.js"></script>
     <script src="script.js"></script>
 </body>
 
