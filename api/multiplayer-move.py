@@ -79,13 +79,22 @@ def update_room_supabase(room):
                     "apikey": supabase_key,
                     "Authorization": f"Bearer {supabase_key}",
                     "Content-Type": "application/json",
-                    "Prefer": "return=minimal"
+                    "Prefer": "return=representation"
                 },
                 method='PATCH'
             )
-            response = urllib.request.urlopen(req)
-            print(f"Supabase update success for room {room['roomId']}: {response.status}")
-            return True
+            with urllib.request.urlopen(req) as response:
+                if response.status == 200:
+                    response_body = response.read().decode()
+                    updated_rows = json.loads(response_body)
+                    if len(updated_rows) == 0:
+                        print("CRITICAL: Supabase reported success (200) but returned 0 rows. RLS likely blocking writes.")
+                        return False
+                    return True
+                elif response.status == 204:
+                    return True
+                
+            return False
         except urllib.error.HTTPError as e:
             error_body = e.read().decode() if e.fp else "No error body"
             print(f"Supabase move update HTTP error {e.code}: {error_body}")

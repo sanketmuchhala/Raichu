@@ -128,8 +128,8 @@ body.dark-mode {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-                visibility 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-                backdrop-filter 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        visibility 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+        backdrop-filter 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar-backdrop.active {
@@ -144,6 +144,7 @@ body.dark-mode {
 
 /* Reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
+
     .sidebar-backdrop,
     .hamburger-menu,
     .hamburger-menu span,
@@ -995,8 +996,13 @@ footer {
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* Mobile Optimization - Portrait & Tablet */
