@@ -9,15 +9,17 @@ from urllib.parse import urlparse, parse_qs
 import urllib.request
 import urllib.error
 
-def load_rooms_supabase():
-    """Load rooms from Supabase"""
+def load_single_room_supabase(room_id):
+    """Load a single room by ID from Supabase (Robust against data types)"""
     supabase_url = os.environ.get('SUPABASE_URL')
     supabase_key = os.environ.get('SUPABASE_KEY')
 
     if supabase_url and supabase_key:
         try:
+            # URL encode the room_id just in case
+            safe_room_id = urllib.parse.quote(room_id)
             req = urllib.request.Request(
-                f"{supabase_url}/rest/v1/rooms?select=*",
+                f"{supabase_url}/rest/v1/rooms?room_id=eq.{safe_room_id}&select=data",
                 headers={
                     "apikey": supabase_key,
                     "Authorization": f"Bearer {supabase_key}"
@@ -25,16 +27,20 @@ def load_rooms_supabase():
             )
             with urllib.request.urlopen(req) as response:
                 data = json.loads(response.read().decode())
-                rooms = [json.loads(row['data']) for row in data] if data else []
-                return rooms
+                if data and len(data) > 0:
+                    raw_data = data[0]['data']
+                    # Handle case where Supabase returns dict (jsonb) or string (double-encoded)
+                    if isinstance(raw_data, str):
+                        return json.loads(raw_data)
+                    return raw_data
         except Exception as e:
-            print(f"Supabase error: {e}")
+            print(f"Supabase single load error: {e}")
     return None
 
 def load_rooms_jsonbin():
-    """Load rooms from JSONBin.io"""
+    """Load rooms from JSONBin.io (Fallback)"""
     bin_id = os.environ.get('JSONBIN_ID')
-    api_key = os.environ.get('JSONBIN_API_KEY', '$2a$10$samplekey')
+    api_key = os.environ.get('JSONBIN_API_KEY')
 
     if bin_id:
         try:
@@ -49,18 +55,6 @@ def load_rooms_jsonbin():
             pass
     return None
 
-def load_rooms():
-    """Load all rooms with fallback chain"""
-    rooms = load_rooms_supabase()
-    if rooms is not None:
-        return rooms
-
-    rooms = load_rooms_jsonbin()
-    if rooms is not None:
-        return rooms
-
-    return []
-
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
@@ -74,13 +68,17 @@ class handler(BaseHTTPRequestHandler):
             if not room_id:
                 raise ValueError('Room ID is required')
 
-            # Get room
-            rooms = load_rooms()
-            room = None
-            for r in rooms:
-                if r['roomId'] == room_id:
-                    room = r
-                    break
+            # 1. Try Fast Path (Supabase Atomic Load)
+            room = load_single_room_supabase(room_id)
+            
+            # 2. Fallback to Slow Path (JSONBin) if not found in Supabase
+            if not room:
+                rooms = load_rooms_jsonbin()
+                if rooms:
+                    for r in rooms:
+                        if r['roomId'] == room_id:
+                            room = r
+                            break
 
             if not room:
                 raise ValueError('Room not found')

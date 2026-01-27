@@ -1068,9 +1068,25 @@ function startOnlineGamePolling() {
             );
 
             if (result.success) {
-                const newBoard = result.room.board;
-                if (newBoard !== gameState.board.join('')) {
-                    gameState.board = newBoard.split('');
+                let newBoardStr = '';
+                let newBoardArr = [];
+
+                // Robustly handle varying board formats from server
+                const incomingBoard = result.room.board;
+                if (Array.isArray(incomingBoard)) {
+                    newBoardArr = incomingBoard;
+                    newBoardStr = incomingBoard.join('');
+                } else if (typeof incomingBoard === 'string') {
+                    newBoardArr = incomingBoard.split('');
+                    newBoardStr = incomingBoard;
+                } else {
+                    console.error("Invalid board format in poll:", incomingBoard);
+                    return; // Skip update if format is bad
+                }
+
+                if (newBoardStr !== gameState.board.join('')) {
+                    console.log("Board updated from polling");
+                    gameState.board = newBoardArr;
                     gameState.currentPlayer = result.room.currentPlayer;
                     renderBoard();
                     updateGameInfo();
