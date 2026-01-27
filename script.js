@@ -39,54 +39,79 @@ const SOUNDS = {
     check: null,
     gameStart: null,
     gameEnd: null,
-    enabled: localStorage.getItem('sounds_enabled') !== 'false' // Default ON
+    enabled: localStorage.getItem('sounds_enabled') !== 'false', // Default ON
+    initialized: false,
+    audioContext: null
 };
 
-// Initialize sounds (will be loaded when needed)
+// Initialize sounds (deferred until first user interaction)
 function initSounds() {
-    if (!SOUNDS.enabled) return;
+    if (!SOUNDS.enabled || SOUNDS.initialized) return;
 
-    // Using simple beep sounds via Web Audio API (no external files needed)
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    try {
+        // Create AudioContext on first call (after user interaction)
+        if (!SOUNDS.audioContext) {
+            SOUNDS.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
 
-    SOUNDS.playMove = () => {
-        if (!SOUNDS.enabled) return;
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        oscillator.frequency.value = 400;
-        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.1);
-    };
+        const audioContext = SOUNDS.audioContext;
 
-    SOUNDS.playCapture = () => {
-        if (!SOUNDS.enabled) return;
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        oscillator.frequency.value = 300;
-        gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.15);
-    };
+        SOUNDS.playMove = () => {
+            if (!SOUNDS.enabled || !audioContext) return;
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                oscillator.frequency.value = 400;
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.1);
+            } catch (e) {
+                console.warn('Sound playback failed:', e);
+            }
+        };
 
-    SOUNDS.playGameEnd = () => {
-        if (!SOUNDS.enabled) return;
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        oscillator.frequency.value = 600;
-        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.3);
-    };
+        SOUNDS.playCapture = () => {
+            if (!SOUNDS.enabled || !audioContext) return;
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                oscillator.frequency.value = 300;
+                gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.15);
+            } catch (e) {
+                console.warn('Sound playback failed:', e);
+            }
+        };
+
+        SOUNDS.playGameEnd = () => {
+            if (!SOUNDS.enabled || !audioContext) return;
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                oscillator.frequency.value = 600;
+                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } catch (e) {
+                console.warn('Sound playback failed:', e);
+            }
+        };
+
+        SOUNDS.initialized = true;
+    } catch (e) {
+        console.warn('Failed to initialize sounds:', e);
+        // Don't block game initialization if sounds fail
+    }
 }
 
 // Helper: Convert index to algebraic notation (0 -> a8, 7 -> h8, 56 -> a1, 63 -> h1)
@@ -138,11 +163,6 @@ function initGame() {
     }
     if (typeof updateCapturedPiecesDisplay !== 'undefined') {
         updateCapturedPiecesDisplay();
-    }
-
-    // Initialize sounds
-    if (typeof initSounds !== 'undefined') {
-        initSounds();
     }
 }
 
@@ -334,6 +354,11 @@ function makeMove(from, to) {
 
 // Complete move logic (separated for animation callback)
 function completeMoveLogic(from, to, piece, capturedPiece) {
+    // Lazy initialize sounds on first move (browser requires user interaction)
+    if (!SOUNDS.initialized && typeof initSounds !== 'undefined') {
+        initSounds();
+    }
+
     // Track captured piece before applying
     const capturedPieceChar = capturedPiece !== null ? gameState.board[capturedPiece] : null;
 
