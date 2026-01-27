@@ -4,7 +4,7 @@ A web-based strategic board game inspired by Pokemon, featuring an AI opponent p
 
 ## Live Demo
 
-[Play Raichu Now!](#https://raichu-web-game.vercel.app/) (Link will be added after deployment)
+[Play Raichu Now!](https://raichu-web-game.vercel.app/) (Link will be added after deployment)
 
 ## Game Description
 
