@@ -41,7 +41,7 @@ export default function PlayPage() {
             className="text-xl font-bold tracking-tight"
             style={{ color: theme.textPrimary, textDecoration: 'none' }}
           >
-            ⚡ Raichu
+            Raichu
           </Link>
           <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{
             backgroundColor: theme.accent + '20',
