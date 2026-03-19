@@ -20,7 +20,7 @@ export function PieceSVG({ piece, size }: PieceSVGProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 45 45" xmlns="http://www.w3.org/2000/svg">
       {actualType === 'pichu' && (isWhite ? <WhitePawn /> : <BlackPawn />)}
-      {actualType === 'pikachu' && (isWhite ? <WhiteBishop /> : <BlackBishop />)}
+      {actualType === 'pikachu' && (isWhite ? <WhiteRook /> : <BlackRook />)}
       {actualType === 'raichu' && (isWhite ? <WhiteQueen /> : <BlackQueen />)}
     </svg>
   );
@@ -80,65 +80,70 @@ function BlackPawn() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   BISHOP — Pikachu
+   ROOK — Pikachu
    ═══════════════════════════════════════════════════════════ */
 
-function WhiteBishop() {
+function WhiteRook() {
   return (
     <g>
-      {/* Top ball */}
-      <circle cx="22.5" cy="6" r="2.5" fill="#fff" stroke="#000" strokeWidth="1.5" />
-      {/* Mitre head */}
-      <path d="M 18 14 C 18 10 19.5 8 22.5 8 C 25.5 8 27 10 27 14 C 27 17 25 19 22.5 19 C 20 19 18 17 18 14 Z"
-        fill="#fff" stroke="#000" strokeWidth="1.5" />
-      {/* Mitre slit */}
-      <path d="M 22.5 8.5 L 20.5 14 L 22.5 16 L 24.5 14 Z"
-        fill="none" stroke="#000" strokeWidth="0.75" />
-      {/* Collar */}
-      <path d="M 18.5 21 C 18.5 19.5 20 18.5 22.5 18.5 C 25 18.5 26.5 19.5 26.5 21"
-        fill="#fff" stroke="#000" strokeWidth="1.5" />
-      {/* Body */}
-      <path d="M 16.5 29 L 18.5 21 L 26.5 21 L 28.5 29"
+      {/* Battlements (crenellations) */}
+      <path d="M 9 11 L 9 6 L 13 6 L 13 9 L 17 9 L 17 6 L 21 6 L 21 9 L 24 9 L 24 6 L 28 6 L 28 9 L 32 9 L 32 6 L 36 6 L 36 11"
         fill="#fff" stroke="#000" strokeWidth="1.5" strokeLinejoin="round" />
+      {/* Top horizontal bar */}
+      <path d="M 9 11 L 36 11" fill="none" stroke="#000" strokeWidth="1.5" />
+      {/* Neck */}
+      <path d="M 13 11 L 15 15 L 30 15 L 32 11"
+        fill="#fff" stroke="#000" strokeWidth="1.5" strokeLinejoin="round" />
+      {/* Body shaft */}
+      <path d="M 14 15 L 12 29 L 33 29 L 31 15"
+        fill="#fff" stroke="#000" strokeWidth="1.5" strokeLinejoin="round" />
+      {/* Horizontal body line */}
+      <path d="M 14 16.5 L 31 16.5" fill="none" stroke="#000" strokeWidth="1" />
+      <path d="M 12.5 28 L 32.5 28" fill="none" stroke="#000" strokeWidth="1" />
       {/* Lower collar */}
-      <path d="M 14 31 C 14 29 16.5 29 22.5 29 C 28.5 29 31 29 31 31"
+      <path d="M 10 32 C 10 30 12 29 22.5 29 C 33 29 35 30 35 32"
         fill="#fff" stroke="#000" strokeWidth="1.5" />
       {/* Base */}
-      <path d="M 12.5 36 C 12.5 34 15 32 22.5 32 C 30 32 32.5 34 32.5 36"
+      <path d="M 9 36 C 9 34.5 11 33 22.5 33 C 34 33 36 34.5 36 36"
         fill="#fff" stroke="#000" strokeWidth="1.5" />
-      <path d="M 12.5 36 L 32.5 36" stroke="#000" strokeWidth="1.5" />
-      <path d="M 11 38 C 11 36.5 13 35.5 22.5 35.5 C 32 35.5 34 36.5 34 38"
+      <path d="M 9 36 L 36 36" stroke="#000" strokeWidth="1.5" />
+      <path d="M 8 39 C 8 37.5 10.5 36.5 22.5 36.5 C 34.5 36.5 37 37.5 37 39"
         fill="#fff" stroke="#000" strokeWidth="1.5" />
-      <path d="M 11 38 L 34 38" stroke="#000" strokeWidth="1.5" />
+      <path d="M 8 39 L 37 39" stroke="#000" strokeWidth="1.5" />
     </g>
   );
 }
 
-function BlackBishop() {
+function BlackRook() {
   return (
     <g>
-      <circle cx="22.5" cy="6" r="2.5" fill="#333" stroke="#333" strokeWidth="1.5" />
-      <path d="M 18 14 C 18 10 19.5 8 22.5 8 C 25.5 8 27 10 27 14 C 27 17 25 19 22.5 19 C 20 19 18 17 18 14 Z"
-        fill="#333" stroke="#333" strokeWidth="1.5" />
-      <path d="M 22.5 8.5 L 20.5 14 L 22.5 16 L 24.5 14 Z"
-        fill="none" stroke="#e8e8e8" strokeWidth="0.75" opacity="0.5" />
-      <path d="M 18.5 21 C 18.5 19.5 20 18.5 22.5 18.5 C 25 18.5 26.5 19.5 26.5 21"
-        fill="#333" stroke="#333" strokeWidth="1.5" />
-      <path d="M 16.5 29 L 18.5 21 L 26.5 21 L 28.5 29"
+      {/* Battlements (crenellations) */}
+      <path d="M 9 11 L 9 6 L 13 6 L 13 9 L 17 9 L 17 6 L 21 6 L 21 9 L 24 9 L 24 6 L 28 6 L 28 9 L 32 9 L 32 6 L 36 6 L 36 11"
         fill="#333" stroke="#333" strokeWidth="1.5" strokeLinejoin="round" />
-      <path d="M 14 31 C 14 29 16.5 29 22.5 29 C 28.5 29 31 29 31 31"
+      {/* Top horizontal bar */}
+      <path d="M 9 11 L 36 11" fill="none" stroke="#333" strokeWidth="1.5" />
+      {/* Neck */}
+      <path d="M 13 11 L 15 15 L 30 15 L 32 11"
+        fill="#333" stroke="#333" strokeWidth="1.5" strokeLinejoin="round" />
+      {/* Body shaft */}
+      <path d="M 14 15 L 12 29 L 33 29 L 31 15"
+        fill="#333" stroke="#333" strokeWidth="1.5" strokeLinejoin="round" />
+      {/* Horizontal body highlights */}
+      <path d="M 14 16.5 L 31 16.5" fill="none" stroke="#e8e8e8" strokeWidth="0.75" opacity="0.35" />
+      <path d="M 12.5 28 L 32.5 28" fill="none" stroke="#e8e8e8" strokeWidth="0.75" opacity="0.35" />
+      {/* Lower collar */}
+      <path d="M 10 32 C 10 30 12 29 22.5 29 C 33 29 35 30 35 32"
         fill="#333" stroke="#333" strokeWidth="1.5" />
-      <path d="M 12.5 36 C 12.5 34 15 32 22.5 32 C 30 32 32.5 34 32.5 36"
+      {/* Base */}
+      <path d="M 9 36 C 9 34.5 11 33 22.5 33 C 34 33 36 34.5 36 36"
         fill="#333" stroke="#333" strokeWidth="1.5" />
-      <path d="M 12.5 36 L 32.5 36" stroke="#333" strokeWidth="1.5" />
-      <path d="M 11 38 C 11 36.5 13 35.5 22.5 35.5 C 32 35.5 34 36.5 34 38"
+      <path d="M 9 36 L 36 36" stroke="#333" strokeWidth="1.5" />
+      <path d="M 8 39 C 8 37.5 10.5 36.5 22.5 36.5 C 34.5 36.5 37 37.5 37 39"
         fill="#333" stroke="#333" strokeWidth="1.5" />
-      <path d="M 11 38 L 34 38" stroke="#333" strokeWidth="1.5" />
-      {/* Inner line highlights */}
-      <path d="M 16.5 29 L 18.5 21 L 26.5 21 L 28.5 29"
+      <path d="M 8 39 L 37 39" stroke="#333" strokeWidth="1.5" />
+      {/* Inner body highlight */}
+      <path d="M 14 15 L 12 29 L 33 29 L 31 15"
         fill="none" stroke="#e8e8e8" strokeWidth="0.75" strokeLinejoin="round" opacity="0.3" />
-      <path d="M 14 31 C 14 29 16.5 29 22.5 29 C 28.5 29 31 29 31 31"
-        fill="none" stroke="#e8e8e8" strokeWidth="0.75" opacity="0.3" />
     </g>
   );
 }

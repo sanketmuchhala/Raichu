@@ -23,34 +23,41 @@ export function NewGameDialog() {
     setShow(false);
   };
 
+  const segBtnStyle = (active: boolean) => ({
+    backgroundColor: active ? theme.accent : 'transparent',
+    color: active ? '#fff' : theme.textSecondary,
+  });
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShow(false)}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
+      onClick={() => setShow(false)}
+    >
       <div
-        className="rounded-xl p-6 w-full max-w-sm mx-4 space-y-5"
-        style={{ backgroundColor: theme.bgPanel, borderColor: theme.border, borderWidth: 1 }}
+        className="panel-card p-6 w-full max-w-sm mx-4 space-y-5 animate-fade-in"
+        style={{
+          backgroundColor: theme.bgPanel,
+          borderColor: theme.border,
+          boxShadow: `0 16px 48px ${theme.shadow}`,
+        }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-xl font-bold" style={{ color: theme.textPrimary }}>New Game</h2>
+        <h2 className="text-xl font-bold" style={{ color: theme.textPrimary }}>
+          New Game
+        </h2>
 
         {/* Mode selection */}
         <div>
-          <label className="text-sm mb-2 block" style={{ color: theme.textSecondary }}>Game Mode</label>
-          <div className="flex gap-2">
+          <label className="text-xs mb-2 block font-medium" style={{ color: theme.textSecondary }}>
+            Game Mode
+          </label>
+          <div className="segmented-control" style={{ backgroundColor: theme.bgSecondary }}>
             {[
               { value: 'pvp' as GameMode, label: 'Local PvP' },
               { value: 'bot' as GameMode, label: 'vs Bot' },
             ].map(({ value, label }) => (
-              <button
-                key={value}
-                className="flex-1 px-3 py-2 rounded text-sm font-medium transition-all"
-                style={{
-                  backgroundColor: mode === value ? theme.accent : theme.bgSecondary,
-                  color: mode === value ? '#fff' : theme.textSecondary,
-                  borderColor: theme.border,
-                  borderWidth: 1,
-                }}
-                onClick={() => setMode(value)}
-              >
+              <button key={value} style={segBtnStyle(mode === value)} onClick={() => setMode(value)}>
                 {label}
               </button>
             ))}
@@ -60,18 +67,15 @@ export function NewGameDialog() {
         {/* Difficulty (bot mode only) */}
         {mode === 'bot' && (
           <div>
-            <label className="text-sm mb-2 block" style={{ color: theme.textSecondary }}>Difficulty</label>
-            <div className="flex gap-2">
+            <label className="text-xs mb-2 block font-medium" style={{ color: theme.textSecondary }}>
+              Difficulty
+            </label>
+            <div className="segmented-control" style={{ backgroundColor: theme.bgSecondary }}>
               {(['easy', 'medium', 'hard'] as Difficulty[]).map((d) => (
                 <button
                   key={d}
-                  className="flex-1 px-3 py-2 rounded text-sm font-medium transition-all capitalize"
-                  style={{
-                    backgroundColor: difficulty === d ? theme.accent : theme.bgSecondary,
-                    color: difficulty === d ? '#fff' : theme.textSecondary,
-                    borderColor: theme.border,
-                    borderWidth: 1,
-                  }}
+                  className="capitalize"
+                  style={segBtnStyle(difficulty === d)}
                   onClick={() => setDifficulty(d)}
                 >
                   {d}
@@ -84,23 +88,15 @@ export function NewGameDialog() {
         {/* Player color (bot mode only) */}
         {mode === 'bot' && (
           <div>
-            <label className="text-sm mb-2 block" style={{ color: theme.textSecondary }}>Play as</label>
-            <div className="flex gap-2">
+            <label className="text-xs mb-2 block font-medium" style={{ color: theme.textSecondary }}>
+              Play as
+            </label>
+            <div className="segmented-control" style={{ backgroundColor: theme.bgSecondary }}>
               {[
                 { value: 'white' as Player, label: 'White' },
                 { value: 'black' as Player, label: 'Black' },
               ].map(({ value, label }) => (
-                <button
-                  key={value}
-                  className="flex-1 px-3 py-2 rounded text-sm font-medium transition-all"
-                  style={{
-                    backgroundColor: playerColor === value ? theme.accent : theme.bgSecondary,
-                    color: playerColor === value ? '#fff' : theme.textSecondary,
-                    borderColor: theme.border,
-                    borderWidth: 1,
-                  }}
-                  onClick={() => setPlayerColor(value)}
-                >
+                <button key={value} style={segBtnStyle(playerColor === value)} onClick={() => setPlayerColor(value)}>
                   {label}
                 </button>
               ))}
@@ -108,18 +104,25 @@ export function NewGameDialog() {
           </div>
         )}
 
-        {/* Start button */}
-        <div className="flex gap-3 pt-2">
+        {/* Action buttons */}
+        <div className="flex gap-3 pt-1">
           <button
-            className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold transition-opacity hover:opacity-80"
-            style={{ backgroundColor: theme.bgSecondary, color: theme.textSecondary, borderColor: theme.border, borderWidth: 1 }}
+            className="btn"
+            style={{
+              backgroundColor: theme.btnSecondaryBg,
+              color: theme.textSecondary,
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = theme.btnSecondaryHover)}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = theme.btnSecondaryBg)}
             onClick={() => setShow(false)}
           >
             Cancel
           </button>
           <button
-            className="flex-1 px-4 py-2.5 rounded-lg text-sm font-bold transition-opacity hover:opacity-80"
+            className="btn"
             style={{ backgroundColor: theme.accent, color: '#fff' }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = theme.accentHover)}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = theme.accent)}
             onClick={handleStart}
           >
             Start Game

@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Reset & Base ─────────────────────────────────────── */
 * {
   margin: 0;
   padding: 0;
@@ -9,47 +10,98 @@
 }
 
 body {
-  background-color: #312E2B;
-  color: #FFFFFF;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #1a1b1e;
+  color: #e9ecef;
+  font-family: var(--font-inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Smooth transitions for theme switching */
+/* ─── Smooth Theme Transitions ─────────────────────────── */
 body,
 main,
 header,
 div,
 button {
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-/* Custom scrollbar for panels */
-.overflow-y-auto::-webkit-scrollbar {
-  width: 6px;
+/* ─── Custom Scrollbar ─────────────────────────────────── */
+.custom-scroll::-webkit-scrollbar {
+  width: 5px;
 }
 
-.overflow-y-auto::-webkit-scrollbar-track {
+.custom-scroll::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.overflow-y-auto::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 3px;
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
 }
 
-.overflow-y-auto::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
 }
 
-/* Prevent text selection on board */
+/* ─── Board ────────────────────────────────────────────── */
 svg {
   -webkit-user-select: none;
   user-select: none;
 }
 
-/* Pulse animation for thinking indicator */
+/* ─── Button Base ──────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  line-height: 1;
+  padding: 0 16px;
+  height: 40px;
+  width: 100%;
+  border: none;
+  cursor: pointer;
+  transition: background-color 150ms ease, transform 100ms ease, box-shadow 150ms ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+/* ─── Panel Card ───────────────────────────────────────── */
+.panel-card {
+  border-radius: 12px;
+  border-width: 1px;
+  border-style: solid;
+}
+
+/* ─── Segmented Control ────────────────────────────────── */
+.segmented-control {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 10px;
+}
+
+.segmented-control button {
+  flex: 1;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+/* ─── Animations ────────────────────────────────────────── */
 @keyframes pulse-glow {
   0%, 100% { opacity: 0.5; }
   50% { opacity: 1; }
@@ -57,4 +109,13 @@ svg {
 
 .animate-pulse-glow {
   animation: pulse-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in {
+  animation: fade-in 200ms ease-out;
 }

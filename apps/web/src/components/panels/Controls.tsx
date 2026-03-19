@@ -15,49 +15,67 @@ export function Controls() {
 
   return (
     <div
-      className="rounded-lg p-4 space-y-3"
-      style={{ backgroundColor: theme.bgPanel, borderColor: theme.border, borderWidth: 1 }}
+      className="panel-card p-4 flex flex-col gap-3"
+      style={{
+        backgroundColor: theme.bgPanel,
+        borderColor: theme.border,
+        boxShadow: `0 2px 8px ${theme.shadow}`,
+      }}
     >
-      {/* Action buttons */}
+      {/* Primary action */}
+      <button
+        className="btn"
+        style={{ backgroundColor: theme.accent, color: '#fff' }}
+        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = theme.accentHover)}
+        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = theme.accent)}
+        onClick={() => setShowNewGameDialog(true)}
+      >
+        New Game
+      </button>
+
+      {/* Secondary actions */}
       <div className="flex gap-2">
         <button
-          className="flex-1 px-3 py-2 rounded text-sm font-semibold transition-opacity hover:opacity-80"
-          style={{ backgroundColor: theme.accent, color: '#fff' }}
-          onClick={() => setShowNewGameDialog(true)}
-        >
-          New Game
-        </button>
-        <button
-          className="flex-1 px-3 py-2 rounded text-sm font-semibold transition-opacity hover:opacity-80"
-          style={{ backgroundColor: theme.bgSecondary, color: theme.textPrimary, borderColor: theme.border, borderWidth: 1 }}
+          className="btn"
+          style={{
+            backgroundColor: theme.btnSecondaryBg,
+            color: theme.textSecondary,
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = theme.btnSecondaryHover)}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = theme.btnSecondaryBg)}
           onClick={restart}
         >
           Restart
         </button>
+        <button
+          className="btn"
+          style={{
+            backgroundColor: theme.btnSecondaryBg,
+            color: theme.textSecondary,
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = theme.btnSecondaryHover)}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = theme.btnSecondaryBg)}
+          onClick={flipBoard}
+        >
+          Flip Board
+        </button>
       </div>
 
-      {/* Flip board */}
-      <button
-        className="w-full px-3 py-2 rounded text-sm transition-opacity hover:opacity-80"
-        style={{ backgroundColor: theme.bgSecondary, color: theme.textSecondary, borderColor: theme.border, borderWidth: 1 }}
-        onClick={flipBoard}
-      >
-        Flip Board
-      </button>
-
-      {/* Theme selector */}
+      {/* Theme selector — segmented control */}
       <div>
-        <label className="text-xs block mb-1" style={{ color: theme.textSecondary }}>Theme</label>
-        <div className="flex gap-2">
+        <label className="text-xs block mb-1.5 font-medium" style={{ color: theme.textSecondary }}>
+          Theme
+        </label>
+        <div
+          className="segmented-control"
+          style={{ backgroundColor: theme.bgSecondary }}
+        >
           {(['classic', 'slate', 'walnut'] as ThemeName[]).map((t) => (
             <button
               key={t}
-              className="flex-1 px-2 py-1.5 rounded text-xs font-medium transition-all"
               style={{
-                backgroundColor: themeName === t ? theme.accent : theme.bgSecondary,
+                backgroundColor: themeName === t ? theme.accent : 'transparent',
                 color: themeName === t ? '#fff' : theme.textSecondary,
-                borderColor: theme.border,
-                borderWidth: 1,
               }}
               onClick={() => setTheme(t)}
             >
@@ -69,9 +87,12 @@ export function Controls() {
 
       {/* Game over indicator */}
       {status !== 'playing' && (
-        <div className="text-center py-2 rounded" style={{ backgroundColor: theme.accent + '20' }}>
+        <div
+          className="text-center py-2.5 rounded-lg animate-fade-in"
+          style={{ backgroundColor: theme.accent + '18' }}
+        >
           <p className="text-sm font-bold" style={{ color: theme.accent }}>
-            {status === 'white_wins' ? 'White wins!' : 'Black wins!'}
+            🏆 {status === 'white_wins' ? 'White wins!' : 'Black wins!'}
           </p>
         </div>
       )}

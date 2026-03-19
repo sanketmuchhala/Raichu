@@ -15,7 +15,11 @@ export interface Theme {
   textPrimary: string;
   textSecondary: string;
   accent: string;
+  accentHover: string;
   border: string;
+  shadow: string;
+  btnSecondaryBg: string;
+  btnSecondaryHover: string;
 }
 
 export const THEMES: Record<ThemeName, Theme> = {
@@ -28,13 +32,17 @@ export const THEMES: Record<ThemeName, Theme> = {
     legalMove: 'rgba(0, 0, 0, 0.2)',
     captureIndicator: 'rgba(255, 0, 0, 0.4)',
     lastMove: 'rgba(255, 255, 0, 0.2)',
-    bgPrimary: '#312E2B',
-    bgSecondary: '#272421',
-    bgPanel: '#262421',
-    textPrimary: '#FFFFFF',
-    textSecondary: '#B0B0B0',
-    accent: '#81B64C',
-    border: '#3d3a37',
+    bgPrimary: '#1a1b1e',
+    bgSecondary: '#141517',
+    bgPanel: '#25262b',
+    textPrimary: '#e9ecef',
+    textSecondary: '#909296',
+    accent: '#51cf66',
+    accentHover: '#40c057',
+    border: '#2c2e33',
+    shadow: 'rgba(0, 0, 0, 0.25)',
+    btnSecondaryBg: '#2c2e33',
+    btnSecondaryHover: '#373a40',
   },
   slate: {
     name: 'slate',
@@ -45,13 +53,17 @@ export const THEMES: Record<ThemeName, Theme> = {
     legalMove: 'rgba(0, 0, 0, 0.2)',
     captureIndicator: 'rgba(239, 68, 68, 0.4)',
     lastMove: 'rgba(100, 180, 255, 0.2)',
-    bgPrimary: '#1E293B',
-    bgSecondary: '#0F172A',
-    bgPanel: '#1E293B',
-    textPrimary: '#F1F5F9',
-    textSecondary: '#94A3B8',
-    accent: '#3B82F6',
+    bgPrimary: '#0f172a',
+    bgSecondary: '#0b1120',
+    bgPanel: '#1e293b',
+    textPrimary: '#f1f5f9',
+    textSecondary: '#94a3b8',
+    accent: '#3b82f6',
+    accentHover: '#2563eb',
     border: '#334155',
+    shadow: 'rgba(0, 0, 0, 0.3)',
+    btnSecondaryBg: '#334155',
+    btnSecondaryHover: '#475569',
   },
   walnut: {
     name: 'walnut',
@@ -62,12 +74,16 @@ export const THEMES: Record<ThemeName, Theme> = {
     legalMove: 'rgba(0, 0, 0, 0.2)',
     captureIndicator: 'rgba(220, 38, 38, 0.4)',
     lastMove: 'rgba(255, 200, 50, 0.2)',
-    bgPrimary: '#3E2723',
-    bgSecondary: '#2C1810',
-    bgPanel: '#3E2723',
-    textPrimary: '#EFEBE9',
-    textSecondary: '#A1887F',
-    accent: '#FF8A65',
-    border: '#5D4037',
+    bgPrimary: '#1c1410',
+    bgSecondary: '#14100c',
+    bgPanel: '#2a1f18',
+    textPrimary: '#efebe9',
+    textSecondary: '#a1887f',
+    accent: '#ff8a65',
+    accentHover: '#ff7043',
+    border: '#3e2e23',
+    shadow: 'rgba(0, 0, 0, 0.3)',
+    btnSecondaryBg: '#3e2e23',
+    btnSecondaryHover: '#5d4037',
   },
 };
