@@ -13,7 +13,7 @@
     "@raichu/shared-types": "workspace:*",
     "@raichu/game-engine": "workspace:*",
     "@raichu/ai-engine": "workspace:*",
-    "express": "^4.21.0",
+    "express": "^5.2.1",
     "cors": "^2.8.5",
     "zod": "^3.23.0"
   },
