@@ -12,7 +12,8 @@ import { PieceSVG } from '../pieces/PieceSVG';
 const SQUARE_SIZE = 64;
 const COORD_SIZE = 20;
 const BOARD_PX = SQUARE_SIZE * BOARD_SIZE;
-const TOTAL_SIZE = BOARD_PX + COORD_SIZE;
+const TOTAL_WIDTH = BOARD_PX + COORD_SIZE;
+const TOTAL_HEIGHT = BOARD_PX + COORD_SIZE * 2; // top gutter for row numbers + bottom gutter for column letters
 
 const COL_LABELS = 'abcdefgh';
 
@@ -78,7 +79,7 @@ export function Board() {
 
     if (boardRef.current) {
       const rect = boardRef.current.getBoundingClientRect();
-      const scale = rect.width / TOTAL_SIZE;
+      const scale = rect.width / TOTAL_WIDTH;
       const x = (e.clientX - rect.left) / scale - COORD_SIZE;
       const y = (e.clientY - rect.top) / scale - COORD_SIZE;
       startDrag(cell, row, col, x, y);
@@ -88,7 +89,7 @@ export function Board() {
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!isDragging || !boardRef.current) return;
     const rect = boardRef.current.getBoundingClientRect();
-    const scale = rect.width / TOTAL_SIZE;
+    const scale = rect.width / TOTAL_WIDTH;
     const x = (e.clientX - rect.left) / scale - COORD_SIZE;
     const y = (e.clientY - rect.top) / scale - COORD_SIZE;
     updateDrag(x, y);
@@ -101,7 +102,7 @@ export function Board() {
     }
 
     const rect = boardRef.current.getBoundingClientRect();
-    const scale = rect.width / TOTAL_SIZE;
+    const scale = rect.width / TOTAL_WIDTH;
     const x = (e.clientX - rect.left) / scale - COORD_SIZE;
     const y = (e.clientY - rect.top) / scale - COORD_SIZE;
 
@@ -138,14 +139,14 @@ export function Board() {
   return (
     <svg
       ref={boardRef}
-      viewBox={`0 0 ${TOTAL_SIZE} ${TOTAL_SIZE}`}
+      viewBox={`0 0 ${TOTAL_WIDTH} ${TOTAL_HEIGHT}`}
       className="w-full h-full max-w-[min(85vw,85vh)] max-h-[min(85vw,85vh)] select-none touch-none"
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerLeave={handlePointerUp}
     >
       {/* Background */}
-      <rect width={TOTAL_SIZE} height={TOTAL_SIZE} fill={theme.bgSecondary} rx="4" />
+      <rect width={TOTAL_WIDTH} height={TOTAL_HEIGHT} fill={theme.bgSecondary} rx="4" />
 
       {/* Coordinate labels — columns (a-h) */}
       {Array.from({ length: BOARD_SIZE }, (_, i) => {
@@ -154,7 +155,7 @@ export function Board() {
           <text
             key={`col-${i}`}
             x={COORD_SIZE + displayCol * SQUARE_SIZE + SQUARE_SIZE / 2}
-            y={TOTAL_SIZE - 5}
+            y={COORD_SIZE + BOARD_PX + 14}
             textAnchor="middle"
             fontSize="11"
             fill={theme.textSecondary}
