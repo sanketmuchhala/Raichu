@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Classic theme (default) */
+  --board-light: #F0D9B5;
+  --board-dark: #B58863;
+  --board-selected: rgba(255, 255, 0, 0.4);
+  --board-legal-move: rgba(0, 0, 0, 0.2);
+  --board-capture: rgba(255, 0, 0, 0.4);
+  --board-last-move: rgba(255, 255, 0, 0.2);
+  --bg-primary: #312E2B;
+  --bg-secondary: #272421;
+  --text-primary: #FFFFFF;
+  --text-secondary: #B0B0B0;
+  --accent: #81B64C;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
