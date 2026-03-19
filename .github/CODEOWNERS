@@ -27,3 +27,7 @@
 
 # Documentation
 /docs/                     @sanketmuchhala
+
+# Legacy reference files (Python bot, game rules)
+/api/                      @sanketmuchhala
+/Game Theory/              @sanketmuchhala
