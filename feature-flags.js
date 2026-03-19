@@ -13,10 +13,7 @@ const FEATURE_FLAGS = {
     ENABLE_ANIMATIONS: localStorage.getItem('feature_animations') !== 'false', // Default ON
 
     // Use incremental rendering instead of full board rebuild
-    INCREMENTAL_RENDER: localStorage.getItem('feature_incremental_render') === 'true', // Default OFF (testing)
-
-    // Enable client-side move prediction for online play
-    OPTIMISTIC_UPDATES: localStorage.getItem('feature_optimistic_updates') === 'true' // Default OFF (testing)
+    INCREMENTAL_RENDER: localStorage.getItem('feature_incremental_render') === 'true' // Default OFF (testing)
 };
 
 // SVG piece mapping

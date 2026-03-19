@@ -9,16 +9,8 @@ let gameState = {
     moveHistoryNotation: [], // NEW: Algebraic notation for display
     capturedPieces: { white: [], black: [] }, // NEW: Track captured pieces
     N: 8,
-    gameMode: 'bot', // 'bot', '2player', or 'online'
-    difficulty: 2, // 1=Easy, 2=Medium, 3=Hard
-    // Online multiplayer state
-    online: {
-        roomId: null,
-        playerId: null,
-        playerColor: null,
-        polling: false,
-        pollInterval: null
-    }
+    gameMode: 'bot', // 'bot' or '2player'
+    difficulty: 2 // 1=Easy, 2=Medium, 3=Hard
 };
 
 // Piece mapping for display
@@ -119,9 +111,10 @@ function renderBoard() {
 
                 // Enable drag and drop for player's pieces
                 const canDrag = getPieceColor(piece) === gameState.currentPlayer && !gameState.gameOver;
-                if (canDrag && (gameState.gameMode !== 'online' || gameState.online.playerColor === gameState.currentPlayer)) {
+                if (canDrag) {
                     cell.setAttribute('draggable', 'true');
                     cell.addEventListener('dragstart', handleDragStart);
+                    cell.addEventListener('dragend', handleDragEnd);
                 }
             }
 
@@ -167,6 +160,11 @@ function handleDragStart(e) {
     e.currentTarget.style.opacity = '0.5';
 }
 
+function handleDragEnd(e) {
+    e.currentTarget.style.opacity = '1';
+    draggedPieceIndex = null;
+}
+
 function handleDragOver(e) {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
@@ -181,7 +179,6 @@ function handleDrop(e) {
     }
 
     draggedPieceIndex = null;
-    renderBoard();
 }
 
 // Handle cell click
@@ -242,18 +239,21 @@ function makeMove(from, to) {
         typeof animatePieceMove !== 'undefined';
 
     if (useAnimations) {
-        // Animate the move, then update state
-        animatePieceMove(from, to, piece, () => {
-            // Complete the move after animation
-            completeMoveLogic(from, to, piece, capturedPiece);
-        });
-
-        // Optionally animate capture
         if (capturedPiece !== null && typeof animatePieceCapture !== 'undefined') {
-            animatePieceCapture(capturedPiece, () => { });
+            // Capture: fade out captured piece, then animate move, then complete
+            animatePieceCapture(capturedPiece, () => {
+                animatePieceMove(from, to, piece, () => {
+                    completeMoveLogic(from, to, piece, capturedPiece);
+                });
+            });
+        } else {
+            // No capture: just animate the move
+            animatePieceMove(from, to, piece, () => {
+                completeMoveLogic(from, to, piece, capturedPiece);
+            });
         }
     } else {
-        // Instant move (legacy behavior)
+        // Instant move (no animations)
         completeMoveLogic(from, to, piece, capturedPiece);
     }
 }
@@ -310,17 +310,17 @@ function completeMoveLogic(from, to, piece, capturedPiece) {
     gameState.selectedCell = null;
     gameState.possibleMoves = [];
 
-    // Highlight last move
-    if (typeof highlightLastMove !== 'undefined') {
-        highlightLastMove(from, to);
-    }
-
     // Check win condition
     if (checkWinCondition()) {
         gameState.gameOver = true;
         const winner = gameState.currentPlayer === 'w' ? 'White' : 'Black';
         showMessage(`${winner} wins!`);
         renderBoard();
+
+        // Highlight last move after render so it persists
+        if (typeof highlightLastMove !== 'undefined') {
+            highlightLastMove(from, to);
+        }
 
         // Play win sound
         if (typeof SoundManager !== 'undefined') {
@@ -337,8 +337,12 @@ function completeMoveLogic(from, to, piece, capturedPiece) {
     renderBoard();
     updateGameInfo();
 
+    // Highlight last move after render so it persists
+    if (typeof highlightLastMove !== 'undefined') {
+        highlightLastMove(from, to);
+    }
+
     // If it's now black's turn and in bot mode, trigger bot move
-    // REMOVED 500ms artificial delay - bot thinks immediately
     if (gameState.currentPlayer === 'b' && gameState.gameMode === 'bot') {
         requestBotMove();
     }
@@ -928,372 +932,6 @@ document.getElementById('diff-3').addEventListener('click', () => {
     gameState.difficulty = 3;
     document.querySelectorAll('.diff-btn').forEach(btn => btn.classList.remove('active'));
     document.getElementById('diff-3').classList.add('active');
-});
-
-// Online Multiplayer Functions
-const MultiplayerAPI = {
-    baseURL: '/api',
-
-    async createRoom(playerName) {
-        const response = await fetch(`${this.baseURL}/multiplayer-create`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ playerName })
-        });
-        return await response.json();
-    },
-
-    async getRooms() {
-        const response = await fetch(`${this.baseURL}/multiplayer-rooms`);
-        return await response.json();
-    },
-
-    async joinRoom(roomId, playerName) {
-        const response = await fetch(`${this.baseURL}/multiplayer-join`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ roomId, playerName })
-        });
-        return await response.json();
-    },
-
-    async getGameState(roomId, playerId) {
-        const response = await fetch(`${this.baseURL}/multiplayer-state?roomId=${roomId}&playerId=${playerId}`);
-        return await response.json();
-    },
-
-    async submitMove(roomId, playerId, board) {
-        const response = await fetch(`${this.baseURL}/multiplayer-move`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ roomId, playerId, board })
-        });
-        return await response.json();
-    }
-};
-
-function showOnlineMenu() {
-    document.getElementById('online-menu').classList.remove('hidden');
-    document.getElementById('difficulty-selector').classList.add('hidden');
-    document.getElementById('game-status').classList.add('hidden');
-    document.getElementById('new-game-btn').classList.add('hidden');
-    document.getElementById('bot-move-btn').classList.add('hidden');
-    document.getElementById('undo-btn').classList.add('hidden');
-}
-
-function hideOnlineMenu() {
-    document.getElementById('online-menu').classList.add('hidden');
-    document.getElementById('room-browser').classList.add('hidden');
-    document.getElementById('waiting-room').classList.add('hidden');
-}
-
-function showGameControls() {
-    document.getElementById('game-status').classList.remove('hidden');
-    document.getElementById('new-game-btn').classList.remove('hidden');
-    document.getElementById('undo-btn').classList.remove('hidden');
-}
-
-async function handleCreateRoom() {
-    try {
-        const playerName = prompt('Enter your name:') || 'Player 1';
-        const result = await MultiplayerAPI.createRoom(playerName);
-
-        if (result.success) {
-            gameState.online.roomId = result.roomId;
-            gameState.online.playerId = result.playerId;
-            gameState.online.playerColor = 'w';
-
-            document.getElementById('room-code-text').textContent = result.roomId;
-            document.getElementById('online-menu').classList.add('hidden');
-            document.getElementById('waiting-room').classList.remove('hidden');
-
-            // Start polling for opponent
-            startWaitingForOpponent();
-        } else {
-            alert('Failed to create room: ' + result.error);
-        }
-    } catch (error) {
-        console.error('Error creating room:', error);
-        alert('Failed to create room');
-    }
-}
-
-async function handleBrowseRooms() {
-    try {
-        document.getElementById('online-menu').classList.add('hidden');
-        document.getElementById('room-browser').classList.remove('hidden');
-        await loadRoomList();
-    } catch (error) {
-        console.error('Error browsing rooms:', error);
-        alert('Failed to load rooms');
-    }
-}
-
-async function loadRoomList() {
-    try {
-        const roomList = document.getElementById('room-list');
-        roomList.innerHTML = '<p class="loading-text">Loading rooms...</p>';
-
-        const result = await MultiplayerAPI.getRooms();
-
-        if (result.success && result.rooms.length > 0) {
-            roomList.innerHTML = '';
-            result.rooms.forEach(room => {
-                const roomCard = createRoomCard(room);
-                roomList.appendChild(roomCard);
-            });
-        } else {
-            roomList.innerHTML = '<p class="loading-text">No rooms available</p>';
-        }
-    } catch (error) {
-        console.error('Error loading rooms:', error);
-        document.getElementById('room-list').innerHTML = '<p class="loading-text">Error loading rooms</p>';
-    }
-}
-
-function createRoomCard(room) {
-    const card = document.createElement('div');
-    card.className = 'room-card';
-
-    const header = document.createElement('div');
-    header.className = 'room-card-header';
-
-    const title = document.createElement('div');
-    title.className = 'room-card-title';
-    title.textContent = room.roomName;
-
-    const status = document.createElement('span');
-    status.className = `room-card-status ${room.status}`;
-    status.textContent = room.status === 'waiting' ? 'Waiting' : 'In Progress';
-
-    header.appendChild(title);
-    header.appendChild(status);
-
-    const info = document.createElement('div');
-    info.className = 'room-card-info';
-    info.textContent = `Room: ${room.roomId} • Players: ${room.playerCount}/2`;
-
-    const joinBtn = document.createElement('button');
-    joinBtn.className = 'room-card-join';
-    joinBtn.textContent = room.canJoin ? 'Join Game' : 'Spectate';
-    joinBtn.disabled = !room.canJoin;
-
-    if (room.canJoin) {
-        joinBtn.onclick = () => handleJoinRoom(room.roomId);
-    }
-
-    card.appendChild(header);
-    card.appendChild(info);
-    card.appendChild(joinBtn);
-
-    return card;
-}
-
-async function handleJoinRoom(roomId) {
-    try {
-        const playerName = prompt('Enter your name:') || 'Player 2';
-        console.log("Attempting to join room:", roomId); // Debug log
-
-        const result = await MultiplayerAPI.joinRoom(roomId, playerName);
-        console.log("Join Room Result:", result); // Debug log (CRITICAL)
-
-        if (result.success) {
-            gameState.online.roomId = result.room.roomId;
-            gameState.online.playerId = result.playerId;
-            gameState.online.playerColor = 'b';
-
-            // Robust Board Handling: Handle String OR Array
-            let boardData = result.room.board;
-            if (typeof boardData === 'string') {
-                gameState.board = boardData.split('');
-            } else if (Array.isArray(boardData)) {
-                gameState.board = boardData;
-            } else {
-                console.error("Invalid board format:", boardData);
-                gameState.board = new Array(64).fill('.'); // Fallback to empty to prevent crash
-            }
-
-            gameState.currentPlayer = result.room.currentPlayer;
-
-            document.getElementById('room-browser').classList.add('hidden');
-            showGameControls();
-            renderBoard();
-            updateGameInfo();
-
-            // Start polling
-            startOnlineGamePolling();
-
-            showMessage(gameState.online.playerColor === gameState.currentPlayer ? 'Your turn!' : "Opponent's turn");
-        } else {
-            console.error("Join failed with API error:", result.error);
-            alert('Server Refused Join: ' + result.error);
-        }
-    } catch (error) {
-        console.error('CRITICAL Error joining room:', error);
-        alert('App Logic Error: ' + error.message);
-    }
-}
-
-function startWaitingForOpponent() {
-    gameState.online.pollInterval = setInterval(async () => {
-        try {
-            const result = await MultiplayerAPI.getGameState(
-                gameState.online.roomId,
-                gameState.online.playerId
-            );
-
-            if (result.success && result.room.status === 'playing') {
-                // Opponent joined!
-                clearInterval(gameState.online.pollInterval);
-                document.getElementById('waiting-room').classList.add('hidden');
-                showGameControls();
-
-                gameState.board = result.room.board.split('');
-                renderBoard();
-                updateGameInfo();
-
-                startOnlineGamePolling();
-                showMessage('Opponent joined! Your turn.');
-            }
-        } catch (error) {
-            console.error('Polling error:', error);
-        }
-    }, 2000);
-}
-
-function startOnlineGamePolling() {
-    gameState.online.polling = true;
-
-    gameState.online.pollInterval = setInterval(async () => {
-        if (gameState.gameOver) {
-            stopOnlineGamePolling();
-            return;
-        }
-
-        try {
-            const result = await MultiplayerAPI.getGameState(
-                gameState.online.roomId,
-                gameState.online.playerId
-            );
-
-            if (result.success) {
-                let newBoardStr = '';
-                let newBoardArr = [];
-
-                // Robustly handle varying board formats from server
-                const incomingBoard = result.room.board;
-                if (Array.isArray(incomingBoard)) {
-                    newBoardArr = incomingBoard;
-                    newBoardStr = incomingBoard.join('');
-                } else if (typeof incomingBoard === 'string') {
-                    newBoardArr = incomingBoard.split('');
-                    newBoardStr = incomingBoard;
-                } else {
-                    console.error("Invalid board format in poll:", incomingBoard);
-                    return; // Skip update if format is bad
-                }
-
-                if (newBoardStr !== gameState.board.join('')) {
-                    console.log("Board updated from polling");
-                    gameState.board = newBoardArr;
-                    gameState.currentPlayer = result.room.currentPlayer;
-                    renderBoard();
-                    updateGameInfo();
-
-                    if (gameState.online.playerColor === gameState.currentPlayer) {
-                        showMessage('Your turn!');
-                    }
-                }
-
-                // Check for game over
-                if (result.room.gameOver) {
-                    gameState.gameOver = true;
-                    const winner = result.room.winner === gameState.online.playerColor ? 'you' : 'opponent';
-                    showGameModal(winner);
-                }
-            }
-        } catch (error) {
-            console.error('Polling error:', error);
-        }
-    }, 1500);
-}
-
-function stopOnlineGamePolling() {
-    if (gameState.online.pollInterval) {
-        clearInterval(gameState.online.pollInterval);
-        gameState.online.pollInterval = null;
-    }
-    gameState.online.polling = false;
-}
-
-// Override makeMove for online mode
-const originalMakeMove = makeMove;
-makeMove = function (from, to) {
-    if (gameState.gameMode === 'online') {
-        // Check if it's player's turn
-        if (gameState.online.playerColor !== gameState.currentPlayer) {
-            showMessage("Not your turn!");
-            return;
-        }
-
-        // Make move locally first
-        originalMakeMove(from, to);
-
-        // Send move to server
-        MultiplayerAPI.submitMove(
-            gameState.online.roomId,
-            gameState.online.playerId,
-            gameState.board.join('')
-        ).catch(error => {
-            console.error('Error submitting move:', error);
-            showMessage('Failed to submit move');
-        });
-    } else {
-        originalMakeMove(from, to);
-    }
-};
-
-// Event Listeners for Online Mode
-document.getElementById('mode-online').addEventListener('click', () => {
-    gameState.gameMode = 'online';
-    document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById('mode-online').classList.add('active');
-    showOnlineMenu();
-    showMessage('Select an option to play online');
-});
-
-document.getElementById('create-room-btn').addEventListener('click', handleCreateRoom);
-document.getElementById('browse-rooms-btn').addEventListener('click', handleBrowseRooms);
-document.getElementById('refresh-rooms-btn').addEventListener('click', loadRoomList);
-
-document.getElementById('back-from-browser-btn').addEventListener('click', () => {
-    document.getElementById('room-browser').classList.add('hidden');
-    document.getElementById('online-menu').classList.remove('hidden');
-});
-
-document.getElementById('cancel-room-btn').addEventListener('click', () => {
-    stopOnlineGamePolling();
-    document.getElementById('waiting-room').classList.add('hidden');
-    document.getElementById('online-menu').classList.remove('hidden');
-    gameState.online = {
-        roomId: null,
-        playerId: null,
-        playerColor: null,
-        polling: false,
-        pollInterval: null
-    };
-});
-
-document.getElementById('copy-code-btn').addEventListener('click', () => {
-    const code = document.getElementById('room-code-text').textContent;
-    navigator.clipboard.writeText(code).then(() => {
-        const btn = document.getElementById('copy-code-btn');
-        const originalText = btn.textContent;
-        btn.textContent = 'Copied!';
-        setTimeout(() => {
-            btn.textContent = originalText;
-        }, 2000);
-    });
 });
 
 // Clear move history button

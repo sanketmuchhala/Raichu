@@ -25,6 +25,8 @@ const ANIMATION_CONFIG = {
  * @param {Function} onComplete - Callback when animation finishes
  */
 function animatePieceMove(fromIndex, toIndex, piece, onComplete) {
+    let completed = false;
+
     const boardElement = document.getElementById('game-board');
     const fromCell = boardElement.querySelector(`[data-index="${fromIndex}"]`);
     const toCell = boardElement.querySelector(`[data-index="${toIndex}"]`);
@@ -62,6 +64,8 @@ function animatePieceMove(fromIndex, toIndex, piece, onComplete) {
 
     // Clean up after animation
     flyingPiece.addEventListener('transitionend', () => {
+        if (completed) return;
+        completed = true;
         flyingPiece.remove();
         if (originalPieceSpan) {
             originalPieceSpan.style.opacity = '1';
@@ -71,13 +75,15 @@ function animatePieceMove(fromIndex, toIndex, piece, onComplete) {
 
     // Fallback timeout in case transitionend doesn't fire
     setTimeout(() => {
+        if (completed) return;
+        completed = true;
         if (flyingPiece.parentNode) {
             flyingPiece.remove();
-            if (originalPieceSpan) {
-                originalPieceSpan.style.opacity = '1';
-            }
-            onComplete();
         }
+        if (originalPieceSpan) {
+            originalPieceSpan.style.opacity = '1';
+        }
+        onComplete();
     }, ANIMATION_CONFIG.MOVE_DURATION + 50);
 }
 

@@ -6,6 +6,7 @@
 const SoundManager = {
     enabled: localStorage.getItem('sound_enabled') !== 'false',
     volume: parseFloat(localStorage.getItem('sound_volume') || '0.5'),
+    _audioContext: null,
 
     sounds: {
         move: null,
@@ -13,6 +14,16 @@ const SoundManager = {
         promotion: null,
         gameStart: null,
         gameEnd: null
+    },
+
+    getAudioContext() {
+        if (!this._audioContext) {
+            this._audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (this._audioContext.state === 'suspended') {
+            this._audioContext.resume();
+        }
+        return this._audioContext;
     },
 
     init() {
@@ -29,7 +40,7 @@ const SoundManager = {
             if (!this.enabled) return;
 
             try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const audioContext = this.getAudioContext();
                 const oscillator = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
 
