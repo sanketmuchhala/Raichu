@@ -7,10 +7,5 @@
     "declaration": false,
     "declarationMap": false
   },
-  "include": ["src"],
-  "references": [
-    { "path": "../../packages/shared-types" },
-    { "path": "../../packages/game-engine" },
-    { "path": "../../packages/ai-engine" }
-  ]
+  "include": ["src"]
 }
