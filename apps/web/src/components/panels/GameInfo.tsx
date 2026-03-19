@@ -24,15 +24,15 @@ export function GameInfo() {
 
   return (
     <div
-      className="panel-card p-3 lg:p-4"
+      className="panel-card mobile-compact p-3 lg:p-4"
       style={{
         backgroundColor: theme.bgPanel,
         borderColor: theme.border,
         boxShadow: `0 2px 8px ${theme.shadow}`,
       }}
     >
-      {/* Turn indicator */}
-      <div className="flex items-center gap-3 mb-2 lg:mb-3">
+      {/* Single row on mobile: dot + status + meta. Two rows on desktop (unchanged). */}
+      <div className="flex items-center gap-2 lg:gap-3 lg:mb-3">
         <div
           style={{
             width: 14,
@@ -47,10 +47,9 @@ export function GameInfo() {
           }}
         />
         <span
-          className="font-semibold"
+          className="font-semibold text-sm lg:text-base"
           style={{
             color: isGameOver ? theme.accent : theme.textPrimary,
-            fontSize: '1rem',
           }}
         >
           {statusText}
@@ -68,10 +67,19 @@ export function GameInfo() {
             }}
           />
         )}
+        {/* Inline meta on mobile — pushed right */}
+        <div className="lg:hidden flex items-center gap-3 ml-auto text-xs" style={{ color: theme.textSecondary }}>
+          <span className="font-semibold" style={{ color: theme.textPrimary }}>
+            {gameMode === 'pvp' ? 'PvP' : `Bot`}
+          </span>
+          <span style={{ color: theme.textSecondary }}>
+            Move <span className="font-semibold" style={{ color: theme.textPrimary }}>{Math.floor(moveCount / 2) + 1}</span>
+          </span>
+        </div>
       </div>
 
-      {/* Game info row */}
-      <div className="flex gap-4 text-xs" style={{ color: theme.textSecondary }}>
+      {/* Desktop-only detailed meta row */}
+      <div className="hidden lg:flex gap-4 text-xs" style={{ color: theme.textSecondary }}>
         <div className="flex items-center gap-1.5">
           <span>Mode</span>
           <span className="font-semibold" style={{ color: theme.textPrimary }}>

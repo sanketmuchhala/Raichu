@@ -15,26 +15,51 @@ export function Controls() {
 
   return (
     <div
-      className="panel-card p-3 lg:p-4 flex flex-col gap-2 lg:gap-3"
+      className="panel-card mobile-compact p-3 lg:p-4 flex flex-col gap-2 lg:gap-3"
       style={{
         backgroundColor: theme.bgPanel,
         borderColor: theme.border,
         boxShadow: `0 2px 8px ${theme.shadow}`,
       }}
     >
-      {/* Primary action */}
-      <button
-        className="btn"
-        style={{ backgroundColor: theme.accent, color: '#fff' }}
-        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = theme.accentHover)}
-        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = theme.accent)}
-        onClick={() => setShowNewGameDialog(true)}
-      >
-        New Game
-      </button>
+      {/* Mobile: all 3 buttons in a single row */}
+      <div className="flex lg:hidden gap-2">
+        <button
+          className="btn"
+          style={{ backgroundColor: theme.accent, color: '#fff' }}
+          onClick={() => setShowNewGameDialog(true)}
+        >
+          New Game
+        </button>
+        <button
+          className="btn"
+          style={{ backgroundColor: theme.btnSecondaryBg, color: theme.textSecondary }}
+          onClick={restart}
+        >
+          Restart
+        </button>
+        <button
+          className="btn"
+          style={{ backgroundColor: theme.btnSecondaryBg, color: theme.textSecondary }}
+          onClick={flipBoard}
+        >
+          Flip
+        </button>
+      </div>
 
-      {/* Secondary actions */}
-      <div className="flex gap-2">
+      {/* Desktop: original layout (unchanged) */}
+      <div className="hidden lg:block">
+        <button
+          className="btn"
+          style={{ backgroundColor: theme.accent, color: '#fff' }}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = theme.accentHover)}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = theme.accent)}
+          onClick={() => setShowNewGameDialog(true)}
+        >
+          New Game
+        </button>
+      </div>
+      <div className="hidden lg:flex gap-2">
         <button
           className="btn"
           style={{
@@ -61,8 +86,8 @@ export function Controls() {
         </button>
       </div>
 
-      {/* Theme selector — segmented control */}
-      <div className="border-t lg:border-t-0 pt-2 lg:pt-0 mt-1 lg:mt-0" style={{ borderColor: theme.border }}>
+      {/* Theme selector — hidden on mobile, visible on desktop */}
+      <div className="hidden lg:block">
         <label className="text-xs block mb-1.5 font-medium" style={{ color: theme.textSecondary }}>
           Theme
         </label>
@@ -85,10 +110,10 @@ export function Controls() {
         </div>
       </div>
 
-      {/* Game over indicator */}
+      {/* Game over indicator — desktop only */}
       {status !== 'playing' && (
         <div
-          className="text-center py-2 lg:py-2.5 rounded-lg animate-fade-in"
+          className="hidden lg:block text-center py-2.5 rounded-lg animate-fade-in"
           style={{ backgroundColor: theme.accent + '18' }}
         >
           <p className="text-sm font-bold" style={{ color: theme.accent }}>

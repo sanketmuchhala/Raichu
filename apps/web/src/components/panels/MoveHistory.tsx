@@ -22,7 +22,7 @@ export function MoveHistory() {
 
   return (
     <div
-      className="panel-card flex flex-col lg:flex-1 lg:min-h-0"
+      className="panel-card mobile-compact flex flex-col lg:flex-1 lg:min-h-0"
       style={{
         backgroundColor: theme.bgPanel,
         borderColor: theme.border,

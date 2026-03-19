@@ -124,10 +124,20 @@ svg {
 @media (max-width: 1023px) {
   .btn {
     height: 44px;
+    border-radius: 8px;
+    font-size: 0.8125rem;
   }
 
   .sidebar-responsive {
     height: auto !important;
     min-height: 0 !important;
+  }
+
+  /* Strip panel-card chrome on mobile for compact feel */
+  .mobile-compact {
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background-color: transparent !important;
   }
 }
