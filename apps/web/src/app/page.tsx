@@ -40,6 +40,18 @@ export default function Home() {
           >
             Puzzles
           </Link>
+          <Link
+            href="/rules"
+            className="px-8 py-3.5 rounded-lg font-semibold text-lg transition-opacity hover:opacity-80"
+            style={{
+              backgroundColor: theme.bgSecondary,
+              color: theme.textSecondary,
+              borderColor: theme.border,
+              borderWidth: 1,
+            }}
+          >
+            How to Play
+          </Link>
         </div>
 
         {/* Piece legend */}

@@ -49,6 +49,13 @@ export default function PlayPage() {
           }}>
             Strategy Board Game
           </span>
+          <Link
+            href="/rules"
+            className="text-xs ml-auto hover:underline"
+            style={{ color: theme.textSecondary }}
+          >
+            Rules
+          </Link>
         </div>
 
         {/* Two-column grid */}
