@@ -1,0 +1,59 @@
+# Dependabot dependency update configuration
+# https://docs.github.com/en/code-security/dependabot/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+
+updates:
+  # ── GitHub Actions ──────────────────────────────────────────
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+
+  # ── Root workspace (pnpm monorepo) ─────────────────────────
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+
+  # ── Backend API ─────────────────────────────────────────────
+  - package-ecosystem: npm
+    directory: /apps/api
+    schedule:
+      interval: weekly
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+
+  # ── Web Frontend ────────────────────────────────────────────
+  - package-ecosystem: npm
+    directory: /apps/web
+    schedule:
+      interval: weekly
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+
+  # ── Game Engine ─────────────────────────────────────────────
+  - package-ecosystem: npm
+    directory: /packages/game-engine
+    schedule:
+      interval: weekly
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+
+  # ── AI Engine ───────────────────────────────────────────────
+  - package-ecosystem: npm
+    directory: /packages/ai-engine
+    schedule:
+      interval: weekly
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
