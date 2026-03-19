@@ -15,7 +15,7 @@ export function Controls() {
 
   return (
     <div
-      className="panel-card p-4 flex flex-col gap-3"
+      className="panel-card p-3 lg:p-4 flex flex-col gap-2 lg:gap-3"
       style={{
         backgroundColor: theme.bgPanel,
         borderColor: theme.border,
@@ -62,7 +62,7 @@ export function Controls() {
       </div>
 
       {/* Theme selector — segmented control */}
-      <div>
+      <div className="border-t lg:border-t-0 pt-2 lg:pt-0 mt-1 lg:mt-0" style={{ borderColor: theme.border }}>
         <label className="text-xs block mb-1.5 font-medium" style={{ color: theme.textSecondary }}>
           Theme
         </label>
@@ -88,7 +88,7 @@ export function Controls() {
       {/* Game over indicator */}
       {status !== 'playing' && (
         <div
-          className="text-center py-2.5 rounded-lg animate-fade-in"
+          className="text-center py-2 lg:py-2.5 rounded-lg animate-fade-in"
           style={{ backgroundColor: theme.accent + '18' }}
         >
           <p className="text-sm font-bold" style={{ color: theme.accent }}>

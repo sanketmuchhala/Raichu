@@ -30,12 +30,12 @@ export default function PlayPage() {
 
   return (
     <main
-      className="min-h-screen flex items-center justify-center p-4 lg:p-8"
+      className="min-h-screen flex items-center justify-center px-3 py-4 sm:px-4 lg:p-8"
       style={{ backgroundColor: theme.bgPrimary }}
     >
       <div className="w-full" style={{ maxWidth: 1100 }}>
         {/* Title */}
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-3 mb-3 lg:mb-4">
           <Link
             href="/"
             className="text-xl font-bold tracking-tight"
@@ -52,11 +52,11 @@ export default function PlayPage() {
         </div>
 
         {/* Two-column grid */}
-        <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex flex-col lg:flex-row gap-3 lg:gap-6">
           {/* Board — perfect square */}
           <div
             ref={boardContainerRef}
-            className="w-full lg:flex-1"
+            className="w-full lg:flex-1 mx-auto lg:mx-0"
             style={{ aspectRatio: '1 / 1', maxWidth: 700 }}
           >
             <div
@@ -72,7 +72,7 @@ export default function PlayPage() {
 
           {/* Sidebar — matches board height */}
           <div
-            className="w-full lg:w-80 flex flex-col gap-3"
+            className="w-full lg:w-80 flex flex-col gap-3 sidebar-responsive"
             style={{
               height: boardHeight > 0 ? boardHeight : 'auto',
               minHeight: 400,

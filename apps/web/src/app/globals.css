@@ -119,3 +119,15 @@ svg {
 .animate-fade-in {
   animation: fade-in 200ms ease-out;
 }
+
+/* ─── Mobile / Tablet (<1024px) ─────────────────────────── */
+@media (max-width: 1023px) {
+  .btn {
+    height: 44px;
+  }
+
+  .sidebar-responsive {
+    height: auto !important;
+    min-height: 0 !important;
+  }
+}

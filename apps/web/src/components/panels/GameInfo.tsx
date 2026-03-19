@@ -24,7 +24,7 @@ export function GameInfo() {
 
   return (
     <div
-      className="panel-card p-4"
+      className="panel-card p-3 lg:p-4"
       style={{
         backgroundColor: theme.bgPanel,
         borderColor: theme.border,
@@ -32,7 +32,7 @@ export function GameInfo() {
       }}
     >
       {/* Turn indicator */}
-      <div className="flex items-center gap-3 mb-3">
+      <div className="flex items-center gap-3 mb-2 lg:mb-3">
         <div
           style={{
             width: 14,

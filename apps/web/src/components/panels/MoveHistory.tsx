@@ -9,6 +9,8 @@ import { formatMoveHuman, formatMoveCoordinate } from '@raichu/game-engine';
 export function MoveHistory() {
   const moveHistory = useGameStore((s) => s.moveHistory);
   const theme = useUIStore((s) => THEMES[s.theme]);
+  const mobileHistoryOpen = useUIStore((s) => s.mobileHistoryOpen);
+  const toggleMobileHistory = useUIStore((s) => s.toggleMobileHistory);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showCoordinates, setShowCoordinates] = useState(false);
 
@@ -20,21 +22,41 @@ export function MoveHistory() {
 
   return (
     <div
-      className="panel-card flex flex-col flex-1 min-h-0"
+      className="panel-card flex flex-col lg:flex-1 lg:min-h-0"
       style={{
         backgroundColor: theme.bgPanel,
         borderColor: theme.border,
         boxShadow: `0 2px 8px ${theme.shadow}`,
       }}
     >
-      {/* Header */}
+      {/* Header — clickable accordion toggle on mobile, static on desktop */}
       <div
-        className="flex items-center justify-between px-4 py-3"
+        className="flex items-center justify-between px-3 lg:px-4 py-2.5 lg:py-3"
         style={{ borderBottom: `1px solid ${theme.border}` }}
       >
-        <span className="text-sm font-semibold" style={{ color: theme.textPrimary }}>
-          Move History
-        </span>
+        <button
+          className="flex items-center gap-2 lg:cursor-default"
+          onClick={toggleMobileHistory}
+          style={{ background: 'none', border: 'none', padding: 0 }}
+        >
+          <span className="text-sm font-semibold" style={{ color: theme.textPrimary }}>
+            Move History
+          </span>
+          {/* Chevron — mobile only */}
+          <svg
+            className="lg:hidden"
+            width="12"
+            height="12"
+            viewBox="0 0 12 12"
+            fill="none"
+            style={{
+              transform: mobileHistoryOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 300ms ease',
+            }}
+          >
+            <path d="M2.5 4.5L6 8L9.5 4.5" stroke={theme.textSecondary} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
         <button
           className="text-xs px-2.5 py-1 rounded-md font-medium"
           style={{
@@ -50,10 +72,17 @@ export function MoveHistory() {
         </button>
       </div>
 
-      {/* Move list */}
+      {/* Move list — collapsible on mobile, always visible on desktop */}
       <div
         ref={scrollRef}
-        className="overflow-y-auto flex-1 px-2 py-1.5 custom-scroll"
+        className={[
+          'custom-scroll px-2 py-1.5',
+          'lg:overflow-y-auto lg:flex-1',
+          mobileHistoryOpen
+            ? 'max-h-[300px] overflow-y-auto'
+            : 'max-h-0 overflow-hidden lg:max-h-none',
+        ].join(' ')}
+        style={{ transition: 'max-height 300ms ease-in-out' }}
       >
         {moveHistory.length === 0 ? (
           <p

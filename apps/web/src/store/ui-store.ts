@@ -15,6 +15,7 @@ interface UIStore {
   } | null;
   boardFlipped: boolean;
   showNewGameDialog: boolean;
+  mobileHistoryOpen: boolean;
 
   setTheme: (theme: ThemeName) => void;
   startDrag: (piece: string, fromRow: number, fromCol: number, x: number, y: number) => void;
@@ -22,6 +23,7 @@ interface UIStore {
   endDrag: () => void;
   flipBoard: () => void;
   setShowNewGameDialog: (show: boolean) => void;
+  toggleMobileHistory: () => void;
 }
 
 export const useUIStore = create<UIStore>((set) => ({
@@ -30,6 +32,7 @@ export const useUIStore = create<UIStore>((set) => ({
   dragPiece: null,
   boardFlipped: false,
   showNewGameDialog: false,
+  mobileHistoryOpen: false,
 
   setTheme: (theme) => set({ theme }),
 
@@ -49,4 +52,7 @@ export const useUIStore = create<UIStore>((set) => ({
 
   setShowNewGameDialog: (show) =>
     set({ showNewGameDialog: show }),
+
+  toggleMobileHistory: () =>
+    set((state) => ({ mobileHistoryOpen: !state.mobileHistoryOpen })),
 }));
