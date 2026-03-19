@@ -45,18 +45,19 @@ export function evaluate(board: Board, player: Player): number {
   return score;
 }
 
-/** Bonus for how far forward a piece has advanced */
+/** Bonus for how far forward a piece has advanced (accelerates near promotion) */
 function getAdvancementBonus(row: number, owner: Player, type: string): number {
   if (type === 'raichu') return 0; // Raichus don't need advancement bonus
 
   const advancement = owner === 'white' ? row : (BOARD_SIZE - 1 - row);
-  return advancement * 5; // 5 points per row advanced
+  // Linear base + quadratic near-promotion surge
+  return advancement * 8 + (advancement >= 5 ? (advancement - 4) * 15 : 0);
 }
 
 /** Bonus for being near the center of the board */
 function getCenterBonus(row: number, col: number): number {
   const centerDist = Math.abs(row - 3.5) + Math.abs(col - 3.5);
-  return Math.max(0, (4 - centerDist) * 3);
+  return Math.max(0, (4 - centerDist) * 5);
 }
 
 /** Check if the position is terminal (one side has no pieces) */
