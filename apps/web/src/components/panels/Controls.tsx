@@ -92,7 +92,7 @@ export function Controls() {
           style={{ backgroundColor: theme.accent + '18' }}
         >
           <p className="text-sm font-bold" style={{ color: theme.accent }}>
-            🏆 {status === 'white_wins' ? 'White wins!' : 'Black wins!'}
+            {status === 'white_wins' ? 'White wins!' : 'Black wins!'}
           </p>
         </div>
       )}
