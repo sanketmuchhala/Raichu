@@ -30,6 +30,9 @@ updates:
     groups:
       minor-and-patch:
         update-types: [minor, patch]
+    ignore:
+      - dependency-name: express
+        update-types: [version-update:semver-major]
 
   # ── Web Frontend ────────────────────────────────────────────
   - package-ecosystem: npm
@@ -39,6 +42,22 @@ updates:
     groups:
       minor-and-patch:
         update-types: [minor, patch]
+    ignore:
+      # Major bumps require migration — upgrade these intentionally
+      - dependency-name: next
+        update-types: [version-update:semver-major]
+      - dependency-name: react
+        update-types: [version-update:semver-major]
+      - dependency-name: react-dom
+        update-types: [version-update:semver-major]
+      - dependency-name: "@types/react"
+        update-types: [version-update:semver-major]
+      - dependency-name: "@types/react-dom"
+        update-types: [version-update:semver-major]
+      - dependency-name: tailwindcss
+        update-types: [version-update:semver-major]
+      - dependency-name: framer-motion
+        update-types: [version-update:semver-major]
 
   # ── Game Engine ─────────────────────────────────────────────
   - package-ecosystem: npm
