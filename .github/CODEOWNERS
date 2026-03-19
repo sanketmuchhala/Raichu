@@ -1,0 +1,29 @@
+# ──────────────────────────────────────────────────────────────
+# CODEOWNERS — Raichu
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+# ──────────────────────────────────────────────────────────────
+
+# Default: catch-all owner for any file not matched below
+*                          @sanketmuchhala
+
+# Frontend (Next.js)
+/apps/web/                 @sanketmuchhala
+
+# Backend (Express API)
+/apps/api/                 @sanketmuchhala
+
+# iOS placeholder
+/apps/ios/                 @sanketmuchhala
+
+# Shared packages
+/packages/game-engine/     @sanketmuchhala
+/packages/ai-engine/       @sanketmuchhala
+/packages/shared-types/    @sanketmuchhala
+/packages/ui/              @sanketmuchhala
+/packages/config/          @sanketmuchhala
+
+# CI/CD and repo config
+/.github/                  @sanketmuchhala
+
+# Documentation
+/docs/                     @sanketmuchhala
