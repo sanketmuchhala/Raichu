@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useUIStore } from '../../../store/ui-store';
@@ -52,15 +52,16 @@ export default function OnlineGamePage() {
     return () => reset();
   }, [gameId, loadGame, reset]);
 
-  // Set myColor once game + user are available
+  // Set myColor once game + user are available (guard to avoid redundant updates)
   useEffect(() => {
     if (!game || !user) return;
-    if (game.white_player_id === user.id) {
+    const current = useOnlineGameStore.getState().myColor;
+    if (game.white_player_id === user.id && current !== 'white') {
       useOnlineGameStore.setState({ myColor: 'white' });
-    } else if (game.black_player_id === user.id) {
+    } else if (game.black_player_id === user.id && current !== 'black') {
       useOnlineGameStore.setState({ myColor: 'black' });
     }
-  }, [game, user]);
+  }, [game?.white_player_id, game?.black_player_id, user]);
 
   // Track board height for sidebar sizing
   useEffect(() => {
@@ -112,7 +113,7 @@ export default function OnlineGamePage() {
   const topColor: 'white' | 'black' = myColor === 'black' ? 'white' : 'black';
   const bottomColor: 'white' | 'black' = myColor === 'black' ? 'black' : 'white';
 
-  const boardContextValue = {
+  const boardContextValue = useMemo(() => ({
     board,
     currentPlayer,
     status,
@@ -124,7 +125,7 @@ export default function OnlineGamePage() {
     selectPiece,
     makeMove: submitMove,
     clearSelection,
-  };
+  }), [board, currentPlayer, status, selectedPiece, legalMoves, lastMove, isThinking, canInteract, selectPiece, submitMove, clearSelection]);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: theme.bgPrimary }}>
@@ -158,7 +159,7 @@ export default function OnlineGamePage() {
                 )}
 
                 {/* Board */}
-                <div ref={boardContainerRef} className="relative" style={{ aspectRatio: '1 / 1' }}>
+                <div ref={boardContainerRef} className="relative" style={{ aspectRatio: '532 / 552' }}>
                   <div
                     className="w-full h-full overflow-hidden"
                     style={{

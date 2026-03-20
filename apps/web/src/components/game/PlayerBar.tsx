@@ -18,7 +18,7 @@ export function PlayerBar({ username, elo, isCurrentTurn, color }: PlayerBarProp
       className={`flex items-center gap-3 px-4 py-2.5 rounded-lg${isCurrentTurn ? ' animate-turn-glow' : ''}`}
       style={{
         backgroundColor: isCurrentTurn ? theme.accent + '15' : theme.bgSecondary,
-        border: isCurrentTurn ? `2px solid ${theme.accent}` : `1px solid ${theme.border}`,
+        border: `2px solid ${isCurrentTurn ? theme.accent : 'transparent'}`,
         ['--glow-color' as string]: theme.accent + '60',
       }}
     >
