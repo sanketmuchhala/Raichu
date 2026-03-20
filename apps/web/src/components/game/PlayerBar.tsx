@@ -1,0 +1,48 @@
+'use client';
+
+import { useUIStore } from '../../store/ui-store';
+import { THEMES } from '../../lib/themes';
+
+interface PlayerBarProps {
+  username: string;
+  elo: number;
+  isCurrentTurn: boolean;
+  color: 'white' | 'black';
+}
+
+export function PlayerBar({ username, elo, isCurrentTurn, color }: PlayerBarProps) {
+  const theme = useUIStore((s) => THEMES[s.theme]);
+
+  return (
+    <div
+      className="flex items-center gap-3 px-4 py-2 rounded-lg"
+      style={{
+        backgroundColor: isCurrentTurn ? theme.accent + '15' : theme.bgSecondary,
+        border: isCurrentTurn ? `2px solid ${theme.accent}` : `1px solid ${theme.border}`,
+      }}
+    >
+      <div
+        className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+        style={{
+          backgroundColor: color === 'white' ? '#f0f0f0' : '#333',
+          color: color === 'white' ? '#333' : '#f0f0f0',
+        }}
+      >
+        {username[0]?.toUpperCase() || '?'}
+      </div>
+      <div className="flex-1">
+        <span className="text-sm font-medium" style={{ color: theme.textPrimary }}>
+          {username}
+        </span>
+        <span className="text-xs ml-2" style={{ color: theme.textSecondary }}>
+          ({elo})
+        </span>
+      </div>
+      {isCurrentTurn && (
+        <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: theme.accent, color: '#fff' }}>
+          Turn
+        </span>
+      )}
+    </div>
+  );
+}

@@ -10,18 +10,21 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@raichu/shared-types": "workspace:*",
-    "@raichu/game-engine": "workspace:*",
     "@raichu/ai-engine": "workspace:*",
-    "express": "^4.21.0",
+    "@raichu/game-engine": "workspace:*",
+    "@raichu/shared-types": "workspace:*",
+    "@supabase/supabase-js": "^2.99.3",
     "cors": "^2.8.5",
+    "dotenv": "^17.3.1",
+    "express": "^4.21.0",
     "zod": "^3.23.0"
   },
   "devDependencies": {
-    "@types/express": "^5.0.0",
     "@types/cors": "^2.8.17",
-    "typescript": "^5.7.0",
+    "@types/express": "^5.0.0",
+    "supabase": "^2.82.0",
     "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
     "vitest": "^2.1.0"
   }
 }

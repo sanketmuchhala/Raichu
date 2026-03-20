@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import type { Difficulty, GameMode, Player } from '@raichu/shared-types';
 import { useGameStore } from '../../store/game-store';
 import { useUIStore } from '../../store/ui-store';
@@ -11,6 +12,7 @@ export function NewGameDialog() {
   const setShow = useUIStore((s) => s.setShowNewGameDialog);
   const theme = useUIStore((s) => THEMES[s.theme]);
   const newGame = useGameStore((s) => s.newGame);
+  const router = useRouter();
 
   const [mode, setMode] = useState<GameMode>('pvp');
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
@@ -19,6 +21,11 @@ export function NewGameDialog() {
   if (!show) return null;
 
   const handleStart = () => {
+    if (mode === 'online') {
+      setShow(false);
+      router.push('/lobby');
+      return;
+    }
     newGame({ mode, difficulty, playerColor });
     setShow(false);
   };
@@ -56,6 +63,7 @@ export function NewGameDialog() {
             {[
               { value: 'pvp' as GameMode, label: 'Local PvP' },
               { value: 'bot' as GameMode, label: 'vs Bot' },
+              { value: 'online' as GameMode, label: 'Online' },
             ].map(({ value, label }) => (
               <button key={value} style={segBtnStyle(mode === value)} onClick={() => setMode(value)}>
                 {label}

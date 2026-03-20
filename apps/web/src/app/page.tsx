@@ -3,15 +3,19 @@
 import Link from 'next/link';
 import { useUIStore } from '../store/ui-store';
 import { THEMES } from '../lib/themes';
+import { UserMenu } from '../components/auth/UserMenu';
 
 export default function Home() {
   const theme = useUIStore((s) => THEMES[s.theme]);
 
   return (
     <main
-      className="flex min-h-screen flex-col items-center justify-center px-4"
+      className="flex min-h-screen flex-col items-center justify-center px-4 relative"
       style={{ backgroundColor: theme.bgPrimary }}
     >
+      <div className="absolute top-4 right-4">
+        <UserMenu />
+      </div>
       <div className="text-center max-w-lg">
         <h1 className="text-5xl font-bold mb-3" style={{ color: theme.textPrimary }}>
           Raichu
@@ -27,6 +31,13 @@ export default function Home() {
             style={{ backgroundColor: theme.accent }}
           >
             Play Now
+          </Link>
+          <Link
+            href="/lobby"
+            className="px-8 py-3.5 rounded-lg font-bold text-lg text-white transition-opacity hover:opacity-90"
+            style={{ backgroundColor: theme.accentHover }}
+          >
+            Play Online
           </Link>
           <Link
             href="/puzzles"
@@ -54,8 +65,26 @@ export default function Home() {
           </Link>
         </div>
 
+        {/* Secondary links */}
+        <div className="flex gap-4 justify-center mt-4">
+          <Link
+            href="/leaderboard"
+            className="text-sm hover:underline"
+            style={{ color: theme.textSecondary }}
+          >
+            Leaderboard
+          </Link>
+          <Link
+            href="/history"
+            className="text-sm hover:underline"
+            style={{ color: theme.textSecondary }}
+          >
+            Game History
+          </Link>
+        </div>
+
         {/* Piece legend */}
-        <div className="mt-16 grid grid-cols-3 gap-6 text-center">
+        <div className="mt-12 grid grid-cols-3 gap-6 text-center">
           {[
             { name: 'Pichu', desc: 'Moves diagonally', symbol: 'w/b' },
             { name: 'Pikachu', desc: 'Moves forward & sideways', symbol: 'W/B' },

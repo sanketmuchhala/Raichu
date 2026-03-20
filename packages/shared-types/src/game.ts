@@ -4,7 +4,7 @@ import type { Player } from './pieces';
 
 export type GameStatus = 'playing' | 'white_wins' | 'black_wins';
 
-export type GameMode = 'pvp' | 'bot';
+export type GameMode = 'pvp' | 'bot' | 'online';
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
 export interface GameState {
