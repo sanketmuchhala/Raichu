@@ -16,57 +16,61 @@ export default function Home() {
       <div className="absolute top-4 right-4">
         <UserMenu />
       </div>
-      <div className="text-center max-w-lg">
-        <h1 className="text-5xl font-bold mb-3" style={{ color: theme.textPrimary }}>
+
+      <div className="text-center max-w-xl w-full">
+        <h1 className="text-5xl font-bold mb-2" style={{ color: theme.textPrimary }}>
           Raichu
         </h1>
-        <p className="text-lg mb-10" style={{ color: theme.textSecondary }}>
+        <p className="text-base mb-8" style={{ color: theme.textSecondary }}>
           A strategy board game with Pichu, Pikachu, and Raichu
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        {/* Primary actions */}
+        <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto mb-4">
           <Link
             href="/play"
-            className="px-8 py-3.5 rounded-lg font-bold text-lg text-white transition-opacity hover:opacity-90"
+            className="flex items-center justify-center px-6 py-3 rounded-xl font-bold text-white transition-all hover:opacity-90 active:scale-[0.98]"
             style={{ backgroundColor: theme.accent }}
           >
             Play Now
           </Link>
           <Link
             href="/lobby"
-            className="px-8 py-3.5 rounded-lg font-bold text-lg text-white transition-opacity hover:opacity-90"
+            className="flex items-center justify-center px-6 py-3 rounded-xl font-bold text-white transition-all hover:opacity-90 active:scale-[0.98]"
             style={{ backgroundColor: theme.accentHover }}
           >
             Play Online
           </Link>
+        </div>
+
+        {/* Secondary actions */}
+        <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto mb-6">
           <Link
             href="/puzzles"
-            className="px-8 py-3.5 rounded-lg font-semibold text-lg transition-opacity hover:opacity-80"
+            className="flex items-center justify-center px-6 py-2.5 rounded-xl font-medium text-sm transition-all hover:opacity-80"
             style={{
               backgroundColor: theme.bgSecondary,
               color: theme.textSecondary,
-              borderColor: theme.border,
-              borderWidth: 1,
+              border: `1px solid ${theme.border}`,
             }}
           >
             Puzzles
           </Link>
           <Link
             href="/rules"
-            className="px-8 py-3.5 rounded-lg font-semibold text-lg transition-opacity hover:opacity-80"
+            className="flex items-center justify-center px-6 py-2.5 rounded-xl font-medium text-sm transition-all hover:opacity-80"
             style={{
               backgroundColor: theme.bgSecondary,
               color: theme.textSecondary,
-              borderColor: theme.border,
-              borderWidth: 1,
+              border: `1px solid ${theme.border}`,
             }}
           >
             How to Play
           </Link>
         </div>
 
-        {/* Secondary links */}
-        <div className="flex gap-4 justify-center mt-4">
+        {/* Quick links */}
+        <div className="flex gap-4 justify-center mb-10">
           <Link
             href="/leaderboard"
             className="text-sm hover:underline"
@@ -84,17 +88,21 @@ export default function Home() {
         </div>
 
         {/* Piece legend */}
-        <div className="mt-12 grid grid-cols-3 gap-6 text-center">
+        <div className="grid grid-cols-3 gap-4 text-center">
           {[
             { name: 'Pichu', desc: 'Moves diagonally', symbol: 'w/b' },
             { name: 'Pikachu', desc: 'Moves forward & sideways', symbol: 'W/B' },
             { name: 'Raichu', desc: 'Moves in all directions', symbol: '@/$' },
           ].map((p) => (
-            <div key={p.name}>
+            <div
+              key={p.name}
+              className="p-3 rounded-lg"
+              style={{ backgroundColor: theme.bgSecondary }}
+            >
               <div className="text-sm font-mono mb-1" style={{ color: theme.accent }}>
                 {p.symbol}
               </div>
-              <div className="font-semibold" style={{ color: theme.textPrimary }}>
+              <div className="font-semibold text-sm" style={{ color: theme.textPrimary }}>
                 {p.name}
               </div>
               <div className="text-xs" style={{ color: theme.textSecondary }}>

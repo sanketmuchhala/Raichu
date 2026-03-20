@@ -2,10 +2,10 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { useUIStore } from '../../store/ui-store';
 import { THEMES } from '../../lib/themes';
 import { useAuthStore } from '../../store/auth-store';
+import { NavHeader } from '../../components/nav/NavHeader';
 import { CreateGamePanel } from '../../components/lobby/CreateGamePanel';
 import { JoinGamePanel } from '../../components/lobby/JoinGamePanel';
 import { MatchmakingPanel } from '../../components/lobby/MatchmakingPanel';
@@ -14,6 +14,7 @@ import { ActiveGamesList } from '../../components/lobby/ActiveGamesList';
 export default function LobbyPage() {
   const theme = useUIStore((s) => THEMES[s.theme]);
   const user = useAuthStore((s) => s.user);
+  const profile = useAuthStore((s) => s.profile);
   const initialized = useAuthStore((s) => s.initialized);
   const router = useRouter();
 
@@ -33,31 +34,47 @@ export default function LobbyPage() {
 
   if (!user) return null;
 
-  return (
-    <main className="min-h-screen px-4 py-8" style={{ backgroundColor: theme.bgPrimary }}>
-      <div className="max-w-2xl mx-auto">
-        <div className="flex items-center gap-3 mb-6">
-          <Link
-            href="/"
-            className="text-sm hover:underline"
-            style={{ color: theme.accent }}
-          >
-            &larr; Home
-          </Link>
-          <h1 className="text-2xl font-bold" style={{ color: theme.textPrimary }}>
-            Play Online
-          </h1>
-        </div>
+  const displayName = profile?.display_name || profile?.username || 'Player';
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="space-y-4">
-            <MatchmakingPanel />
-            <CreateGamePanel />
-            <JoinGamePanel />
+  return (
+    <div className="min-h-screen" style={{ backgroundColor: theme.bgPrimary }}>
+      <NavHeader title="Play Online" backHref="/" backLabel="Home" />
+      <main className="px-4 py-6">
+        <div className="max-w-5xl mx-auto">
+          {/* Welcome banner */}
+          <div
+            className="flex items-center gap-3 mb-6 px-5 py-4 rounded-xl animate-fade-in"
+            style={{ backgroundColor: theme.bgPanel, border: `1px solid ${theme.border}` }}
+          >
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
+              style={{ backgroundColor: theme.accent, color: '#fff' }}
+            >
+              {displayName[0].toUpperCase()}
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-medium truncate" style={{ color: theme.textPrimary }}>
+                Welcome back, {displayName}
+              </p>
+              <p className="text-xs" style={{ color: theme.textSecondary }}>
+                {profile?.elo_rating ?? 1200} ELO
+              </p>
+            </div>
           </div>
-          <ActiveGamesList />
+
+          {/* Grid: matchmaking+create+join | active games */}
+          <div className="grid gap-4 lg:grid-cols-3 animate-slide-up">
+            <div className="space-y-4 lg:col-span-2">
+              <MatchmakingPanel />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <CreateGamePanel />
+                <JoinGamePanel />
+              </div>
+            </div>
+            <ActiveGamesList />
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }

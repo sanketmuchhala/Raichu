@@ -120,6 +120,32 @@ svg {
   animation: fade-in 200ms ease-out;
 }
 
+@keyframes radar-sweep {
+  to { transform: rotate(360deg); }
+}
+
+.animate-radar {
+  animation: radar-sweep 2s linear infinite;
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slide-up 300ms ease-out;
+}
+
+@keyframes turn-glow {
+  0%, 100% { box-shadow: 0 0 0 0 var(--glow-color, rgba(81, 207, 102, 0.4)); }
+  50% { box-shadow: 0 0 12px 2px var(--glow-color, rgba(81, 207, 102, 0.4)); }
+}
+
+.animate-turn-glow {
+  animation: turn-glow 2s ease-in-out infinite;
+}
+
 /* ─── Mobile / Tablet (<1024px) ─────────────────────────── */
 @media (max-width: 1023px) {
   .btn {

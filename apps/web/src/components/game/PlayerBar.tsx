@@ -15,14 +15,15 @@ export function PlayerBar({ username, elo, isCurrentTurn, color }: PlayerBarProp
 
   return (
     <div
-      className="flex items-center gap-3 px-4 py-2 rounded-lg"
+      className={`flex items-center gap-3 px-4 py-2.5 rounded-lg${isCurrentTurn ? ' animate-turn-glow' : ''}`}
       style={{
         backgroundColor: isCurrentTurn ? theme.accent + '15' : theme.bgSecondary,
         border: isCurrentTurn ? `2px solid ${theme.accent}` : `1px solid ${theme.border}`,
+        ['--glow-color' as string]: theme.accent + '60',
       }}
     >
       <div
-        className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+        className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
         style={{
           backgroundColor: color === 'white' ? '#f0f0f0' : '#333',
           color: color === 'white' ? '#333' : '#f0f0f0',
@@ -30,8 +31,8 @@ export function PlayerBar({ username, elo, isCurrentTurn, color }: PlayerBarProp
       >
         {username[0]?.toUpperCase() || '?'}
       </div>
-      <div className="flex-1">
-        <span className="text-sm font-medium" style={{ color: theme.textPrimary }}>
+      <div className="flex-1 min-w-0">
+        <span className="text-sm font-medium truncate" style={{ color: theme.textPrimary }}>
           {username}
         </span>
         <span className="text-xs ml-2" style={{ color: theme.textSecondary }}>
@@ -39,7 +40,7 @@ export function PlayerBar({ username, elo, isCurrentTurn, color }: PlayerBarProp
         </span>
       </div>
       {isCurrentTurn && (
-        <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: theme.accent, color: '#fff' }}>
+        <span className="text-xs font-medium px-2 py-0.5 rounded-full shrink-0" style={{ backgroundColor: theme.accent, color: '#fff' }}>
           Turn
         </span>
       )}

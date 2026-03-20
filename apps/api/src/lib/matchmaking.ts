@@ -1,5 +1,5 @@
 import { supabaseAdmin } from './supabase';
-import { createGame } from './game-service';
+import { encodeBoard, createInitialBoard } from '@raichu/game-engine';
 
 /** Add a player to the matchmaking queue */
 export async function joinQueue(playerId: string, eloRating: number) {
@@ -30,9 +30,18 @@ export async function getQueueStatus(playerId: string) {
     .from('matchmaking_queue')
     .select('*')
     .eq('player_id', playerId)
-    .single();
+    .maybeSingle();
 
   return data;
+}
+
+/** Get count of players currently in queue */
+export async function getQueueCount(): Promise<number> {
+  const { count } = await supabaseAdmin
+    .from('matchmaking_queue')
+    .select('*', { count: 'exact', head: true });
+
+  return count ?? 0;
 }
 
 /**
@@ -45,12 +54,19 @@ export async function getQueueStatus(playerId: string) {
  *   60s+: match anyone
  */
 export async function processQueue(): Promise<number> {
-  const { data: queue } = await supabaseAdmin
+  const { data: queue, error: queueErr } = await supabaseAdmin
     .from('matchmaking_queue')
     .select('*')
     .order('queued_at', { ascending: true });
 
+  if (queueErr) {
+    console.error('Matchmaking: failed to fetch queue:', queueErr.message);
+    return 0;
+  }
+
   if (!queue || queue.length < 2) return 0;
+
+  console.log(`Matchmaking: processing queue (${queue.length} players)`);
 
   let matchesMade = 0;
   const matched = new Set<string>();
@@ -71,37 +87,54 @@ export async function processQueue(): Promise<number> {
 
       const eloDiff = Math.abs(player1.elo_rating - player2.elo_rating);
       if (eloDiff <= eloRange) {
-        // Match found — create game
+        // Match found — create game atomically with both players
         try {
           const whitePlayer = Math.random() < 0.5 ? player1 : player2;
           const blackPlayer = whitePlayer === player1 ? player2 : player1;
 
-          const game = await createGame({
-            playerId: whitePlayer.player_id,
-            gameType: 'ranked',
-            playAs: 'white',
-          });
+          const boardState = encodeBoard(createInitialBoard());
 
-          // Assign black player
-          await supabaseAdmin
+          // Single insert with both players and status='playing' — no intermediate state
+          const { data: game, error: gameErr } = await supabaseAdmin
             .from('games')
-            .update({
+            .insert({
+              white_player_id: whitePlayer.player_id,
               black_player_id: blackPlayer.player_id,
               status: 'playing',
+              board_state: boardState,
+              current_player: 'white',
+              game_type: 'ranked',
+              difficulty: null,
+              invite_code: null,
+              move_count: 0,
             })
-            .eq('id', game.id);
+            .select('id')
+            .single();
+
+          if (gameErr || !game) {
+            console.error('Matchmaking: failed to create game:', gameErr?.message);
+            continue;
+          }
 
           // Remove both from queue
-          await supabaseAdmin
+          const { error: deleteErr } = await supabaseAdmin
             .from('matchmaking_queue')
             .delete()
             .in('player_id', [player1.player_id, player2.player_id]);
 
+          if (deleteErr) {
+            console.error('Matchmaking: failed to remove from queue:', deleteErr.message);
+          }
+
           matched.add(player1.player_id);
           matched.add(player2.player_id);
           matchesMade++;
-        } catch {
-          // Skip this pair on error
+
+          console.log(
+            `Matchmaking: paired ${whitePlayer.player_id.slice(0, 8)}(W) vs ${blackPlayer.player_id.slice(0, 8)}(B) → game ${game.id.slice(0, 8)}`,
+          );
+        } catch (err) {
+          console.error('Matchmaking: unexpected error pairing players:', err instanceof Error ? err.message : err);
         }
         break;
       }

@@ -29,8 +29,14 @@ export function GameCard({ game, userId }: GameCardProps) {
     return 'Abandoned';
   })();
 
+  // Left border color: green = your turn, yellow = waiting, gray = other
+  const borderColor =
+    isMyTurn ? theme.accent :
+    game.status === 'waiting' ? '#eab308' :
+    theme.border;
+
   const statusColor =
-    game.status === 'waiting' ? theme.textSecondary :
+    game.status === 'waiting' ? '#eab308' :
     isMyTurn ? theme.accent :
     game.status === 'playing' ? theme.textSecondary :
     (game.winner_id === userId ? '#22c55e' : '#ef4444');
@@ -38,8 +44,14 @@ export function GameCard({ game, userId }: GameCardProps) {
   return (
     <Link
       href={`/game/${game.id}`}
-      className="block p-4 rounded-lg transition-opacity hover:opacity-80"
-      style={{ backgroundColor: theme.bgSecondary, border: `1px solid ${theme.border}` }}
+      className="block p-4 rounded-lg transition-all hover:brightness-110"
+      style={{
+        backgroundColor: theme.bgSecondary,
+        borderLeft: `3px solid ${borderColor}`,
+        borderTop: `1px solid ${theme.border}`,
+        borderRight: `1px solid ${theme.border}`,
+        borderBottom: `1px solid ${theme.border}`,
+      }}
     >
       <div className="flex items-center justify-between">
         <div>

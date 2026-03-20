@@ -1,7 +1,7 @@
 import { Router, type Request, type Response } from 'express';
 import { requireAuth } from '../middleware/auth';
 import { supabaseAdmin } from '../lib/supabase';
-import { joinQueue, leaveQueue, getQueueStatus } from '../lib/matchmaking';
+import { joinQueue, leaveQueue, getQueueStatus, getQueueCount } from '../lib/matchmaking';
 
 export const matchmakingRouter = Router();
 
@@ -23,7 +23,8 @@ matchmakingRouter.post('/matchmaking/queue', async (req: Request, res: Response)
     }
 
     await joinQueue(req.user!.id, profile.elo_rating as number);
-    res.json({ status: 'queued' });
+    const queueCount = await getQueueCount();
+    res.json({ status: 'queued', queueCount });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : 'Unknown error' });
   }
@@ -42,26 +43,30 @@ matchmakingRouter.delete('/matchmaking/queue', async (req: Request, res: Respons
 /** GET /matchmaking/status — Check queue status & matched game */
 matchmakingRouter.get('/matchmaking/status', async (req: Request, res: Response) => {
   try {
+    // First check if still in queue
     const queueEntry = await getQueueStatus(req.user!.id);
 
     if (queueEntry) {
       const waitSeconds = Math.floor(
         (Date.now() - new Date(queueEntry.queued_at).getTime()) / 1000,
       );
-      res.json({ status: 'queued', waitSeconds });
+      const queueCount = await getQueueCount();
+      res.json({ status: 'queued', waitSeconds, queueCount });
       return;
     }
 
-    // Check if player was just matched (has a recent playing game where they didn't create it)
+    // Not in queue — check if just matched (recent ranked game with this player)
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
     const { data: recentGame } = await supabaseAdmin
       .from('games')
       .select('id')
       .eq('game_type', 'ranked')
-      .eq('status', 'playing')
+      .in('status', ['waiting', 'playing'])
       .or(`white_player_id.eq.${req.user!.id},black_player_id.eq.${req.user!.id}`)
+      .gte('created_at', fiveMinutesAgo)
       .order('created_at', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (recentGame) {
       res.json({ status: 'matched', gameId: recentGame.id });
