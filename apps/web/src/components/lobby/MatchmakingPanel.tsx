@@ -31,6 +31,7 @@ export function MatchmakingPanel() {
   const waitSeconds = useMatchmakingStore((s) => s.waitSeconds);
   const queueCount = useMatchmakingStore((s) => s.queueCount);
   const matchedGameId = useMatchmakingStore((s) => s.matchedGameId);
+  const loading = useMatchmakingStore((s) => s.loading);
   const error = useMatchmakingStore((s) => s.error);
   const joinQueue = useMatchmakingStore((s) => s.joinQueue);
   const leaveQueue = useMatchmakingStore((s) => s.leaveQueue);
@@ -78,11 +79,12 @@ export function MatchmakingPanel() {
             Play a ranked game against a player of similar skill.
           </p>
           <button
-            className="w-full py-3 rounded-lg font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98]"
+            className="w-full py-3 rounded-lg font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
             style={{ backgroundColor: theme.accent }}
             onClick={joinQueue}
+            disabled={loading}
           >
-            Find Match
+            {loading ? 'Joining...' : 'Find Match'}
           </button>
         </>
       )}

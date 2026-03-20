@@ -60,8 +60,7 @@ export async function processQueue(): Promise<number> {
     .order('queued_at', { ascending: true });
 
   if (queueErr) {
-    console.error('Matchmaking: failed to fetch queue:', queueErr.message);
-    return 0;
+    throw new Error(`Failed to fetch queue: ${queueErr.message}`);
   }
 
   if (!queue || queue.length < 2) return 0;

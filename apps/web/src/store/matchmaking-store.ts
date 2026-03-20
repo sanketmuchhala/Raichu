@@ -7,6 +7,7 @@ type MatchmakingStatus = 'idle' | 'queued' | 'matched';
 
 interface MatchmakingStore {
   status: MatchmakingStatus;
+  loading: boolean;
   waitSeconds: number;
   queueCount: number;
   matchedGameId: string | null;
@@ -21,6 +22,7 @@ interface MatchmakingStore {
 
 export const useMatchmakingStore = create<MatchmakingStore>((set, get) => ({
   status: 'idle',
+  loading: false,
   waitSeconds: 0,
   queueCount: 0,
   matchedGameId: null,
@@ -28,12 +30,14 @@ export const useMatchmakingStore = create<MatchmakingStore>((set, get) => ({
   _idleRetries: 0,
 
   joinQueue: async () => {
+    set({ loading: true, error: null });
     try {
       const data = (await apiFetch('/api/v1/matchmaking/queue', { method: 'POST' })) as {
         queueCount?: number;
       };
       set({
         status: 'queued',
+        loading: false,
         waitSeconds: 0,
         queueCount: data.queueCount ?? 0,
         error: null,
@@ -41,7 +45,7 @@ export const useMatchmakingStore = create<MatchmakingStore>((set, get) => ({
         _idleRetries: 0,
       });
     } catch (err) {
-      set({ error: err instanceof Error ? err.message : 'Failed to join queue' });
+      set({ loading: false, error: err instanceof Error ? err.message : 'Failed to join queue' });
     }
   },
 
@@ -89,6 +93,6 @@ export const useMatchmakingStore = create<MatchmakingStore>((set, get) => ({
   },
 
   reset: () => {
-    set({ status: 'idle', waitSeconds: 0, queueCount: 0, matchedGameId: null, error: null, _idleRetries: 0 });
+    set({ status: 'idle', loading: false, waitSeconds: 0, queueCount: 0, matchedGameId: null, error: null, _idleRetries: 0 });
   },
 }));
