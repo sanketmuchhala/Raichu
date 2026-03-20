@@ -7,7 +7,7 @@ import type { OnlineGame } from '@raichu/shared-types';
 import { useUIStore } from '../../store/ui-store';
 import { THEMES } from '../../lib/themes';
 import { useAuthStore } from '../../store/auth-store';
-import { gamesApi } from '../../lib/api';
+import { getSupabaseBrowserClient } from '../../lib/supabase/client';
 import { NavHeader } from '../../components/nav/NavHeader';
 
 type FilterTab = 'all' | 'ranked' | 'friendly';
@@ -29,12 +29,21 @@ export default function HistoryPage() {
 
   useEffect(() => {
     if (!user) return;
+    const userId = user.id;
     async function load() {
       try {
-        const data = (await gamesApi.myGames()) as OnlineGame[];
-        setGames(data);
-      } catch {
-        // silently fail
+        const supabase = getSupabaseBrowserClient();
+        const { data, error } = await supabase
+          .from('games')
+          .select('*')
+          .or(`white_player_id.eq.${userId},black_player_id.eq.${userId}`)
+          .order('updated_at', { ascending: false })
+          .limit(50);
+
+        if (error) throw new Error(error.message);
+        setGames((data as OnlineGame[]) || []);
+      } catch (err) {
+        console.error('Failed to load game history:', err);
       } finally {
         setLoading(false);
       }
@@ -87,7 +96,6 @@ export default function HistoryPage() {
                   (game.status === 'black_wins' && !isWhite);
                 const eloValue = isWinnerSide ? game.winner_elo_delta : game.loser_elo_delta;
 
-                // Left border: green = win, red = loss, gray = abandoned
                 const borderColor =
                   game.status === 'abandoned' ? theme.border :
                   isWinner ? '#22c55e' : '#ef4444';
