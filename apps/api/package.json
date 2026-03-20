@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "tsc",
+    "build": "esbuild src/index.ts --bundle --platform=node --target=node22 --format=cjs --outfile=dist/index.js --external:express --external:cors --external:dotenv --external:zod --external:@supabase/supabase-js",
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
     "test": "vitest run",
@@ -19,6 +19,7 @@
     "@types/node": "^22.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.3.1",
+    "esbuild": "^0.25.0",
     "express": "^4.21.0",
     "typescript": "^5.7.0",
     "zod": "^3.23.0"
