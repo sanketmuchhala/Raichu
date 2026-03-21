@@ -76,6 +76,23 @@ export default function OnlineGamePage() {
     return () => observer.disconnect();
   }, []);
 
+  const canInteract = !isThinking && myColor === currentPlayer && status === 'playing';
+
+  // useMemo must be called before any early returns (React hooks rules)
+  const boardContextValue = useMemo(() => ({
+    board,
+    currentPlayer,
+    status,
+    selectedPiece,
+    legalMoves,
+    lastMove,
+    isThinking,
+    canInteract,
+    selectPiece,
+    makeMove: submitMove,
+    clearSelection,
+  }), [board, currentPlayer, status, selectedPiece, legalMoves, lastMove, isThinking, canInteract, selectPiece, submitMove, clearSelection]);
+
   if (loading) {
     return (
       <div className="min-h-screen" style={{ backgroundColor: theme.bgPrimary }}>
@@ -105,27 +122,12 @@ export default function OnlineGamePage() {
 
   const isWaiting = game.status === 'waiting';
   const isFinished = game.status !== 'waiting' && game.status !== 'playing';
-  const canInteract = !isThinking && myColor === currentPlayer && status === 'playing';
 
   // Determine which player is on top / bottom based on myColor
   const topPlayer = myColor === 'black' ? game.white_player : game.black_player;
   const bottomPlayer = myColor === 'black' ? game.black_player : game.white_player;
   const topColor: 'white' | 'black' = myColor === 'black' ? 'white' : 'black';
   const bottomColor: 'white' | 'black' = myColor === 'black' ? 'black' : 'white';
-
-  const boardContextValue = useMemo(() => ({
-    board,
-    currentPlayer,
-    status,
-    selectedPiece,
-    legalMoves,
-    lastMove,
-    isThinking,
-    canInteract,
-    selectPiece,
-    makeMove: submitMove,
-    clearSelection,
-  }), [board, currentPlayer, status, selectedPiece, legalMoves, lastMove, isThinking, canInteract, selectPiece, submitMove, clearSelection]);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: theme.bgPrimary }}>
