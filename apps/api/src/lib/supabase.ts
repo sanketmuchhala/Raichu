@@ -19,15 +19,40 @@ export const supabaseAdmin: SupabaseClient = createClient(
   { auth: { persistSession: false } },
 );
 
+/** In-memory auth cache: token → { user, expiresAt } */
+const authCache = new Map<string, { user: { id: string; email: string }; expiresAt: number }>();
+const AUTH_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 /** Verify a Supabase JWT and return the user, or null if invalid */
 export async function getUserFromToken(
   token: string,
 ): Promise<{ id: string; email: string } | null> {
+  // Check cache first
+  const cached = authCache.get(token);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.user;
+  }
+
   const {
     data: { user },
     error,
   } = await supabaseAdmin.auth.getUser(token);
 
-  if (error || !user) return null;
-  return { id: user.id, email: user.email ?? '' };
+  if (error || !user) {
+    authCache.delete(token);
+    return null;
+  }
+
+  const result = { id: user.id, email: user.email ?? '' };
+  authCache.set(token, { user: result, expiresAt: Date.now() + AUTH_CACHE_TTL });
+
+  // Evict expired entries periodically (keep cache from growing unbounded)
+  if (authCache.size > 100) {
+    const now = Date.now();
+    for (const [k, v] of authCache) {
+      if (v.expiresAt <= now) authCache.delete(k);
+    }
+  }
+
+  return result;
 }

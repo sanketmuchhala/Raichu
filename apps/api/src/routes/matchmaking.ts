@@ -22,8 +22,12 @@ matchmakingRouter.post('/matchmaking/queue', async (req: Request, res: Response)
       return;
     }
 
-    await joinQueue(req.user!.id, profile.elo_rating as number);
-    const queueCount = await getQueueCount();
+    // Join queue and get count in parallel
+    const [, queueCount] = await Promise.all([
+      joinQueue(req.user!.id, profile.elo_rating as number),
+      getQueueCount(),
+    ]);
+
     res.json({ status: 'queued', queueCount });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : 'Unknown error' });

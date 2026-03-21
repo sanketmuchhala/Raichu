@@ -3,15 +3,13 @@ import { encodeBoard, createInitialBoard } from '@raichu/game-engine';
 
 /** Add a player to the matchmaking queue */
 export async function joinQueue(playerId: string, eloRating: number) {
-  // Remove from queue first (in case already queued)
-  await supabaseAdmin
-    .from('matchmaking_queue')
-    .delete()
-    .eq('player_id', playerId);
-
+  // Upsert: single call instead of sequential delete + insert
   const { error } = await supabaseAdmin
     .from('matchmaking_queue')
-    .insert({ player_id: playerId, elo_rating: eloRating });
+    .upsert(
+      { player_id: playerId, elo_rating: eloRating, queued_at: new Date().toISOString() },
+      { onConflict: 'player_id' },
+    );
 
   if (error) throw new Error(`Failed to join queue: ${error.message}`);
 }
