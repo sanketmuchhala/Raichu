@@ -15,7 +15,7 @@
     "@raichu/game-engine": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "^5.7.0",
+    "typescript": "^6.0.2",
     "vitest": "^2.1.0"
   }
 }
