@@ -21,16 +21,19 @@ export default function RulesPage() {
         <div className="mb-12">
           <Link
             href="/"
-            className="text-sm mb-4 inline-block hover:underline"
+            className="text-sm mb-5 inline-block hover:opacity-75 transition-opacity"
             style={{ color: theme.accent }}
           >
-            &larr; Back to Home
+            ← Back to Home
           </Link>
-          <h1 className="text-3xl lg:text-4xl font-bold" style={{ color: theme.textPrimary }}>
+          <h1
+            className="text-3xl lg:text-4xl font-bold"
+            style={{ color: theme.textPrimary, fontFamily: 'var(--font-playfair, Georgia, serif)' }}
+          >
             How to Play Raichu
           </h1>
-          <p className="mt-2 text-lg" style={{ color: theme.textSecondary }}>
-            A complete guide to the rules of Raichu
+          <p className="mt-2 text-base" style={{ color: theme.textSecondary }}>
+            A complete guide to the rules and mechanics.
           </p>
         </div>
 
@@ -85,7 +88,10 @@ export default function RulesPage() {
 
         {/* The Pieces */}
         <div className="mb-12">
-          <h2 className="text-2xl font-bold mb-8" style={{ color: theme.textPrimary }}>
+          <h2
+            className="text-2xl font-bold mb-8"
+            style={{ color: theme.textPrimary, fontFamily: 'var(--font-playfair, Georgia, serif)' }}
+          >
             The Pieces
           </h2>
 
@@ -339,8 +345,8 @@ export default function RulesPage() {
           </p>
           <Link
             href="/play"
-            className="inline-block px-8 py-3.5 rounded-lg font-bold text-lg text-white transition-opacity hover:opacity-90"
-            style={{ backgroundColor: theme.accent }}
+            className="inline-block px-8 py-3 rounded-lg font-bold text-base transition-opacity hover:opacity-90"
+            style={{ backgroundColor: theme.accent, color: '#fff' }}
           >
             Play Now
           </Link>
@@ -365,7 +371,14 @@ function Section({
 }) {
   return (
     <section className="mb-12">
-      <h2 className="text-2xl font-bold mb-4" style={{ color: theme.textPrimary }}>
+      <h2
+        className="text-xl lg:text-2xl font-bold mb-4 pb-2"
+        style={{
+          color: theme.textPrimary,
+          fontFamily: 'var(--font-playfair, Georgia, serif)',
+          borderBottom: `2px solid ${theme.border}`,
+        }}
+      >
         {title}
       </h2>
       <div className="leading-relaxed" style={{ color: theme.textSecondary }}>
@@ -390,19 +403,26 @@ function PieceSection({
 }) {
   return (
     <div
-      className="mb-6 p-5 rounded-xl"
+      className="mb-5 p-5 rounded-xl"
       style={{
         backgroundColor: theme.bgPanel,
         border: `1px solid ${theme.border}`,
+        borderLeft: `3px solid ${theme.accent}`,
       }}
     >
       <div className="flex items-center gap-3 mb-4">
-        <PieceSVG piece={piece} size={36} />
+        <PieceSVG piece={piece} size={40} />
         <div>
-          <h3 className="text-xl font-bold" style={{ color: theme.textPrimary }}>
+          <h3
+            className="text-lg font-bold"
+            style={{ color: theme.textPrimary, fontFamily: 'var(--font-playfair, Georgia, serif)' }}
+          >
             {name}
           </h3>
-          <span className="text-xs" style={{ color: theme.textSecondary }}>
+          <span
+            className="text-xs font-semibold tracking-wider uppercase"
+            style={{ color: theme.accent }}
+          >
             {subtitle}
           </span>
         </div>
