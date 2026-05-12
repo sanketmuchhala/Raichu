@@ -209,6 +209,51 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── What is Raichu ───────────────────────────── */}
+      <section style={{ borderTop: `1px solid ${theme.border}`, maxWidth: 900, margin: '0 auto', width: '100%', padding: '3rem 2rem' }}>
+        <div style={{ display: 'grid', gap: '2rem', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
+
+          <div>
+            <h2 style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: theme.textSecondary, marginBottom: '0.75rem' }}>
+              What is Raichu?
+            </h2>
+            <p style={{ fontSize: '0.875rem', color: theme.textSecondary, lineHeight: 1.75 }}>
+              Raichu is a two-player abstract strategy game played on an 8×8 board. It is chess-inspired in spirit — a hierarchy of pieces, a promotion mechanic, no luck, no draws — but has its own complete ruleset and win condition. Capture every enemy piece to win.
+            </p>
+          </div>
+
+          <div>
+            <h2 style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: theme.textSecondary, marginBottom: '0.75rem' }}>
+              Why chess players like it
+            </h2>
+            <ul style={{ fontSize: '0.875rem', color: theme.textSecondary, lineHeight: 1.8, paddingLeft: '1.25rem', margin: 0 }}>
+              <li>Zero luck — outcomes depend entirely on decision quality</li>
+              <li>Deep tactics from a simple ruleset</li>
+              <li>Games finish in 5–15 minutes — no drawn-out endings</li>
+              <li>Promotion pressure creates chess-like middlegame tension</li>
+            </ul>
+          </div>
+
+          <div>
+            <h2 style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: theme.textSecondary, marginBottom: '0.75rem' }}>
+              How it differs from chess
+            </h2>
+            <ul style={{ fontSize: '0.875rem', color: theme.textSecondary, lineHeight: 1.8, paddingLeft: '1.25rem', margin: 0 }}>
+              <li>No king — win by capturing every piece</li>
+              <li>Capture hierarchy limits which pieces can take which</li>
+              <li>Jump-style captures (like checkers), not displacement</li>
+              <li>No draws, no en passant, no castling</li>
+            </ul>
+          </div>
+
+        </div>
+        <div style={{ marginTop: '1.75rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          <Link href="/raichu-vs-chess" style={{ fontSize: '0.8125rem', fontWeight: 600, color: theme.accent, textDecoration: 'none' }}>Raichu vs Chess in detail →</Link>
+          <Link href="/how-to-play"     style={{ fontSize: '0.8125rem', fontWeight: 600, color: theme.accent, textDecoration: 'none' }}>Beginner guide →</Link>
+          <Link href="/strategy"        style={{ fontSize: '0.8125rem', fontWeight: 600, color: theme.accent, textDecoration: 'none' }}>Strategy tips →</Link>
+        </div>
+      </section>
+
       {/* ── Footer CTA ───────────────────────────────── */}
       <section
         style={{
@@ -238,7 +283,7 @@ export default function Home() {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2.5rem', justifyContent: 'center' }}>
           {[
             { group: 'Play',    links: [['/play','Play Now'],['/rules','Rules'],['/how-to-play','How to Play']] },
-            { group: 'Learn',   links: [['/strategy','Strategy Guide'],['/faq','FAQ']] },
+            { group: 'Learn',   links: [['/strategy','Strategy Guide'],['/blog','Blog'],['/faq','FAQ']] },
             { group: 'Explore', links: [['/chess-like-games','Chess-Like Games'],['/chess-variants','Chess Variants'],['/raichu-vs-chess','Raichu vs Chess']] },
           ].map(({ group, links }) => (
             <div key={group}>

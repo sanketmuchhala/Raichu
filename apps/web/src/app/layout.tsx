@@ -46,10 +46,27 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
+const WEBSITE_SCHEMA = {
+  '@context': 'https://schema.org',
+  '@type':    'WebSite',
+  name:       SITE_NAME,
+  url:        SITE_URL,
+  description:'A chess-inspired abstract strategy board game playable free in the browser.',
+  potentialAction: {
+    '@type':       'SearchAction',
+    target:        `${SITE_URL}/faq`,
+    'query-input': 'required name=search_term_string',
+  },
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={figtree.variable}>
       <body className="min-h-screen antialiased overflow-x-hidden">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBSITE_SCHEMA) }}
+        />
         <AuthProvider>{children}</AuthProvider>
         <Analytics />
       </body>

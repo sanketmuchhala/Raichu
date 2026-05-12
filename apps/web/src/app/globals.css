@@ -102,6 +102,16 @@ svg { -webkit-user-select: none; user-select: none; }
 }
 .animate-turn-glow { animation: turn-glow 2s ease-in-out infinite; }
 
+/* ─── Blog card ─────────────────────────────────────────── */
+.blog-card {
+  background-color: var(--c-bg-1);
+  border: 1px solid var(--c-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: border-color 0.15s ease;
+}
+.blog-card:hover { border-color: var(--c-green); }
+
 /* ─── Mobile ────────────────────────────────────────────── */
 @media (max-width: 1023px) {
   .btn { height: 42px; font-size: 0.8125rem; }

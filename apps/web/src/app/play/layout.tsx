@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { pageMetadata } from '../../lib/seo';
 import { SchemaScript } from '../../components/seo/SchemaScript';
 
@@ -31,6 +32,20 @@ export default function PlayLayout({ children }: { children: React.ReactNode }) 
     <>
       <SchemaScript schema={schema} />
       {children}
+      {/* SEO: brief description below the game interface */}
+      <section style={{ backgroundColor: 'var(--c-bg-1)', borderTop: '1px solid var(--c-border)', padding: '1.25rem 2rem', textAlign: 'center' }}>
+        <p style={{ color: 'var(--c-muted)', fontSize: '0.8125rem', maxWidth: 640, margin: '0 auto', lineHeight: 1.65 }}>
+          Raichu is a free chess-inspired abstract strategy game — no download, no account required.
+          Two players, three piece types, zero luck.{' '}
+          <Link href="/rules"       style={{ color: 'var(--c-green)', textDecoration: 'none' }}>Rules</Link>
+          {' · '}
+          <Link href="/how-to-play" style={{ color: 'var(--c-green)', textDecoration: 'none' }}>How to Play</Link>
+          {' · '}
+          <Link href="/strategy"    style={{ color: 'var(--c-green)', textDecoration: 'none' }}>Strategy Guide</Link>
+          {' · '}
+          <Link href="/faq"         style={{ color: 'var(--c-green)', textDecoration: 'none' }}>FAQ</Link>
+        </p>
+      </section>
     </>
   );
 }

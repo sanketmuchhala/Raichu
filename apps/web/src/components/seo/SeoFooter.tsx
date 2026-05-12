@@ -25,6 +25,7 @@ export function SeoFooter() {
             <p style={{ fontWeight: 700, fontSize: '0.8125rem', color: 'var(--c-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.625rem' }}>Learn</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
               <Link href="/strategy" style={linkStyle}>Strategy Guide</Link>
+              <Link href="/blog"     style={linkStyle}>Blog</Link>
               <Link href="/faq"      style={linkStyle}>FAQ</Link>
             </div>
           </div>
@@ -54,7 +55,7 @@ export function SeoNav() {
       <div style={{ maxWidth: 860, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
         <Link href="/" style={{ fontWeight: 700, color: 'var(--c-text)', textDecoration: 'none', fontSize: '1.125rem' }}>Raichu</Link>
         <nav style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
-          {([['Play', '/play'], ['Rules', '/rules'], ['How to Play', '/how-to-play'], ['Strategy', '/strategy'], ['FAQ', '/faq']] as [string, string][]).map(([label, href]) => (
+          {([['Play', '/play'], ['Rules', '/rules'], ['How to Play', '/how-to-play'], ['Strategy', '/strategy'], ['Blog', '/blog'], ['FAQ', '/faq']] as [string, string][]).map(([label, href]) => (
             <Link key={href} href={href} style={{ color: 'var(--c-muted)', textDecoration: 'none', fontSize: '0.875rem' }}>{label}</Link>
           ))}
         </nav>
