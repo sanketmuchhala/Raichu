@@ -81,8 +81,8 @@ describe('Bot move endpoint logic', () => {
   describe('Difficulty levels', () => {
     it('easy searches fewer nodes than hard', () => {
       const board = decodeBoard(INITIAL_BOARD);
-      const easy = findBestMove(board, 'white', 'easy', 1500);
-      const hard = findBestMove(board, 'white', 'hard', 3000);
+      const easy = findBestMove(board, 'white', 'easy', 400);
+      const hard = findBestMove(board, 'white', 'hard', 1500);
       expect(easy.nodesSearched).toBeLessThan(hard.nodesSearched);
     });
   });

@@ -8,18 +8,18 @@ export interface DifficultyConfig {
 
 export const DIFFICULTY_PRESETS: Record<Difficulty, DifficultyConfig> = {
   easy: {
-    maxDepth: 10,
-    timeBudgetMs: 1500,
+    maxDepth: 6,
+    timeBudgetMs: 400,
     label: 'Easy',
   },
   medium: {
-    maxDepth: 16,
-    timeBudgetMs: 3000,
+    maxDepth: 8,
+    timeBudgetMs: 800,
     label: 'Medium',
   },
   hard: {
-    maxDepth: 24,
-    timeBudgetMs: 6000,
+    maxDepth: 12,
+    timeBudgetMs: 1500,
     label: 'Hard',
   },
 };
