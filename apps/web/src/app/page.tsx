@@ -23,7 +23,7 @@ const GAME_SCHEMA = {
 };
 
 export default function Home() {
-  const theme  = useUIStore((s) => THEMES[s.theme]);
+  const theme = useUIStore((s) => THEMES[s.theme]);
 
   return (
     <div
@@ -35,8 +35,6 @@ export default function Home() {
 
       {/* ── Hero ─────────────────────────────────────── */}
       <section className="lp-hero">
-
-        {/* Pieces */}
         <div
           className="r1"
           style={{ display: 'flex', alignItems: 'flex-end', gap: '0.75rem', marginBottom: '2.5rem' }}
@@ -61,7 +59,6 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Wordmark */}
         <h1
           className="r2"
           style={{
@@ -89,50 +86,65 @@ export default function Home() {
           Capture every opponent piece to win.
         </p>
 
-        {/* CTAs */}
         <div
           className="r4"
           style={{ display: 'flex', gap: '0.625rem', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '1.5rem' }}
         >
-          <Link
-            href="/play"
-            className="lp-btn lp-btn-primary"
-            style={{ backgroundColor: theme.accent }}
-          >
-            Play vs AI
-          </Link>
-          <Link
-            href="/lobby"
-            className="lp-btn lp-btn-ghost"
-            style={{
-              color: theme.textPrimary,
-              border: `1px solid ${theme.border}`,
-            }}
-          >
-            Play Online
-          </Link>
+          <Link href="/play"  className="lp-btn lp-btn-primary" style={{ backgroundColor: theme.accent }}>Play vs AI</Link>
+          <Link href="/lobby" className="lp-btn lp-btn-ghost"   style={{ color: theme.textPrimary, border: `1px solid ${theme.border}` }}>Play Online</Link>
         </div>
 
-        {/* Utility links */}
-        <nav
-          className="r5"
-          style={{ display: 'flex', gap: '1.75rem' }}
-        >
+        <nav className="r5" style={{ display: 'flex', gap: '1.75rem' }}>
           {[
-            { href: '/rules',       label: 'How to Play' },
-            { href: '/puzzles',     label: 'Puzzles'     },
-            { href: '/leaderboard', label: 'Leaderboard' },
-            { href: '/history',     label: 'History'     },
+            { href: '/rules',       label: 'How to Play'  },
+            { href: '/puzzles',     label: 'Puzzles'      },
+            { href: '/leaderboard', label: 'Leaderboard'  },
+            { href: '/history',     label: 'History'      },
           ].map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              style={{ fontSize: '0.8125rem', color: theme.textSecondary, textDecoration: 'none' }}
-            >
+            <Link key={href} href={href} style={{ fontSize: '0.8125rem', color: theme.textSecondary, textDecoration: 'none' }}>
               {label}
             </Link>
           ))}
         </nav>
+      </section>
+
+      {/* ── Stats strip ──────────────────────────────── */}
+      <section style={{ borderTop: `1px solid ${theme.border}`, width: '100%' }}>
+        <div
+          style={{
+            maxWidth: 900,
+            margin: '0 auto',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+          }}
+        >
+          {STATS.map(({ value, label }, i) => (
+            <div
+              key={label}
+              style={{
+                padding: '2rem 1rem',
+                textAlign: 'center',
+                borderRight: i < STATS.length - 1 ? `1px solid ${theme.border}` : undefined,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 'clamp(1.5rem, 3vw, 2.25rem)',
+                  fontWeight: 800,
+                  letterSpacing: '-0.02em',
+                  color: theme.textPrimary,
+                  lineHeight: 1,
+                  marginBottom: '0.375rem',
+                }}
+              >
+                {value}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: theme.textSecondary, letterSpacing: '0.04em' }}>
+                {label}
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* ── Piece Guide ──────────────────────────────── */}
@@ -150,11 +162,7 @@ export default function Home() {
             The Pieces
           </h2>
         </div>
-
-        <div
-          className="lp-cards"
-          style={{ borderTop: `1px solid ${theme.border}`, marginBottom: '2rem' }}
-        >
+        <div className="lp-cards" style={{ borderTop: `1px solid ${theme.border}`, marginBottom: '2rem' }}>
           {PIECES.map((p, i) => (
             <div
               key={p.name}
@@ -168,18 +176,8 @@ export default function Home() {
                 <img src={P(p.wCode)} width={48} height={48} alt="" draggable={false} />
                 <img src={P(p.bCode)} width={48} height={48} alt="" draggable={false} />
               </div>
-              <div style={{ fontWeight: 700, fontSize: '1rem', color: theme.textPrimary }}>
-                {p.name}
-              </div>
-              <div
-                style={{
-                  fontSize: '0.7rem',
-                  fontWeight: 600,
-                  letterSpacing: '0.1em',
-                  textTransform: 'uppercase',
-                  color: theme.accent,
-                }}
-              >
+              <div style={{ fontWeight: 700, fontSize: '1rem', color: theme.textPrimary }}>{p.name}</div>
+              <div style={{ fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: theme.accent }}>
                 {p.role}
               </div>
               <p style={{ fontSize: '0.8125rem', color: theme.textSecondary, lineHeight: 1.6, maxWidth: '28ch' }}>
@@ -190,10 +188,67 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── Capture Hierarchy ────────────────────────── */}
+      <section style={{ borderTop: `1px solid ${theme.border}`, maxWidth: 900, margin: '0 auto', width: '100%', padding: '3rem 2rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.5rem' }}>
+          <h2 style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: theme.textSecondary }}>
+            Capture Hierarchy
+          </h2>
+          <span style={{ fontSize: '0.8125rem', color: theme.textSecondary }}>
+            The rule that defines the game
+          </span>
+        </div>
+
+        <div style={{ border: `1px solid ${theme.border}`, borderRadius: 10, overflow: 'hidden' }}>
+          {HIERARCHY.map(({ name, wCode, bCode, canCapture, targetImages, note }, i) => (
+            <div
+              key={name}
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr auto 1fr',
+                alignItems: 'center',
+                padding: '1.125rem 1.5rem',
+                gap: '1.5rem',
+                backgroundColor: i % 2 === 0 ? theme.bgPanel : theme.bgPrimary,
+                borderTop: i > 0 ? `1px solid ${theme.border}` : undefined,
+              }}
+            >
+              {/* Piece identity */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
+                <div style={{ display: 'flex', gap: '0.375rem' }}>
+                  <img src={P(wCode)} width={36} height={36} alt="" draggable={false} />
+                  <img src={P(bCode)} width={36} height={36} alt="" draggable={false} />
+                </div>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '0.9375rem', color: theme.textPrimary }}>{name}</div>
+                  <div style={{ fontSize: '0.75rem', color: theme.textSecondary, marginTop: '0.125rem' }}>{note}</div>
+                </div>
+              </div>
+
+              {/* Arrow */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: theme.textSecondary, fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
+                <span style={{ color: theme.border }}>——</span>
+                <span style={{ color: theme.accent, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', fontSize: '0.6875rem' }}>can capture</span>
+                <span style={{ color: theme.border }}>——›</span>
+              </div>
+
+              {/* Targets */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', gap: '0.375rem', flexWrap: 'wrap' }}>
+                  {targetImages.map((code) => (
+                    <img key={code} src={P(code)} width={32} height={32} alt="" draggable={false} style={{ opacity: 0.9 }} />
+                  ))}
+                </div>
+                <span style={{ fontSize: '0.8125rem', color: theme.textSecondary }}>{canCapture}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* ── What is Raichu ───────────────────────────── */}
       <section style={{ borderTop: `1px solid ${theme.border}`, maxWidth: 900, margin: '0 auto', width: '100%', padding: '3rem 2rem' }}>
         <div style={{ display: 'grid', gap: '2rem', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
-
           <div>
             <h2 style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: theme.textSecondary, marginBottom: '0.75rem' }}>
               What is Raichu?
@@ -202,7 +257,6 @@ export default function Home() {
               Raichu is a two-player abstract strategy game played on an 8×8 board. Chess-inspired in spirit: piece hierarchy, promotion, no luck, no draws. But it has its own complete ruleset and win condition. Capture every enemy piece to win.
             </p>
           </div>
-
           <div>
             <h2 style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: theme.textSecondary, marginBottom: '0.75rem' }}>
               Why chess players like it
@@ -214,7 +268,6 @@ export default function Home() {
               <li>Promotion pressure creates chess-like middlegame tension</li>
             </ul>
           </div>
-
           <div>
             <h2 style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: theme.textSecondary, marginBottom: '0.75rem' }}>
               How it differs from chess
@@ -226,7 +279,6 @@ export default function Home() {
               <li>No draws, no en passant, no castling</li>
             </ul>
           </div>
-
         </div>
         <div style={{ marginTop: '1.75rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
           <Link href="/raichu-vs-chess" style={{ fontSize: '0.8125rem', fontWeight: 600, color: theme.accent, textDecoration: 'none' }}>Raichu vs Chess in detail →</Link>
@@ -235,28 +287,169 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── Game Modes ───────────────────────────────── */}
+      <section style={{ borderTop: `1px solid ${theme.border}`, maxWidth: 900, margin: '0 auto', width: '100%', padding: '3rem 2rem' }}>
+        <h2 style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: theme.textSecondary, marginBottom: '1.5rem', textAlign: 'center' }}>
+          How you want to play
+        </h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1px', border: `1px solid ${theme.border}`, borderRadius: 10, overflow: 'hidden' }}>
+          {MODES.map(({ title, badge, desc, href, cta, primary }, i) => (
+            <div
+              key={title}
+              style={{
+                backgroundColor: theme.bgPanel,
+                padding: '1.75rem 1.5rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.625rem',
+                borderRight: i < MODES.length - 1 ? `1px solid ${theme.border}` : undefined,
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ fontWeight: 700, fontSize: '1.0625rem', color: theme.textPrimary }}>{title}</div>
+                <span style={{ fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: theme.accent, backgroundColor: `${theme.accent}18`, padding: '0.1875rem 0.5rem', borderRadius: 4 }}>
+                  {badge}
+                </span>
+              </div>
+              <p style={{ fontSize: '0.8125rem', color: theme.textSecondary, lineHeight: 1.65, flex: 1 }}>{desc}</p>
+              <Link
+                href={href}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '0.5625rem 1.25rem',
+                  borderRadius: 6,
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  marginTop: '0.25rem',
+                  backgroundColor: primary ? theme.accent : 'transparent',
+                  color: primary ? '#fff' : theme.textSecondary,
+                  border: primary ? 'none' : `1px solid ${theme.border}`,
+                  transition: 'opacity 0.15s',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.8')}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+              >
+                {cta}
+              </Link>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── How to play — 3 steps ────────────────────── */}
+      <section style={{ borderTop: `1px solid ${theme.border}`, maxWidth: 900, margin: '0 auto', width: '100%', padding: '3rem 2rem' }}>
+        <h2 style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: theme.textSecondary, marginBottom: '2rem', textAlign: 'center' }}>
+          Up and running in minutes
+        </h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0' }}>
+          {STEPS.map(({ n, title, body, pieces }, i) => (
+            <div
+              key={n}
+              style={{
+                padding: '1.75rem 1.5rem',
+                borderRight: i < STEPS.length - 1 ? `1px solid ${theme.border}` : undefined,
+                position: 'relative',
+              }}
+            >
+              {/* Step number */}
+              <div
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '50%',
+                  border: `1.5px solid ${theme.border}`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '0.8125rem',
+                  fontWeight: 700,
+                  color: theme.textSecondary,
+                  marginBottom: '1.25rem',
+                }}
+              >
+                {n}
+              </div>
+
+              {/* Piece visual */}
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.375rem', marginBottom: '1rem', minHeight: 52 }}>
+                {pieces.map(({ code, size }) => (
+                  <img key={code} src={P(code)} width={size} height={size} alt="" draggable={false} style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.4))' }} />
+                ))}
+              </div>
+
+              <div style={{ fontWeight: 700, fontSize: '1rem', color: theme.textPrimary, marginBottom: '0.375rem' }}>{title}</div>
+              <p style={{ fontSize: '0.8125rem', color: theme.textSecondary, lineHeight: 1.65 }}>{body}</p>
+            </div>
+          ))}
+        </div>
+        <div style={{ marginTop: '2rem', textAlign: 'center' }}>
+          <Link
+            href="/how-to-play"
+            style={{ fontSize: '0.875rem', fontWeight: 600, color: theme.accent, textDecoration: 'none' }}
+          >
+            Full beginner guide →
+          </Link>
+        </div>
+      </section>
+
+      {/* ── Learning resources ───────────────────────── */}
+      <section style={{ borderTop: `1px solid ${theme.border}`, maxWidth: 900, margin: '0 auto', width: '100%', padding: '3rem 2rem' }}>
+        <h2 style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: theme.textSecondary, marginBottom: '1.5rem', textAlign: 'center' }}>
+          Go deeper
+        </h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1px', border: `1px solid ${theme.border}`, borderRadius: 10, overflow: 'hidden' }}>
+          {RESOURCES.map(({ label, title, desc, href }, i) => (
+            <Link
+              key={title}
+              href={href}
+              style={{
+                display: 'block',
+                backgroundColor: theme.bgPanel,
+                padding: '1.5rem',
+                textDecoration: 'none',
+                borderRight: i < RESOURCES.length - 1 ? `1px solid ${theme.border}` : undefined,
+                transition: 'background-color 0.15s',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = theme.bgSecondary)}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = theme.bgPanel)}
+            >
+              <div style={{ fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: theme.accent, marginBottom: '0.5rem' }}>
+                {label}
+              </div>
+              <div style={{ fontWeight: 700, fontSize: '0.9375rem', color: theme.textPrimary, marginBottom: '0.375rem' }}>{title}</div>
+              <p style={{ fontSize: '0.8125rem', color: theme.textSecondary, lineHeight: 1.6, margin: 0 }}>{desc}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       {/* ── Footer CTA ───────────────────────────────── */}
-      <section
-        style={{
-          padding: '3rem 2rem 5rem',
-          textAlign: 'center',
-          borderTop: `1px solid ${theme.border}`,
-        }}
-      >
-        <p style={{ color: theme.textSecondary, fontSize: '0.9rem', marginBottom: '1.25rem' }}>
-          White moves first. Capture all enemy pieces to win. No draws.
+      <section style={{ borderTop: `1px solid ${theme.border}`, padding: '4rem 2rem 5rem', textAlign: 'center' }}>
+        <p style={{ fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: theme.textSecondary, marginBottom: '1rem' }}>
+          Ready to play?
         </p>
-        <Link
-          href="/rules"
+        <h2
           style={{
-            fontSize: '0.875rem',
-            fontWeight: 600,
-            color: theme.accent,
-            textDecoration: 'none',
+            fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
+            fontWeight: 800,
+            letterSpacing: '-0.025em',
+            color: theme.textPrimary,
+            marginBottom: '0.625rem',
+            lineHeight: 1.15,
           }}
         >
-          Read the full rules →
-        </Link>
+          White moves first.
+        </h2>
+        <p style={{ color: theme.textSecondary, fontSize: '0.9rem', marginBottom: '2rem', maxWidth: '36ch', margin: '0 auto 2rem' }}>
+          Capture all enemy pieces to win. No draws, no luck — just tactics.
+        </p>
+        <div style={{ display: 'flex', gap: '0.625rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <Link href="/play"  className="lp-btn lp-btn-primary" style={{ backgroundColor: theme.accent }}>Play Now</Link>
+          <Link href="/rules" className="lp-btn lp-btn-ghost"   style={{ color: theme.textPrimary, border: `1px solid ${theme.border}` }}>Read the Rules</Link>
+        </div>
       </section>
 
       {/* ── SEO nav links ────────────────────────────── */}
@@ -291,9 +484,7 @@ export default function Home() {
           flexWrap: 'wrap',
         }}
       >
-        <span style={{ fontSize: '0.8125rem', color: theme.textSecondary }}>
-          © 2026 Sanket Muchhala
-        </span>
+        <span style={{ fontSize: '0.8125rem', color: theme.textSecondary }}>© 2026 Sanket Muchhala</span>
         <span style={{ color: theme.border }}>·</span>
         <a
           href="https://github.com/sanketmuchhala"
@@ -321,11 +512,119 @@ export default function Home() {
   );
 }
 
+/* ── Data ──────────────────────────────────────────────── */
+
 const PIECES = [
-  { wCode:'wp', bCode:'bp', name:'Pichu',   role:'Pawn',
-    desc:'Moves one square diagonally forward. Can only capture other Pichus.' },
-  { wCode:'wr', bCode:'br', name:'Pikachu', role:'Rook',
-    desc:'Moves 1–2 squares forward or sideways. Captures Pichus and Pikachus.' },
-  { wCode:'wq', bCode:'bq', name:'Raichu',  role:'Queen',
-    desc:'Moves any direction, any distance. Captures any piece. Earned through promotion.' },
+  { wCode: 'wp', bCode: 'bp', name: 'Pichu',   role: 'Pawn',
+    desc: 'Moves one square diagonally forward. Can only capture other Pichus.' },
+  { wCode: 'wr', bCode: 'br', name: 'Pikachu', role: 'Rook',
+    desc: 'Moves 1–2 squares forward or sideways. Captures Pichus and Pikachus.' },
+  { wCode: 'wq', bCode: 'bq', name: 'Raichu',  role: 'Queen',
+    desc: 'Moves any direction, any distance. Captures any piece. Earned through promotion.' },
+];
+
+const STATS = [
+  { value: '5–15',  label: 'minutes per game'   },
+  { value: '0',     label: 'luck involved'       },
+  { value: '3',     label: 'piece types to learn' },
+  { value: 'Free',  label: 'no account needed'   },
+];
+
+const HIERARCHY = [
+  {
+    name: 'Pichu',
+    wCode: 'wp', bCode: 'bp',
+    canCapture: 'Pichu only',
+    targetImages: ['bp', 'wp'],
+    note: 'The foot soldier. Cheap but expendable.',
+  },
+  {
+    name: 'Pikachu',
+    wCode: 'wr', bCode: 'br',
+    canCapture: 'Pichu and Pikachu',
+    targetImages: ['bp', 'br'],
+    note: 'Your main attacker. Cannot threaten Raichus.',
+  },
+  {
+    name: 'Raichu',
+    wCode: 'wq', bCode: 'bq',
+    canCapture: 'Any piece',
+    targetImages: ['bp', 'br', 'bq'],
+    note: 'Earned by promotion. Dominates the board.',
+  },
+];
+
+const MODES = [
+  {
+    title:   'Play vs AI',
+    badge:   'Solo',
+    desc:    'Three difficulty levels. The engine runs entirely in your browser — instant response, no server wait.',
+    href:    '/play',
+    cta:     'Start Game',
+    primary: true,
+  },
+  {
+    title:   'Play Online',
+    badge:   'Ranked',
+    desc:    'ELO-rated matchmaking against real players. Track your rating and climb the leaderboard.',
+    href:    '/lobby',
+    cta:     'Find Match',
+    primary: false,
+  },
+  {
+    title:   'Local PvP',
+    badge:   'Two players',
+    desc:    'Pass and play on the same device. No accounts, no setup — just open the board and go.',
+    href:    '/play',
+    cta:     'Play Now',
+    primary: false,
+  },
+];
+
+const STEPS = [
+  {
+    n: 1,
+    title: 'Set up and move',
+    body: 'White moves first. Move one piece per turn — forward, sideways (Pikachu), or in any direction (Raichu).',
+    pieces: [{ code: 'wp', size: 44 }, { code: 'wr', size: 52 }],
+  },
+  {
+    n: 2,
+    title: 'Capture by jumping',
+    body: 'Jump over an enemy piece to capture it. The capture hierarchy determines who can take whom.',
+    pieces: [{ code: 'wq', size: 52 }, { code: 'bp', size: 36 }],
+  },
+  {
+    n: 3,
+    title: 'Promote and win',
+    body: "Reach the back rank to promote to Raichu. Capture every enemy piece to win. No draws — ever.",
+    pieces: [{ code: 'wp', size: 36 }, { code: 'wq', size: 52 }],
+  },
+];
+
+const RESOURCES = [
+  {
+    label: 'Reference',
+    title: 'Full Rules',
+    desc:  'Complete ruleset: board setup, all piece movements, captures, promotion, and win conditions.',
+    href:  '/rules',
+  },
+  {
+    label: 'Guide',
+    title: 'Strategy',
+    desc:  'Opening principles, board control, tactical patterns, and endgame technique.',
+    href:  '/strategy',
+  },
+  {
+    label: 'Compare',
+    title: 'Raichu vs Chess',
+    desc:  'Similarities, differences, and what transfers from chess intuition.',
+    href:  '/raichu-vs-chess',
+  },
+  {
+    label: 'Articles',
+    title: 'Blog',
+    desc:  'Guides on abstract strategy, chess-like games, and game design.',
+    href:  '/blog',
+  },
 ];
