@@ -58,8 +58,7 @@ CREATE INDEX idx_analytics_session_id    ON analytics_events (session_id);
 CREATE INDEX idx_analytics_country       ON analytics_events (country) WHERE country IS NOT NULL;
 CREATE INDEX idx_analytics_device_type   ON analytics_events (device_type);
 CREATE INDEX idx_analytics_page          ON analytics_events (page);
--- For daily/hourly bucketing
-CREATE INDEX idx_analytics_created_date  ON analytics_events (date_trunc('day', created_at));
+-- Daily bucketing queries use the existing idx_analytics_created_at (B-tree range scan is sufficient)
 
 -- =============================================
 -- Row Level Security
