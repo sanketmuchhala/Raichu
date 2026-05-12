@@ -1,33 +1,35 @@
 'use client';
 
 import { useCallback, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { BOARD_SIZE } from '@raichu/shared-types';
 import type { Move, PieceChar } from '@raichu/shared-types';
 import { useBoardContext } from './BoardContext';
 import { useUIStore } from '../../store/ui-store';
 import { THEMES } from '../../lib/themes';
 import { PieceSVG } from '../pieces/PieceSVG';
+import { usePieceMoveAnimation, SQUARE_SIZE, COORD_SIZE } from './usePieceMoveAnimation';
 
-const SQUARE_SIZE = 64;
-const COORD_SIZE = 20;
-const BOARD_PX = SQUARE_SIZE * BOARD_SIZE;
-const TOTAL_WIDTH = BOARD_PX + COORD_SIZE;
+const BOARD_PX    = SQUARE_SIZE * BOARD_SIZE;
+const TOTAL_WIDTH  = BOARD_PX + COORD_SIZE;
 const TOTAL_HEIGHT = BOARD_PX + COORD_SIZE * 2;
-const COL_LABELS = 'abcdefgh';
+const COL_LABELS   = 'abcdefgh';
+const ANIM_MS      = 260;
+
+const SLIDE_EASE = [0.25, 0.46, 0.45, 0.94] as const;
 
 interface OnlineBoardProps {
   flipped?: boolean;
 }
 
-/** Board component that reads from BoardContext (for online games) */
 export function OnlineBoard({ flipped = false }: OnlineBoardProps) {
   const boardRef = useRef<SVGSVGElement>(null);
-  const theme = useUIStore((s) => THEMES[s.theme]);
+  const theme      = useUIStore((s) => THEMES[s.theme]);
   const isDragging = useUIStore((s) => s.isDragging);
-  const dragPiece = useUIStore((s) => s.dragPiece);
-  const startDrag = useUIStore((s) => s.startDrag);
+  const dragPiece  = useUIStore((s) => s.dragPiece);
+  const startDrag  = useUIStore((s) => s.startDrag);
   const updateDrag = useUIStore((s) => s.updateDrag);
-  const endDrag = useUIStore((s) => s.endDrag);
+  const endDrag    = useUIStore((s) => s.endDrag);
 
   const {
     board,
@@ -43,6 +45,8 @@ export function OnlineBoard({ flipped = false }: OnlineBoardProps) {
 
   const toDisplayRow = useCallback((row: number) => flipped ? BOARD_SIZE - 1 - row : row, [flipped]);
   const toDisplayCol = useCallback((col: number) => flipped ? BOARD_SIZE - 1 - col : col, [flipped]);
+
+  const { animState, markDragMove } = usePieceMoveAnimation(lastMove, toDisplayRow, toDisplayCol);
 
   const handleSquareClick = useCallback((row: number, col: number) => {
     if (!canInteract) return;
@@ -71,20 +75,20 @@ export function OnlineBoard({ flipped = false }: OnlineBoardProps) {
     selectPiece(row, col);
 
     if (boardRef.current) {
-      const rect = boardRef.current.getBoundingClientRect();
+      const rect  = boardRef.current.getBoundingClientRect();
       const scale = rect.width / TOTAL_WIDTH;
       const x = (e.clientX - rect.left) / scale - COORD_SIZE;
-      const y = (e.clientY - rect.top) / scale - COORD_SIZE;
+      const y = (e.clientY - rect.top)  / scale - COORD_SIZE;
       startDrag(cell, row, col, x, y);
     }
   }, [board, canInteract, selectPiece, startDrag]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!isDragging || !boardRef.current) return;
-    const rect = boardRef.current.getBoundingClientRect();
+    const rect  = boardRef.current.getBoundingClientRect();
     const scale = rect.width / TOTAL_WIDTH;
     const x = (e.clientX - rect.left) / scale - COORD_SIZE;
-    const y = (e.clientY - rect.top) / scale - COORD_SIZE;
+    const y = (e.clientY - rect.top)  / scale - COORD_SIZE;
     updateDrag(x, y);
   }, [isDragging, updateDrag]);
 
@@ -94,10 +98,10 @@ export function OnlineBoard({ flipped = false }: OnlineBoardProps) {
       return;
     }
 
-    const rect = boardRef.current.getBoundingClientRect();
+    const rect  = boardRef.current.getBoundingClientRect();
     const scale = rect.width / TOTAL_WIDTH;
     const x = (e.clientX - rect.left) / scale - COORD_SIZE;
-    const y = (e.clientY - rect.top) / scale - COORD_SIZE;
+    const y = (e.clientY - rect.top)  / scale - COORD_SIZE;
 
     let dropCol = Math.floor(x / SQUARE_SIZE);
     let dropRow = Math.floor(y / SQUARE_SIZE);
@@ -109,21 +113,21 @@ export function OnlineBoard({ flipped = false }: OnlineBoardProps) {
 
     const move = legalMoves.find((m) => m.to.row === dropRow && m.to.col === dropCol);
     if (move) {
+      markDragMove();
       makeMove(move);
     }
 
     endDrag();
-  }, [isDragging, dragPiece, flipped, legalMoves, makeMove, endDrag]);
+  }, [isDragging, dragPiece, flipped, legalMoves, makeMove, endDrag, markDragMove]);
 
-  const isLegalMoveTarget = (row: number, col: number): Move | undefined => {
-    return legalMoves.find((m) => m.to.row === row && m.to.col === col);
-  };
+  const isLegalMoveTarget = (row: number, col: number): Move | undefined =>
+    legalMoves.find((m) => m.to.row === row && m.to.col === col);
 
   const isLastMoveSquare = (row: number, col: number): boolean => {
     if (!lastMove) return false;
     return (
       (lastMove.from.row === row && lastMove.from.col === col) ||
-      (lastMove.to.row === row && lastMove.to.col === col)
+      (lastMove.to.row   === row && lastMove.to.col   === col)
     );
   };
 
@@ -177,20 +181,19 @@ export function OnlineBoard({ flipped = false }: OnlineBoardProps) {
       {/* Board squares */}
       {Array.from({ length: BOARD_SIZE }, (_, row) =>
         Array.from({ length: BOARD_SIZE }, (_, col) => {
-          const displayRow = toDisplayRow(row);
-          const displayCol = toDisplayCol(col);
-          const isLight = (row + col) % 2 === 0;
-          const isSelected = selectedPiece?.row === row && selectedPiece?.col === col;
-          const legalMove = isLegalMoveTarget(row, col);
-          const isLastMove = isLastMoveSquare(row, col);
+          const displayRow  = toDisplayRow(row);
+          const displayCol  = toDisplayCol(col);
+          const isLight     = (row + col) % 2 === 0;
+          const isSelected  = selectedPiece?.row === row && selectedPiece?.col === col;
+          const legalMove   = isLegalMoveTarget(row, col);
+          const isLastMove  = isLastMoveSquare(row, col);
 
           return (
             <g key={`${row}-${col}`}>
               <rect
                 x={COORD_SIZE + displayCol * SQUARE_SIZE}
                 y={COORD_SIZE + displayRow * SQUARE_SIZE}
-                width={SQUARE_SIZE}
-                height={SQUARE_SIZE}
+                width={SQUARE_SIZE} height={SQUARE_SIZE}
                 fill={isLight ? theme.boardLight : theme.boardDark}
                 onClick={() => handleSquareClick(row, col)}
                 onPointerDown={(e) => handlePointerDown(e, row, col)}
@@ -201,8 +204,7 @@ export function OnlineBoard({ flipped = false }: OnlineBoardProps) {
                 <rect
                   x={COORD_SIZE + displayCol * SQUARE_SIZE}
                   y={COORD_SIZE + displayRow * SQUARE_SIZE}
-                  width={SQUARE_SIZE}
-                  height={SQUARE_SIZE}
+                  width={SQUARE_SIZE} height={SQUARE_SIZE}
                   fill={theme.lastMove}
                   pointerEvents="none"
                 />
@@ -212,8 +214,7 @@ export function OnlineBoard({ flipped = false }: OnlineBoardProps) {
                 <rect
                   x={COORD_SIZE + displayCol * SQUARE_SIZE}
                   y={COORD_SIZE + displayRow * SQUARE_SIZE}
-                  width={SQUARE_SIZE}
-                  height={SQUARE_SIZE}
+                  width={SQUARE_SIZE} height={SQUARE_SIZE}
                   fill={theme.selected}
                   pointerEvents="none"
                 />
@@ -245,12 +246,13 @@ export function OnlineBoard({ flipped = false }: OnlineBoardProps) {
         })
       )}
 
-      {/* Pieces */}
+      {/* Static pieces — hidden at dest while animation plays */}
       {Array.from({ length: BOARD_SIZE }, (_, row) =>
         Array.from({ length: BOARD_SIZE }, (_, col) => {
           const cell = board[row][col];
           if (cell === '.') return null;
           if (isDragging && dragPiece?.fromRow === row && dragPiece?.fromCol === col) return null;
+          if (animState && row === animState.toRow && col === animState.toCol) return null;
 
           const displayRow = toDisplayRow(row);
           const displayCol = toDisplayCol(col);
@@ -269,6 +271,35 @@ export function OnlineBoard({ flipped = false }: OnlineBoardProps) {
             </g>
           );
         })
+      )}
+
+      {/* Move animation overlay */}
+      {animState && !isDragging && (
+        <>
+          {animState.capturedPiece !== undefined &&
+           animState.capturedX    !== undefined &&
+           animState.capturedY    !== undefined && (
+            <motion.g
+              key={`cap-${animState.moveId}`}
+              initial={{ x: animState.capturedX, y: animState.capturedY, opacity: 1 }}
+              animate={{ x: animState.capturedX, y: animState.capturedY, opacity: 0 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+              pointerEvents="none"
+            >
+              <PieceSVG piece={animState.capturedPiece} size={SQUARE_SIZE - 4} />
+            </motion.g>
+          )}
+
+          <motion.g
+            key={`mv-${animState.moveId}`}
+            initial={{ x: animState.fromX, y: animState.fromY }}
+            animate={{ x: animState.toX,   y: animState.toY   }}
+            transition={{ duration: ANIM_MS / 1000, ease: SLIDE_EASE }}
+            pointerEvents="none"
+          >
+            <PieceSVG piece={animState.landingPiece} size={SQUARE_SIZE - 4} />
+          </motion.g>
+        </>
       )}
 
       {/* Drag overlay */}
