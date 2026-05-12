@@ -18,8 +18,8 @@ export default function RulesLayout({ children }: { children: React.ReactNode })
     breadcrumb: {
       '@type': 'BreadcrumbList',
       itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Home',  item: 'https://raichugame.com' },
-        { '@type': 'ListItem', position: 2, name: 'Rules', item: 'https://raichugame.com/rules' },
+        { '@type': 'ListItem', position: 1, name: 'Home',  item: 'https://raichu.live' },
+        { '@type': 'ListItem', position: 2, name: 'Rules', item: 'https://raichu.live/rules' },
       ],
     },
   };

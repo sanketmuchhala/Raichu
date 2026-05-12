@@ -31,7 +31,7 @@ const schema = {
 const GAMES = [
   {
     name:     'Raichu Game',
-    url:      'https://raichugame.com/play',
+    url:      'https://raichu.live/play',
     internal: '/play',
     type:     'Chess-inspired abstract strategy',
     free:     'Yes — no account needed for AI play',

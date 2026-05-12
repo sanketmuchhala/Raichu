@@ -18,7 +18,7 @@ const GAME_SCHEMA = {
   applicationCategory:  'Game',
   playMode:             ['SinglePlayer', 'MultiPlayer'],
   operatingSystem:      'Any',
-  url:                  'https://raichugame.com',
+  url:                  'https://raichu.live',
   offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
 };
 

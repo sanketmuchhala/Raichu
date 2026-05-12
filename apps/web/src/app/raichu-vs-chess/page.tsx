@@ -20,8 +20,8 @@ const schema = {
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home',           item: 'https://raichugame.com' },
-      { '@type': 'ListItem', position: 2, name: 'Raichu vs Chess', item: 'https://raichugame.com/raichu-vs-chess' },
+      { '@type': 'ListItem', position: 1, name: 'Home',           item: 'https://raichu.live' },
+      { '@type': 'ListItem', position: 2, name: 'Raichu vs Chess', item: 'https://raichu.live/raichu-vs-chess' },
     ],
   },
 };

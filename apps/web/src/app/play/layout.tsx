@@ -20,7 +20,7 @@ export default function PlayLayout({ children }: { children: React.ReactNode }) 
     applicationCategory:  'Game',
     playMode:             ['SinglePlayer', 'MultiPlayer'],
     operatingSystem:      'Any',
-    url:                  'https://raichugame.com/play',
+    url:                  'https://raichu.live/play',
     offers: {
       '@type': 'Offer',
       price:   '0',

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-export const SITE_URL  = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://raichugame.com').replace(/\/$/, '');
+export const SITE_URL  = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://raichu.live').replace(/\/$/, '');
 export const SITE_NAME = 'Raichu Game';
 
 export function pageMetadata({
