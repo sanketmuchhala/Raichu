@@ -8,6 +8,20 @@ import { UserMenu } from '../components/auth/UserMenu';
 const CDN = 'https://images.chesscomfiles.com/chess-themes/pieces/neo/150';
 const P   = (c: string) => `${CDN}/${c}.png`;
 
+const GAME_SCHEMA = {
+  '@context':           'https://schema.org',
+  '@type':              'VideoGame',
+  name:                 'Raichu Game',
+  description:          'A chess-inspired abstract strategy game playable free in the browser. Capture all opponent pieces to win.',
+  genre:                'Abstract strategy game',
+  gamePlatform:         'Web Browser',
+  applicationCategory:  'Game',
+  playMode:             ['SinglePlayer', 'MultiPlayer'],
+  operatingSystem:      'Any',
+  url:                  'https://raichugame.com',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+};
+
 export default function Home() {
   const theme  = useUIStore((s) => THEMES[s.theme]);
 
@@ -16,6 +30,7 @@ export default function Home() {
       className="lp"
       style={{ backgroundColor: theme.bgPrimary, color: theme.textPrimary }}
     >
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(GAME_SCHEMA) }} />
       {/* ── Nav ──────────────────────────────────────── */}
       <header
         className="lp-nav"
@@ -216,6 +231,26 @@ export default function Home() {
         >
           Read the full rules →
         </Link>
+      </section>
+
+      {/* ── SEO nav links ────────────────────────────── */}
+      <section style={{ borderTop: `1px solid ${theme.border}`, padding: '2rem', maxWidth: 900, margin: '0 auto', width: '100%' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2.5rem', justifyContent: 'center' }}>
+          {[
+            { group: 'Play',    links: [['/play','Play Now'],['/rules','Rules'],['/how-to-play','How to Play']] },
+            { group: 'Learn',   links: [['/strategy','Strategy Guide'],['/faq','FAQ']] },
+            { group: 'Explore', links: [['/chess-like-games','Chess-Like Games'],['/chess-variants','Chess Variants'],['/raichu-vs-chess','Raichu vs Chess']] },
+          ].map(({ group, links }) => (
+            <div key={group}>
+              <p style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: theme.textSecondary, marginBottom: '0.5rem' }}>{group}</p>
+              {links.map(([href, label]) => (
+                <div key={href} style={{ marginBottom: '0.25rem' }}>
+                  <Link href={href} style={{ fontSize: '0.8125rem', color: theme.textSecondary, textDecoration: 'none' }}>{label}</Link>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* ── Footer ───────────────────────────────────── */}

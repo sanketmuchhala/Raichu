@@ -311,6 +311,19 @@ export default function RulesPage() {
         </div>
       </div>
 
+      {/* SEO internal links */}
+      <nav style={{ borderTop: `1px solid ${theme.border}`, padding: '1.5rem 2rem', display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center' }}>
+        {[
+          ['/how-to-play', 'How to Play'],
+          ['/strategy', 'Strategy Guide'],
+          ['/faq', 'FAQ'],
+          ['/chess-like-games', 'Chess-Like Games'],
+          ['/raichu-vs-chess', 'Raichu vs Chess'],
+        ].map(([href, label]) => (
+          <Link key={href} href={href} style={{ fontSize: '0.8125rem', color: theme.textSecondary, textDecoration: 'none' }}>{label}</Link>
+        ))}
+      </nav>
+
       <footer
         style={{
           borderTop: `1px solid ${theme.border}`,
