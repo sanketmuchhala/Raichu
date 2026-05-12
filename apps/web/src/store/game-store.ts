@@ -10,6 +10,7 @@ import {
   getGameStatus,
 } from '@raichu/game-engine';
 import { findBestMove } from '@raichu/ai-engine';
+import { analytics } from '../lib/analytics';
 
 interface GameStore {
   // Game state
@@ -95,9 +96,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
       legalMoves: [],
     });
 
+    // Track game end
+    if (newStatus !== 'playing') {
+      analytics.gameEnded({
+        mode:      gameMode,
+        status:    newStatus,
+        moveCount: moveHistory.length + 1,
+      });
+    }
+
     // If bot mode and it's now the bot's turn, request a move
     if (gameMode === 'bot' && newStatus === 'playing' && nextPlayer !== playerColor) {
-      // Small delay so the UI updates first
       setTimeout(() => get().requestBotMove(), 300);
     }
   },
@@ -108,6 +117,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   newGame: (config) => {
     const initial = createInitialBoard();
+    analytics.gameStarted({
+      mode:        config.mode,
+      difficulty:  config.difficulty,
+      playerColor: config.playerColor,
+    });
     set({
       board: initial,
       currentPlayer: 'white',

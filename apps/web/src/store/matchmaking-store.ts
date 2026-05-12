@@ -2,6 +2,7 @@
 
 import { create } from 'zustand';
 import { apiFetch } from '../lib/api';
+import { analytics } from '../lib/analytics';
 
 type MatchmakingStatus = 'idle' | 'queued' | 'matched';
 
@@ -69,6 +70,7 @@ export const useMatchmakingStore = create<MatchmakingStore>((set, get) => ({
       };
 
       if (data.status === 'matched' && data.gameId) {
+        analytics.matchFound({ gameType: 'ranked' });
         set({ status: 'matched', matchedGameId: data.gameId, _idleRetries: 0 });
       } else if (data.status === 'queued') {
         set({

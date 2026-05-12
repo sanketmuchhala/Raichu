@@ -3,6 +3,7 @@ import { Figtree } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
 import { AuthProvider } from '../components/auth/AuthProvider';
+import { AnalyticsProvider } from '../components/analytics/AnalyticsProvider';
 import { SITE_URL, SITE_NAME } from '../lib/seo';
 
 const figtree = Figtree({
@@ -67,7 +68,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBSITE_SCHEMA) }}
         />
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <AnalyticsProvider />
+          {children}
+        </AuthProvider>
         <Analytics />
       </body>
     </html>

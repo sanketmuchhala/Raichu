@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
 import type { Profile } from '@raichu/shared-types';
 import { getSupabaseBrowserClient } from '../lib/supabase/client';
+import { analytics } from '../lib/analytics';
 
 interface AuthStore {
   user: User | null;
@@ -68,6 +69,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       if (data.session?.user) {
         set({ user: data.session.user });
         await get().fetchProfile();
+        analytics.signup(data.session.user.id);
       }
     } finally {
       set({ loading: false });
@@ -81,10 +83,10 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
 
-      // Set user immediately from the response instead of waiting for onAuthStateChange
       if (data.user) {
         set({ user: data.user });
         await get().fetchProfile();
+        analytics.login(data.user.id);
       }
     } finally {
       set({ loading: false });
@@ -112,6 +114,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   signOut: async () => {
+    const { user } = get();
+    analytics.logout(user?.id ?? null);
     const supabase = getSupabaseBrowserClient();
     await supabase.auth.signOut();
     set({ user: null, profile: null });
