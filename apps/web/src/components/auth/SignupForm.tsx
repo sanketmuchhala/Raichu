@@ -71,12 +71,14 @@ export function SignupForm({ theme, onSwitchToLogin }: SignupFormProps) {
           minLength={3}
           maxLength={24}
           pattern="[a-zA-Z0-9_]+"
-          className="w-full px-3 py-2.5 rounded-lg text-sm outline-none"
+          className="w-full px-3 py-2.5 rounded-lg text-sm outline-none transition-colors"
           style={{
             backgroundColor: theme.bgSecondary,
             color: theme.textPrimary,
             border: `1px solid ${theme.border}`,
           }}
+          onFocus={(e) => (e.currentTarget.style.borderColor = theme.accent)}
+          onBlur={(e)  => (e.currentTarget.style.borderColor = theme.border)}
           placeholder="Choose a username"
         />
       </div>
@@ -90,12 +92,14 @@ export function SignupForm({ theme, onSwitchToLogin }: SignupFormProps) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full px-3 py-2.5 rounded-lg text-sm outline-none"
+          className="w-full px-3 py-2.5 rounded-lg text-sm outline-none transition-colors"
           style={{
             backgroundColor: theme.bgSecondary,
             color: theme.textPrimary,
             border: `1px solid ${theme.border}`,
           }}
+          onFocus={(e) => (e.currentTarget.style.borderColor = theme.accent)}
+          onBlur={(e)  => (e.currentTarget.style.borderColor = theme.border)}
           placeholder="you@example.com"
         />
       </div>
@@ -110,12 +114,14 @@ export function SignupForm({ theme, onSwitchToLogin }: SignupFormProps) {
           onChange={(e) => setPassword(e.target.value)}
           required
           minLength={6}
-          className="w-full px-3 py-2.5 rounded-lg text-sm outline-none"
+          className="w-full px-3 py-2.5 rounded-lg text-sm outline-none transition-colors"
           style={{
             backgroundColor: theme.bgSecondary,
             color: theme.textPrimary,
             border: `1px solid ${theme.border}`,
           }}
+          onFocus={(e) => (e.currentTarget.style.borderColor = theme.accent)}
+          onBlur={(e)  => (e.currentTarget.style.borderColor = theme.border)}
           placeholder="At least 6 characters"
         />
       </div>

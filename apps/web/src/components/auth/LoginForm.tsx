@@ -38,12 +38,14 @@ export function LoginForm({ theme, onSwitchToSignup }: LoginFormProps) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full px-3 py-2.5 rounded-lg text-sm outline-none"
+          className="w-full px-3 py-2.5 rounded-lg text-sm outline-none transition-colors"
           style={{
             backgroundColor: theme.bgSecondary,
             color: theme.textPrimary,
             border: `1px solid ${theme.border}`,
           }}
+          onFocus={(e) => (e.currentTarget.style.borderColor = theme.accent)}
+          onBlur={(e)  => (e.currentTarget.style.borderColor = theme.border)}
           placeholder="you@example.com"
         />
       </div>
@@ -57,12 +59,14 @@ export function LoginForm({ theme, onSwitchToSignup }: LoginFormProps) {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="w-full px-3 py-2.5 rounded-lg text-sm outline-none"
+          className="w-full px-3 py-2.5 rounded-lg text-sm outline-none transition-colors"
           style={{
             backgroundColor: theme.bgSecondary,
             color: theme.textPrimary,
             border: `1px solid ${theme.border}`,
           }}
+          onFocus={(e) => (e.currentTarget.style.borderColor = theme.accent)}
+          onBlur={(e)  => (e.currentTarget.style.borderColor = theme.border)}
           placeholder="Your password"
         />
       </div>

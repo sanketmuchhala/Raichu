@@ -50,7 +50,14 @@ export function NewGameDialog() {
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-xl font-bold" style={{ color: theme.textPrimary }}>
+        <h2
+          className="text-xl font-bold"
+          style={{
+            color: theme.textPrimary,
+            fontFamily: 'var(--font-display, Georgia, serif)',
+            fontStyle: 'italic',
+          }}
+        >
           New Game
         </h2>
 

@@ -25,7 +25,7 @@ export default function Home() {
 
       {/* ── Nav ─────────────────────────────────────────── */}
       <header className="lp3-nav">
-        <span className="lp3-nav-logo">Raichu</span>
+        <Link href="/" className="lp3-nav-logo">Raichu</Link>
         <nav className="lp3-nav-links">
           <Link href="/rules"       className="lp3-nav-link">Rules</Link>
           <Link href="/leaderboard" className="lp3-nav-link">Leaderboard</Link>
