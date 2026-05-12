@@ -1,14 +1,27 @@
 'use client';
 
 import Link from 'next/link';
+import { useUIStore } from '../store/ui-store';
+import { THEMES } from '../lib/themes';
 import { UserMenu } from '../components/auth/UserMenu';
 
 const CDN = 'https://images.chesscomfiles.com/chess-themes/pieces/neo/150';
-const P = (code: string) => `${CDN}/${code}.png`;
+const P   = (code: string) => `${CDN}/${code}.png`;
 
 export default function Home() {
+  const theme  = useUIStore((s) => THEMES[s.theme]);
+  const accent = theme.accent;
+
+  // Derived: a dimmed version of the accent for subtle borders (hex + alpha)
+  const accentDim = accent + '3A';
+
+  const cssVars = {
+    '--lp3-accent':     accent,
+    '--lp3-accent-dim': accentDim,
+  } as React.CSSProperties;
+
   return (
-    <div className="lp3">
+    <div className="lp3" style={cssVars}>
 
       {/* ── Nav ─────────────────────────────────────────── */}
       <header className="lp3-nav">
@@ -23,26 +36,16 @@ export default function Home() {
 
       {/* ── Hero ────────────────────────────────────────── */}
       <section className="lp3-hero">
-        <div className="lp3-board-bg"    aria-hidden="true" />
+        <div className="lp3-board-bg"     aria-hidden="true" />
         <div className="lp3-hero-vignette" aria-hidden="true" />
 
         {/* Floating piece showcase */}
         <div className="lp3-pieces lp3-r1">
-          <div className="lp3-piece lp3-p1">
-            <img src={P('bp')} width={58}  height={58}  alt="" draggable={false} />
-          </div>
-          <div className="lp3-piece lp3-p2">
-            <img src={P('br')} width={72}  height={72}  alt="" draggable={false} />
-          </div>
-          <div className="lp3-piece lp3-p3">
-            <img src={P('bq')} width={100} height={100} alt="" draggable={false} />
-          </div>
-          <div className="lp3-piece lp3-p4">
-            <img src={P('wr')} width={72}  height={72}  alt="" draggable={false} />
-          </div>
-          <div className="lp3-piece lp3-p5">
-            <img src={P('wp')} width={58}  height={58}  alt="" draggable={false} />
-          </div>
+          <div className="lp3-piece lp3-p1"><img src={P('bp')} width={58}  height={58}  alt="" draggable={false} /></div>
+          <div className="lp3-piece lp3-p2"><img src={P('br')} width={72}  height={72}  alt="" draggable={false} /></div>
+          <div className="lp3-piece lp3-p3"><img src={P('bq')} width={100} height={100} alt="" draggable={false} /></div>
+          <div className="lp3-piece lp3-p4"><img src={P('wr')} width={72}  height={72}  alt="" draggable={false} /></div>
+          <div className="lp3-piece lp3-p5"><img src={P('wp')} width={58}  height={58}  alt="" draggable={false} /></div>
         </div>
 
         <h1 className="lp3-title lp3-r2">Raichu</h1>
@@ -54,7 +57,7 @@ export default function Home() {
         </p>
 
         <div className="lp3-ctas lp3-r4">
-          <Link href="/play"  className="lp3-btn-gold">▶ Play vs AI</Link>
+          <Link href="/play"  className="lp3-btn-primary">▶ Play vs AI</Link>
           <Link href="/lobby" className="lp3-btn-ghost">Play Online</Link>
         </div>
 
@@ -96,8 +99,8 @@ export default function Home() {
             White moves first. No draws — every game has a winner.
           </p>
           <div className="lp3-finale-btns">
-            <Link href="/play"  className="lp3-btn-gold">Start Playing</Link>
-            <Link href="/rules" className="lp3-btn-ghost">Read the Rules</Link>
+            <Link href="/play"  className="lp3-btn-primary">Start Playing</Link>
+            <Link href="/lobby" className="lp3-btn-ghost">Play Online</Link>
           </div>
         </div>
       </section>
@@ -107,19 +110,10 @@ export default function Home() {
 }
 
 const PIECES = [
-  {
-    wCode: 'wp', bCode: 'bp',
-    name: 'Pichu', role: 'The Pawn',
-    desc: 'Moves one square diagonally forward. Can only capture other Pichus by jumping.',
-  },
-  {
-    wCode: 'wr', bCode: 'br',
-    name: 'Pikachu', role: 'The Rook',
-    desc: 'Moves 1–2 squares forward or sideways. Captures Pichus and Pikachus, not Raichu.',
-  },
-  {
-    wCode: 'wq', bCode: 'bq',
-    name: 'Raichu', role: 'The Queen',
-    desc: 'Moves any direction, any distance. Captures anything. Earned through promotion.',
-  },
+  { wCode:'wp', bCode:'bp', name:'Pichu',   role:'The Pawn',
+    desc:'Moves one square diagonally forward. Can only capture other Pichus by jumping.' },
+  { wCode:'wr', bCode:'br', name:'Pikachu', role:'The Rook',
+    desc:'Moves 1–2 squares forward or sideways. Captures Pichus and Pikachus, not Raichu.' },
+  { wCode:'wq', bCode:'bq', name:'Raichu',  role:'The Queen',
+    desc:'Moves any direction, any distance. Captures anything. Earned through promotion.' },
 ];

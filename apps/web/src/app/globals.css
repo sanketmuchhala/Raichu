@@ -237,7 +237,7 @@ svg {
   font-weight: 700;
   font-size: 1.25rem;
   font-style: italic;
-  color: var(--gold-light);
+  color: var(--text);
   text-decoration: none;
   letter-spacing: 0.02em;
 }
@@ -268,7 +268,7 @@ svg {
 .lp3-board-bg {
   position: absolute; inset: 0;
   background-image: repeating-conic-gradient(
-    rgba(200,144,56,0.035) 0% 25%,
+    rgba(255,255,255,0.025) 0% 25%,
     transparent 0% 50%
   );
   background-size: 56px 56px;
@@ -317,17 +317,12 @@ svg {
   line-height: 0.9;
   letter-spacing: -0.02em;
   margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, #e8dcc8 0%, var(--gold-light) 45%, #c89038 75%, #e8dcc8 100%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: lp3-shimmer 6s linear 1.5s infinite;
+  color: var(--text);
 }
 .lp3-rule {
   width: 60px;
   height: 2px;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  background: linear-gradient(90deg, transparent, var(--lp3-accent, #C8923A), transparent);
   margin: 1rem auto 1.5rem;
 }
 .lp3-subtitle {
@@ -344,22 +339,22 @@ svg {
   flex-wrap: wrap; justify-content: center;
   margin-bottom: 1.5rem;
 }
-.lp3-btn-gold {
+.lp3-btn-primary {
   display: inline-flex; align-items: center; gap: 0.375rem;
   padding: 0.8125rem 2rem;
   border-radius: 8px;
   font-weight: 700;
   font-size: 0.9375rem;
-  background: linear-gradient(135deg, #d4a040, #b07828);
-  color: #fef8ec;
+  background-color: var(--lp3-accent, #C8923A);
+  color: #fff;
   text-decoration: none;
   letter-spacing: 0.01em;
   transition: transform 0.15s, box-shadow 0.15s;
-  box-shadow: 0 2px 12px rgba(200,144,56,0.25);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
-.lp3-btn-gold:hover {
+.lp3-btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(200,144,56,0.4);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.35);
 }
 .lp3-btn-ghost {
   display: inline-flex; align-items: center;
@@ -374,8 +369,8 @@ svg {
   transition: border-color 0.15s, color 0.15s;
 }
 .lp3-btn-ghost:hover {
-  border-color: var(--gold-dim);
-  color: var(--gold-light);
+  border-color: var(--lp3-accent, #C8923A);
+  color: var(--lp3-accent, #C8923A);
 }
 .lp3-aux {
   display: flex; gap: 2rem; justify-content: center;
@@ -426,7 +421,7 @@ svg {
 .lp3-card {
   background: var(--bg-1);
   border: 1px solid var(--border);
-  border-top: 2px solid var(--gold-dim);
+  border-top: 2px solid var(--lp3-accent-dim, #6a4c1a);
   border-radius: 12px;
   padding: 2rem 1.5rem 1.75rem;
   display: flex; flex-direction: column; align-items: center;
@@ -435,7 +430,7 @@ svg {
   transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 .lp3-card:hover {
-  border-top-color: var(--gold);
+  border-top-color: var(--lp3-accent, #C8923A);
   transform: translateY(-3px);
   box-shadow: 0 12px 40px rgba(0,0,0,0.4);
 }
@@ -455,7 +450,7 @@ svg {
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--lp3-accent, #C8923A);
 }
 .lp3-card-desc {
   font-size: 0.875rem;
@@ -484,7 +479,7 @@ svg {
   position: absolute;
   top: 0; left: 50%; transform: translateX(-50%);
   width: 200px; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+  background: linear-gradient(90deg, transparent, var(--lp3-accent, #C8923A), transparent);
 }
 .lp3-finale-heading {
   font-family: var(--font-display, Georgia, serif);
