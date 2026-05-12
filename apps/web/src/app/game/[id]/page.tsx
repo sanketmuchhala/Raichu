@@ -267,6 +267,114 @@ export default function OnlineGamePage() {
                     </button>
                   </div>
                 )}
+
+                {/* Mobile replay panel — finished games only */}
+                {isFinished && (
+                  <div className="lg:hidden mt-3 space-y-3">
+                    {/* Result + ELO */}
+                    {(() => {
+                      const isWinner = game.winner_id === user?.id;
+                      const isAbandoned = game.status === 'abandoned';
+                      const resultText = isAbandoned ? 'Game Abandoned' : isWinner ? 'You Won' : 'You Lost';
+                      const resultColor = isAbandoned ? theme.textSecondary : isWinner ? '#22c55e' : '#ef4444';
+                      const myIsWhite = myColor === 'white';
+                      const myIsWinner = (game.status === 'white_wins' && myIsWhite) || (game.status === 'black_wins' && !myIsWhite);
+                      const eloVal = myIsWinner ? game.winner_elo_delta : game.loser_elo_delta;
+                      return (
+                        <div
+                          className="flex items-center justify-between px-4 py-3 rounded-xl"
+                          style={{ backgroundColor: theme.bgPanel, border: `1px solid ${theme.border}` }}
+                        >
+                          <span className="text-base font-bold" style={{ color: resultColor }}>{resultText}</span>
+                          {eloVal != null && game.game_type === 'ranked' && (
+                            <span className="text-sm font-bold font-mono" style={{ color: (eloVal ?? 0) >= 0 ? '#22c55e' : '#ef4444' }}>
+                              {(eloVal ?? 0) >= 0 ? '+' : ''}{eloVal} ELO
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })()}
+
+                    {/* Replay controls */}
+                    {moves.length > 0 && (
+                      <div
+                        className="rounded-xl overflow-hidden"
+                        style={{ backgroundColor: theme.bgPanel, border: `1px solid ${theme.border}` }}
+                      >
+                        {/* Step nav bar */}
+                        <div
+                          className="flex items-center justify-between px-4 py-3"
+                          style={{ borderBottom: `1px solid ${theme.border}` }}
+                        >
+                          <span className="text-xs font-medium" style={{ color: replayStep !== null ? theme.accent : theme.textSecondary }}>
+                            {replayStep !== null ? `Move ${replayStep} of ${moves.length}` : 'Replay'}
+                          </span>
+                          <div className="flex items-center gap-1">
+                            {[
+                              { label: '⏮', action: () => setReplayStep(0), disabled: replayStep === 0 },
+                              { label: '◀', action: () => setReplayStep(Math.max(0, (replayStep ?? moves.length) - 1)), disabled: replayStep === 0 },
+                              { label: '▶', action: () => setReplayStep(Math.min(moves.length, (replayStep ?? 0) + 1)), disabled: replayStep === moves.length },
+                              { label: '⏭', action: () => setReplayStep(moves.length), disabled: replayStep === moves.length },
+                            ].map(({ label, action, disabled }) => (
+                              <button
+                                key={label}
+                                onClick={action}
+                                disabled={disabled}
+                                className="w-9 h-9 rounded-lg flex items-center justify-center text-sm"
+                                style={{
+                                  backgroundColor: theme.bgSecondary,
+                                  color: disabled ? theme.textSecondary + '50' : theme.textPrimary,
+                                  border: `1px solid ${theme.border}`,
+                                  cursor: disabled ? 'not-allowed' : 'pointer',
+                                }}
+                              >
+                                {label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Move list — compact scrollable grid */}
+                        <div className="px-3 py-2 max-h-48 overflow-y-auto">
+                          <div className="grid gap-px" style={{ gridTemplateColumns: 'auto 1fr 1fr' }}>
+                            {Array.from({ length: Math.ceil(moves.length / 2) }, (_, i) => {
+                              const wMove = moves[i * 2];
+                              const bMove = moves[i * 2 + 1];
+                              const wActive = replayStep === i * 2 + 1;
+                              const bActive = bMove && replayStep === i * 2 + 2;
+                              const COL = 'abcdefgh';
+                              const fmt = (m: typeof wMove) => `${COL[m.from_col]}${8 - m.from_row}${m.captured_piece ? 'x' : '-'}${COL[m.to_col]}${8 - m.to_row}`;
+                              return [
+                                <span key={`n-${i}`} className="text-[10px] py-0.5 pr-1 text-right" style={{ color: theme.textSecondary }}>{i + 1}.</span>,
+                                <button key={`w-${i}`} onClick={() => setReplayStep(i * 2 + 1)}
+                                  className="text-[11px] font-mono py-0.5 px-1 rounded text-left"
+                                  style={{ backgroundColor: wActive ? theme.accent + '22' : 'transparent', color: wActive ? theme.accent : theme.textPrimary, border: 'none', cursor: 'pointer', fontWeight: wActive ? 700 : 400 }}>
+                                  {fmt(wMove)}
+                                </button>,
+                                bMove
+                                  ? <button key={`b-${i}`} onClick={() => setReplayStep(i * 2 + 2)}
+                                      className="text-[11px] font-mono py-0.5 px-1 rounded text-left"
+                                      style={{ backgroundColor: bActive ? theme.accent + '22' : 'transparent', color: bActive ? theme.accent : theme.textPrimary, border: 'none', cursor: 'pointer', fontWeight: bActive ? 700 : 400 }}>
+                                      {fmt(bMove)}
+                                    </button>
+                                  : <span key={`b-${i}`} />,
+                              ];
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Back to lobby */}
+                    <Link
+                      href="/lobby"
+                      className="block w-full py-3 rounded-xl text-sm font-semibold text-center transition-opacity hover:opacity-80"
+                      style={{ backgroundColor: theme.bgPanel, color: theme.textSecondary, border: `1px solid ${theme.border}` }}
+                    >
+                      Back to Lobby
+                    </Link>
+                  </div>
+                )}
               </div>
 
               {/* Sidebar — desktop only */}
