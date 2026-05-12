@@ -112,10 +112,9 @@ export default function HistoryPage() {
                   : '';
 
                 return (
-                  <Link
+                  <div
                     key={game.id}
-                    href={`/game/${game.id}`}
-                    className="flex items-center justify-between p-4 rounded-lg transition-all hover:brightness-110"
+                    className="flex items-center justify-between p-4 rounded-lg"
                     style={{
                       backgroundColor: theme.bgPanel,
                       borderLeft: `3px solid ${borderColor}`,
@@ -124,7 +123,7 @@ export default function HistoryPage() {
                       borderBottom: `1px solid ${theme.border}`,
                     }}
                   >
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium" style={{ color: theme.textPrimary }}>
                           {game.game_type === 'ranked' ? 'Ranked' : 'Friendly'} — {isWhite ? 'White' : 'Black'}
@@ -148,11 +147,21 @@ export default function HistoryPage() {
                           {(eloValue ?? 0) >= 0 ? '+' : ''}{eloValue}
                         </span>
                       )}
-                      <span className="text-xs font-medium" style={{ color: resultColor }}>
+                      <span className="text-xs font-medium mr-2" style={{ color: resultColor }}>
                         {resultLabel}
                       </span>
+                      <Link
+                        href={`/game/${game.id}`}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-80"
+                        style={{ backgroundColor: theme.accent, color: '#fff' }}
+                      >
+                        <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                          <path d="M2.5 2L8.5 5.5L2.5 9V2Z" fill="currentColor"/>
+                        </svg>
+                        Replay
+                      </Link>
                     </div>
-                  </Link>
+                  </div>
                 );
               })}
             </div>

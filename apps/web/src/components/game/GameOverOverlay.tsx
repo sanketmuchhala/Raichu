@@ -10,9 +10,10 @@ interface GameOverOverlayProps {
   status: string;
   winnerId: string | null;
   myId: string;
+  onReplay?: () => void;
 }
 
-export function GameOverOverlay({ status, winnerId, myId }: GameOverOverlayProps) {
+export function GameOverOverlay({ status, winnerId, myId, onReplay }: GameOverOverlayProps) {
   const theme = useUIStore((s) => THEMES[s.theme]);
   const router = useRouter();
   const joinQueue = useMatchmakingStore((s) => s.joinQueue);
@@ -53,6 +54,19 @@ export function GameOverOverlay({ status, winnerId, myId }: GameOverOverlayProps
           {status === 'white_wins' ? 'White wins' : status === 'black_wins' ? 'Black wins' : 'Game over'}
         </p>
         <div className="flex flex-col gap-2 pt-2">
+          {onReplay && (
+            <button
+              onClick={onReplay}
+              className="px-5 py-2.5 rounded-lg text-sm font-semibold transition-opacity hover:opacity-90 flex items-center justify-center gap-2"
+              style={{ backgroundColor: theme.bgSecondary, color: theme.textPrimary, border: `1px solid ${theme.border}` }}
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M7 1.5C4 1.5 1.5 4 1.5 7S4 12.5 7 12.5 12.5 10 12.5 7 10 1.5 7 1.5Z" stroke="currentColor" strokeWidth="1.2"/>
+                <path d="M5.5 5L9.5 7L5.5 9V5Z" fill="currentColor"/>
+              </svg>
+              Watch Replay
+            </button>
+          )}
           <button
             onClick={handlePlayAgain}
             className="px-5 py-2.5 rounded-lg text-sm font-medium text-white transition-opacity hover:opacity-90"

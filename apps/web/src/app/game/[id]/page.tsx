@@ -48,13 +48,24 @@ export default function OnlineGamePage() {
   const [boardHeight, setBoardHeight] = useState(0);
   // null = live; number = replay at that step
   const [replayStep, setReplayStep] = useState<number | null>(null);
+  const autoReplayed = useRef(false);
 
   useGameSubscription(gameId);
 
   useEffect(() => {
     loadGame(gameId);
-    return () => reset();
+    return () => { reset(); autoReplayed.current = false; };
   }, [gameId, loadGame, reset]);
+
+  // Auto-enter replay at step 0 when a finished game and its moves are loaded
+  useEffect(() => {
+    if (autoReplayed.current) return;
+    const isFinishedGame = game && game.status !== 'waiting' && game.status !== 'playing';
+    if (isFinishedGame && moves.length > 0) {
+      autoReplayed.current = true;
+      setReplayStep(0);
+    }
+  }, [game?.status, moves.length]);
 
   useEffect(() => {
     if (!game || !user) return;
@@ -228,6 +239,7 @@ export default function OnlineGamePage() {
                       status={game.status}
                       winnerId={game.winner_id}
                       myId={user?.id || ''}
+                      onReplay={() => setReplayStep(0)}
                     />
                   )}
                 </div>
