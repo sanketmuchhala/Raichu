@@ -38,17 +38,18 @@ export default function PlayPage() {
         <div className="hidden lg:flex items-center gap-3 mb-4">
           <Link
             href="/"
-            className="text-xl font-bold tracking-tight"
-            style={{ color: theme.textPrimary, textDecoration: 'none' }}
+            style={{
+              fontFamily: 'var(--font-display, Georgia, serif)',
+              fontStyle: 'italic',
+              fontSize: '1.375rem',
+              fontWeight: 700,
+              color: theme.textPrimary,
+              textDecoration: 'none',
+              letterSpacing: '-0.01em',
+            }}
           >
             Raichu
           </Link>
-          <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{
-            backgroundColor: theme.accent + '20',
-            color: theme.accent,
-          }}>
-            Strategy Board Game
-          </span>
           <Link
             href="/rules"
             className="text-xs ml-auto hover:underline"

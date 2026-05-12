@@ -28,7 +28,7 @@ export default function RulesPage() {
           </Link>
           <h1
             className="text-3xl lg:text-4xl font-bold"
-            style={{ color: theme.textPrimary, fontFamily: 'var(--font-playfair, Georgia, serif)' }}
+            style={{ color: theme.textPrimary, fontFamily: 'var(--font-display, Georgia, serif)' }}
           >
             How to Play Raichu
           </h1>
@@ -90,7 +90,7 @@ export default function RulesPage() {
         <div className="mb-12">
           <h2
             className="text-2xl font-bold mb-8"
-            style={{ color: theme.textPrimary, fontFamily: 'var(--font-playfair, Georgia, serif)' }}
+            style={{ color: theme.textPrimary, fontFamily: 'var(--font-display, Georgia, serif)' }}
           >
             The Pieces
           </h2>
@@ -375,7 +375,7 @@ function Section({
         className="text-xl lg:text-2xl font-bold mb-4 pb-2"
         style={{
           color: theme.textPrimary,
-          fontFamily: 'var(--font-playfair, Georgia, serif)',
+          fontFamily: 'var(--font-display, Georgia, serif)',
           borderBottom: `2px solid ${theme.border}`,
         }}
       >
@@ -415,7 +415,7 @@ function PieceSection({
         <div>
           <h3
             className="text-lg font-bold"
-            style={{ color: theme.textPrimary, fontFamily: 'var(--font-playfair, Georgia, serif)' }}
+            style={{ color: theme.textPrimary, fontFamily: 'var(--font-display, Georgia, serif)' }}
           >
             {name}
           </h3>
