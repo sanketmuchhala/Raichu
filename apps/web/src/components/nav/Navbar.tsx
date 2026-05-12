@@ -6,15 +6,19 @@ import { usePathname } from 'next/navigation';
 import { useUIStore } from '../../store/ui-store';
 import { THEMES } from '../../lib/themes';
 import { UserMenu } from '../auth/UserMenu';
+import { useAuthStore } from '../../store/auth-store';
 
-const NAV_LINKS = [
+const BASE_LINKS = [
   { href: '/play',        label: 'Play'        },
   { href: '/lobby',       label: 'Online'      },
   { href: '/rules',       label: 'Rules'       },
   { href: '/how-to-play', label: 'How to Play' },
-  { href: '/strategy',    label: 'Strategy'    },
   { href: '/leaderboard', label: 'Leaderboard' },
   { href: '/blog',        label: 'Blog'        },
+];
+
+const AUTH_LINKS = [
+  { href: '/history', label: 'History' },
 ];
 
 interface NavbarProps {
@@ -26,7 +30,10 @@ interface NavbarProps {
 export function Navbar({ backHref, backLabel }: NavbarProps) {
   const theme    = useUIStore((s) => THEMES[s.theme]);
   const pathname = usePathname();
+  const user     = useAuthStore((s) => s.user);
   const [open, setOpen] = useState(false);
+
+  const NAV_LINKS = user ? [...BASE_LINKS, ...AUTH_LINKS] : BASE_LINKS;
 
   // Close mobile menu when navigating
   useEffect(() => { setOpen(false); }, [pathname]);
