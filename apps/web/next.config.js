@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['@raichu/shared-types', '@raichu/game-engine'],
+  transpilePackages: ['@raichu/shared-types', '@raichu/game-engine', '@raichu/ai-engine'],
   async rewrites() {
     return [
       {

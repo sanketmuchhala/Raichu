@@ -8,8 +8,8 @@ import {
   generateMovesForPiece,
   applyMove,
   getGameStatus,
-  encodeBoard,
 } from '@raichu/game-engine';
+import { findBestMove } from '@raichu/ai-engine';
 
 interface GameStore {
   // Game state
@@ -130,45 +130,30 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   requestBotMove: async () => {
-    const { board, currentPlayer, difficulty, status } = get();
+    const { status } = get();
     if (status !== 'playing') return;
 
     set({ isThinking: true });
 
+    // Yield to React so the "Thinking…" state renders before the synchronous
+    // AI search blocks the main thread.
+    await new Promise<void>(resolve => setTimeout(resolve, 50));
+
     try {
-      const boardStr = encodeBoard(board);
-      const playerChar = currentPlayer === 'white' ? 'w' : 'b';
+      const { board, currentPlayer, difficulty, status: currentStatus } = get();
+      if (currentStatus !== 'playing') return;
 
-      const response = await fetch('/api/v1/bot/move', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          board: boardStr,
-          player: playerChar,
-          difficulty,
-        }),
-      });
+      const result = findBestMove(board, currentPlayer, difficulty);
 
-      if (!response.ok) {
-        // Fallback: use local engine if API fails
-        const moves = generateAllMoves(board, currentPlayer);
-        if (moves.length > 0) {
-          const randomMove = moves[Math.floor(Math.random() * moves.length)];
-          get().makeMove(randomMove);
-        }
-        return;
-      }
-
-      const data = await response.json();
-      if (data.move) {
-        get().makeMove(data.move);
+      if (result.move) {
+        get().makeMove(result.move);
       }
     } catch {
-      // Fallback: use local engine for bot move
+      // Last-resort: pick any legal move so the game never deadlocks
+      const { board, currentPlayer } = get();
       const moves = generateAllMoves(board, currentPlayer);
       if (moves.length > 0) {
-        const randomMove = moves[Math.floor(Math.random() * moves.length)];
-        get().makeMove(randomMove);
+        get().makeMove(moves[0]);
       }
     } finally {
       set({ isThinking: false });

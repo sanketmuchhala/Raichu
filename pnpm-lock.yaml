@@ -76,6 +76,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@raichu/ai-engine':
+        specifier: workspace:*
+        version: link:../../packages/ai-engine
       '@raichu/game-engine':
         specifier: workspace:*
         version: link:../../packages/game-engine
