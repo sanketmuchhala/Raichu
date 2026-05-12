@@ -8,7 +8,7 @@ import { THEMES } from '../../../lib/themes';
 import { useAuthStore } from '../../../store/auth-store';
 import { useOnlineGameStore } from '../../../store/online-game-store';
 import { useGameSubscription } from '../../../lib/supabase/use-game-subscription';
-import { NavHeader } from '../../../components/nav/NavHeader';
+import { Navbar } from '../../../components/nav/Navbar';
 import { BoardProvider } from '../../../components/board/BoardContext';
 import { OnlineBoard } from '../../../components/board/OnlineBoard';
 import { OnlineGameSidebar } from '../../../components/game/OnlineGameSidebar';
@@ -96,7 +96,7 @@ export default function OnlineGamePage() {
   if (loading) {
     return (
       <div className="min-h-screen" style={{ backgroundColor: theme.bgPrimary }}>
-        <NavHeader backHref="/lobby" backLabel="Lobby" />
+        <Navbar backHref="/lobby" backLabel="Lobby" />
         <main className="flex items-center justify-center" style={{ minHeight: 'calc(100vh - 57px)' }}>
           <p style={{ color: theme.textSecondary }}>Loading game...</p>
         </main>
@@ -107,7 +107,7 @@ export default function OnlineGamePage() {
   if (error) {
     return (
       <div className="min-h-screen" style={{ backgroundColor: theme.bgPrimary }}>
-        <NavHeader backHref="/lobby" backLabel="Lobby" />
+        <Navbar backHref="/lobby" backLabel="Lobby" />
         <main className="flex flex-col items-center justify-center gap-4" style={{ minHeight: 'calc(100vh - 57px)' }}>
           <p style={{ color: '#ef4444' }}>{error}</p>
           <Link href="/lobby" className="text-sm hover:underline" style={{ color: theme.accent }}>
@@ -131,7 +131,7 @@ export default function OnlineGamePage() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: theme.bgPrimary }}>
-      <NavHeader backHref="/lobby" backLabel="Lobby" />
+      <Navbar backHref="/lobby" backLabel="Lobby" />
       <main className="px-2 py-4 lg:p-8">
         {isWaiting ? (
           <div className="max-w-lg mx-auto">

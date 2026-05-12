@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useUIStore } from '../../store/ui-store';
 import { THEMES } from '../../lib/themes';
 import { useAuthStore } from '../../store/auth-store';
-import { NavHeader } from '../../components/nav/NavHeader';
+import { Navbar } from '../../components/nav/Navbar';
 import { CreateGamePanel } from '../../components/lobby/CreateGamePanel';
 import { JoinGamePanel } from '../../components/lobby/JoinGamePanel';
 import { MatchmakingPanel } from '../../components/lobby/MatchmakingPanel';
@@ -38,7 +38,7 @@ export default function LobbyPage() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: theme.bgPrimary }}>
-      <NavHeader title="Play Online" backHref="/" backLabel="Home" />
+      <Navbar />
       <main className="px-4 py-6">
         <div className="max-w-5xl mx-auto">
           {/* Welcome banner */}

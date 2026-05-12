@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { pageMetadata, SITE_URL } from '../../lib/seo';
 import { SchemaScript } from '../../components/seo/SchemaScript';
-import { SeoNav, SeoFooter } from '../../components/seo/SeoFooter';
+import { SeoFooter } from '../../components/seo/SeoFooter';
+import { Navbar } from '../../components/nav/Navbar';
 
 export const metadata: Metadata = pageMetadata({
   title:       'Raichu Game Blog | Strategy Guides and Abstract Board Game Articles',
@@ -56,7 +57,7 @@ export default function BlogPage() {
   return (
     <main style={{ backgroundColor: 'var(--c-bg)', color: 'var(--c-text)', minHeight: '100vh' }}>
       <SchemaScript schema={schema} />
-      <SeoNav />
+      <Navbar />
 
       <nav aria-label="breadcrumb" style={{ maxWidth: 860, margin: '1rem auto 0', padding: '0 1.5rem', fontSize: '0.8125rem', color: 'var(--c-muted)' }}>
         <Link href="/" style={{ color: 'var(--c-muted)', textDecoration: 'none' }}>Home</Link>

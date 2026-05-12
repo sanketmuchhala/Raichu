@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 import type { PieceChar } from '@raichu/shared-types';
 import { useUIStore } from '../../store/ui-store';
 import { THEMES, type Theme } from '../../lib/themes';
+import { Navbar } from '../../components/nav/Navbar';
 import { MiniBoard } from '../../components/rules/MiniBoard';
 import { AnimatedMiniBoard } from '../../components/rules/AnimatedMiniBoard';
 import { PieceSVG } from '../../components/pieces/PieceSVG';
@@ -13,20 +14,15 @@ export default function RulesPage() {
   const theme = useUIStore((s) => THEMES[s.theme]);
 
   return (
-    <main
-      className="min-h-screen px-4 py-8 lg:py-16"
-      style={{ backgroundColor: theme.bgPrimary }}
-    >
+    <>
+      <Navbar />
+      <main
+        className="min-h-screen px-4 py-8 lg:py-12"
+        style={{ backgroundColor: theme.bgPrimary }}
+      >
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="mb-12">
-          <Link
-            href="/"
-            className="text-sm mb-5 inline-block hover:opacity-75 transition-opacity"
-            style={{ color: theme.accent }}
-          >
-            ← Back to Home
-          </Link>
           <h1
             className="text-3xl lg:text-4xl font-bold"
             style={{ color: theme.textPrimary, fontFamily: 'var(--font-sans, system-ui)' }}
@@ -349,6 +345,7 @@ export default function RulesPage() {
         </a>
       </footer>
     </main>
+    </>
   );
 }
 

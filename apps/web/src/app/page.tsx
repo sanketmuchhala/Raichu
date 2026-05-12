@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useUIStore } from '../store/ui-store';
 import { THEMES } from '../lib/themes';
-import { UserMenu } from '../components/auth/UserMenu';
+import { Navbar } from '../components/nav/Navbar';
 
 const CDN = 'https://images.chesscomfiles.com/chess-themes/pieces/neo/150';
 const P   = (c: string) => `${CDN}/${c}.png`;
@@ -31,26 +31,7 @@ export default function Home() {
       style={{ backgroundColor: theme.bgPrimary, color: theme.textPrimary }}
     >
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(GAME_SCHEMA) }} />
-      {/* ── Nav ──────────────────────────────────────── */}
-      <header
-        className="lp-nav"
-        style={{ borderBottom: `1px solid ${theme.border}` }}
-      >
-        <Link
-          href="/"
-          className="lp-nav-logo"
-          style={{ color: theme.textPrimary }}
-        >
-          Raichu
-        </Link>
-
-        <nav className="lp-nav-links">
-          <Link href="/rules"       className="lp-nav-link" style={{ color: theme.textSecondary }}>Rules</Link>
-          <Link href="/leaderboard" className="lp-nav-link" style={{ color: theme.textSecondary }}>Leaderboard</Link>
-          <Link href="/puzzles"     className="lp-nav-link" style={{ color: theme.textSecondary }}>Puzzles</Link>
-          <UserMenu />
-        </nav>
-      </header>
+      <Navbar />
 
       {/* ── Hero ─────────────────────────────────────── */}
       <section className="lp-hero">

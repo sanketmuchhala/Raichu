@@ -6,7 +6,7 @@ import { useUIStore } from '../../store/ui-store';
 import { THEMES } from '../../lib/themes';
 import { useAuthStore } from '../../store/auth-store';
 import { getSupabaseBrowserClient } from '../../lib/supabase/client';
-import { NavHeader } from '../../components/nav/NavHeader';
+import { Navbar } from '../../components/nav/Navbar';
 import { LeaderboardTable } from '../../components/leaderboard/LeaderboardTable';
 
 export default function LeaderboardPage() {
@@ -40,7 +40,7 @@ export default function LeaderboardPage() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: theme.bgPrimary }}>
-      <NavHeader title="Leaderboard" backHref="/" backLabel="Home" />
+      <Navbar />
       <main className="px-4 py-8">
         <div className="max-w-2xl mx-auto">
           {loading ? (

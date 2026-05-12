@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { pageMetadata, SITE_URL } from '../../lib/seo';
 import { SchemaScript } from '../../components/seo/SchemaScript';
-import { SeoNav, SeoFooter } from '../../components/seo/SeoFooter';
+import { SeoFooter } from '../../components/seo/SeoFooter';
+import { Navbar } from '../../components/nav/Navbar';
 
 export const metadata: Metadata = pageMetadata({
   title:       'How to Play Raichu | Beginner Guide and Strategy Basics',
@@ -60,7 +61,7 @@ export default function HowToPlayPage() {
       <SchemaScript schema={howToSchema} />
       <SchemaScript schema={faqSchema} />
 
-      <SeoNav />
+      <Navbar />
 
       {/* Breadcrumb */}
       <nav aria-label="breadcrumb" style={{ maxWidth: 860, margin: '1rem auto 0', padding: '0 1.5rem', fontSize: '0.8125rem', color: 'var(--c-muted)' }}>

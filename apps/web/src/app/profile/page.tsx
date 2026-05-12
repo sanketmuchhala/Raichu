@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useUIStore } from '../../store/ui-store';
 import { THEMES } from '../../lib/themes';
 import { useAuthStore } from '../../store/auth-store';
-import { NavHeader } from '../../components/nav/NavHeader';
+import { Navbar } from '../../components/nav/Navbar';
 
 type Rank = { label: string; color: string; bg: string; min: number };
 
@@ -90,7 +90,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: theme.bgPrimary }}>
-      <NavHeader title="Profile" backHref="/" backLabel="Home" />
+      <Navbar />
 
       <main className="px-4 py-8 max-w-md mx-auto">
 
