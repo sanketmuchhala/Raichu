@@ -1,4 +1,4 @@
-import type { Board, GameStatus, Move, PieceChar, Player, Position } from '@raichu/shared-types';
+import type { Board, GameStatus, Move, PieceChar, Player } from '@raichu/shared-types';
 import { BOARD_SIZE } from '@raichu/shared-types';
 import { cloneBoard } from './board';
 import { isWhitePiece, isBlackPiece, raichuChar, getOwner } from './pieces';
@@ -50,11 +50,15 @@ export function countPieces(board: Board): { white: number; black: number } {
   return { white, black };
 }
 
-/** Get the game status — playing, white wins, or black wins */
-export function getGameStatus(board: Board): GameStatus {
+/** Get the game status — playing, white wins, or black wins.
+ *  Pass nextPlayer to also detect "no legal moves" losses. */
+export function getGameStatus(board: Board, nextPlayer?: Player): GameStatus {
   const { white, black } = countPieces(board);
   if (black === 0) return 'white_wins';
   if (white === 0) return 'black_wins';
+  if (nextPlayer !== undefined && generateAllMoves(board, nextPlayer).length === 0) {
+    return nextPlayer === 'white' ? 'black_wins' : 'white_wins';
+  }
   return 'playing';
 }
 

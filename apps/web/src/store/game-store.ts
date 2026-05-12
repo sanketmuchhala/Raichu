@@ -79,8 +79,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const { board, currentPlayer, moveHistory, gameMode, playerColor } = get();
 
     const newBoard = applyMove(board, move);
-    const newStatus = getGameStatus(newBoard);
     const nextPlayer: Player = currentPlayer === 'white' ? 'black' : 'white';
+    const newStatus = getGameStatus(newBoard, nextPlayer);
 
     set({
       board: newBoard,
