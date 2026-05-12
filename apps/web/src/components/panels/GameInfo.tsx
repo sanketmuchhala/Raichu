@@ -3,6 +3,7 @@
 import { useGameStore } from '../../store/game-store';
 import { useUIStore } from '../../store/ui-store';
 import { THEMES } from '../../lib/themes';
+import { BOT_NAME, DIFFICULTY_LABEL } from '../../lib/constants';
 
 export function GameInfo() {
   const currentPlayer = useGameStore((s) => s.currentPlayer);
@@ -70,7 +71,7 @@ export function GameInfo() {
         {/* Inline meta on mobile — pushed right */}
         <div className="lg:hidden flex items-center gap-3 ml-auto text-xs" style={{ color: theme.textSecondary }}>
           <span className="font-semibold" style={{ color: theme.textPrimary }}>
-            {gameMode === 'pvp' ? 'PvP' : `Bot`}
+            {gameMode === 'pvp' ? 'PvP' : BOT_NAME}
           </span>
           <span style={{ color: theme.textSecondary }}>
             Move <span className="font-semibold" style={{ color: theme.textPrimary }}>{Math.floor(moveCount / 2) + 1}</span>
@@ -83,7 +84,7 @@ export function GameInfo() {
         <div className="flex items-center gap-1.5">
           <span>Mode</span>
           <span className="font-semibold" style={{ color: theme.textPrimary }}>
-            {gameMode === 'pvp' ? 'PvP' : `Bot (${difficulty})`}
+            {gameMode === 'pvp' ? 'PvP' : `${BOT_NAME} · ${DIFFICULTY_LABEL[difficulty]}`}
           </span>
         </div>
         <div className="flex items-center gap-1.5">

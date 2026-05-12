@@ -4,6 +4,63 @@ import { pageMetadata, SITE_URL } from '../../../lib/seo';
 import { SchemaScript } from '../../../components/seo/SchemaScript';
 import { SeoFooter } from '../../../components/seo/SeoFooter';
 import { Navbar } from '../../../components/nav/Navbar';
+import { BlogBoardDemo } from '../../../components/blog/BlogBoardDemo';
+
+// ─── Demo board data ──────────────────────────────────────────────────────
+
+// Pichu advancing diagonally then promoting at row 7
+const PICHU_BOARD =
+  '........' +
+  '........' +
+  '...w....' +
+  '........' +
+  '........' +
+  '........' +
+  '........' +
+  '........';
+
+const PICHU_SEQ = [
+  { from: [2, 3] as [number,number], to: [3, 4] as [number,number] },
+  { from: [3, 4] as [number,number], to: [4, 3] as [number,number] },
+  { from: [4, 3] as [number,number], to: [5, 4] as [number,number] },
+  { from: [5, 4] as [number,number], to: [6, 3] as [number,number] },
+  { from: [6, 3] as [number,number], to: [7, 4] as [number,number], promotion: '@' },
+];
+
+// Pikachu moving forward and sideways
+const PIKA_BOARD =
+  '........' +
+  '........' +
+  '........' +
+  '........' +
+  '...W....' +
+  '........' +
+  '........' +
+  '........';
+
+const PIKA_SEQ = [
+  { from: [4, 3] as [number,number], to: [3, 3] as [number,number] },
+  { from: [3, 3] as [number,number], to: [3, 5] as [number,number] },
+  { from: [3, 5] as [number,number], to: [2, 5] as [number,number] },
+  { from: [2, 5] as [number,number], to: [2, 3] as [number,number] },
+  { from: [2, 3] as [number,number], to: [4, 3] as [number,number] },
+];
+
+// Raichu jumping over a black Pichu to capture it
+const RAICHU_BOARD =
+  '........' +
+  '........' +
+  '........' +
+  '....b...' +
+  '........' +
+  '......@.' +
+  '........' +
+  '........';
+
+const RAICHU_SEQ = [
+  { from: [5, 6] as [number,number], to: [2, 3] as [number,number], capture: [3, 4] as [number,number] },
+  { from: [2, 3] as [number,number], to: [5, 6] as [number,number] },
+];
 
 export const metadata: Metadata = pageMetadata({
   title:       'Raichu Piece Guide: How Pichu, Pikachu, and Raichu Work',
@@ -67,6 +124,16 @@ export default function Article() {
             <p style={{ color: 'var(--c-muted)', fontSize: '0.8125rem', fontWeight: 600, marginBottom: 4 }}>PROMOTION</p>
             <p style={{ color: 'var(--c-text)', lineHeight: 1.6, margin: 0 }}>Reaches the far edge of the board and promotes to Raichu.</p>
           </div>
+          <div style={{ margin: '1.25rem 0', display: 'flex', justifyContent: 'center' }}>
+            <BlogBoardDemo
+              initialBoard={PICHU_BOARD}
+              sequence={PICHU_SEQ}
+              caption="Pichu advances diagonally and promotes to Raichu on the far rank"
+              squareSize={48}
+              intervalMs={1200}
+            />
+          </div>
+
           <p style={{ color: 'var(--c-muted)', lineHeight: 1.7, marginBottom: '1rem' }}>
             Pichu is the most limited piece but creates the most tension. A Pichu that reaches the far rank promotes to Raichu, the most powerful piece on the board. This promotion threat forces your opponent to respond. A passed Pichu with a clear path to promotion is a serious threat.
           </p>
@@ -91,6 +158,16 @@ export default function Article() {
             <p style={{ color: 'var(--c-muted)', fontSize: '0.8125rem', fontWeight: 600, marginBottom: 4 }}>PROMOTION</p>
             <p style={{ color: 'var(--c-text)', lineHeight: 1.6, margin: 0 }}>Reaches the far edge and promotes to Raichu.</p>
           </div>
+          <div style={{ margin: '1.25rem 0', display: 'flex', justifyContent: 'center' }}>
+            <BlogBoardDemo
+              initialBoard={PIKA_BOARD}
+              sequence={PIKA_SEQ}
+              caption="Pikachu moves forward and sideways but never diagonally or backward"
+              squareSize={48}
+              intervalMs={1100}
+            />
+          </div>
+
           <p style={{ color: 'var(--c-muted)', lineHeight: 1.7, marginBottom: '1rem' }}>
             Pikachu is the workhorse piece. It can take most things, move in three directions, and promote if it gets through. The restriction to no diagonals and no backward movement means positioning matters: a Pikachu on the wrong side of the board has limited options.
           </p>
@@ -115,6 +192,16 @@ export default function Article() {
             <p style={{ color: 'var(--c-muted)', fontSize: '0.8125rem', fontWeight: 600, marginBottom: 4 }}>CAPTURE METHOD</p>
             <p style={{ color: 'var(--c-text)', lineHeight: 1.6, margin: 0 }}>Jumps to capture. Does not slide through pieces like a chess queen.</p>
           </div>
+          <div style={{ margin: '1.25rem 0', display: 'flex', justifyContent: 'center' }}>
+            <BlogBoardDemo
+              initialBoard={RAICHU_BOARD}
+              sequence={RAICHU_SEQ}
+              caption="Raichu jumps over an enemy piece to capture it, landing on the square beyond"
+              squareSize={48}
+              intervalMs={1800}
+            />
+          </div>
+
           <p style={{ color: 'var(--c-muted)', lineHeight: 1.7, marginBottom: '1rem' }}>
             Raichu is the most powerful piece and the only piece that can capture another Raichu. The jump-capture rule is the key difference from a chess queen: a Raichu cannot simply slide into a piece and take it. It must jump to the target square, which must be reachable without obstruction between the Raichu and the target.
           </p>

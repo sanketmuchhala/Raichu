@@ -1,5 +1,26 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { BlogBoardDemo } from '../../../components/blog/BlogBoardDemo';
+
+// Opening demo: white and black each advance pieces toward center
+const OPENING_BOARD =
+  '........' +
+  '.W.W.W.W' +
+  'w.w.w.w.' +
+  '........' +
+  '........' +
+  '.b.b.b.b' +
+  'B.B.B.B.' +
+  '........';
+
+const OPENING_SEQ = [
+  { from: [2, 2] as [number,number], to: [3, 3] as [number,number] },
+  { from: [5, 3] as [number,number], to: [4, 2] as [number,number] },
+  { from: [1, 3] as [number,number], to: [3, 3] as [number,number] },
+  { from: [6, 2] as [number,number], to: [4, 2] as [number,number] },
+  { from: [2, 4] as [number,number], to: [3, 5] as [number,number] },
+  { from: [5, 5] as [number,number], to: [4, 4] as [number,number] },
+];
 import { pageMetadata, SITE_URL } from '../../../lib/seo';
 import { SchemaScript } from '../../../components/seo/SchemaScript';
 import { SeoFooter } from '../../../components/seo/SeoFooter';
@@ -75,6 +96,16 @@ export default function Article() {
         <h1 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, lineHeight: 1.2, marginBottom: '0.75rem' }}>
           Raichu Opening Strategy: Five Principles for the First Moves
         </h1>
+        <div style={{ margin: '0 0 2rem', display: 'flex', justifyContent: 'center' }}>
+          <BlogBoardDemo
+            initialBoard={OPENING_BOARD}
+            sequence={OPENING_SEQ}
+            caption="Both sides develop pieces toward the center in the opening"
+            squareSize={46}
+            intervalMs={1300}
+          />
+        </div>
+
         <p style={{ color: 'var(--c-muted)', fontSize: '1.0625rem', lineHeight: 1.7, marginBottom: '2.5rem' }}>
           Raichu has no opening theory. There is no database of memorized sequences to study. What there is: a set of principles that apply in the early game of every match. Learn these and your opening play will be solid regardless of what your opponent does.
         </p>

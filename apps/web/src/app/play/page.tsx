@@ -8,11 +8,13 @@ import { GameInfo } from '../../components/panels/GameInfo';
 import { MoveHistory } from '../../components/panels/MoveHistory';
 import { Controls } from '../../components/panels/Controls';
 import { NewGameDialog } from '../../components/panels/NewGameDialog';
+import { GameResultModal } from '../../components/game/GameResultModal';
 import { useUIStore } from '../../store/ui-store';
 import { useGameStore } from '../../store/game-store';
 import { THEMES } from '../../lib/themes';
 import { BLACK_PIECES, WHITE_PIECES } from '@raichu/shared-types';
 import type { PieceChar } from '@raichu/shared-types';
+import { BOT_NAME, DIFFICULTY_LABEL } from '../../lib/constants';
 
 export default function PlayPage() {
   const theme = useUIStore((s) => THEMES[s.theme]);
@@ -20,33 +22,40 @@ export default function PlayPage() {
   const replayMode = useUIStore((s) => s.replayMode);
   const replayStep = useUIStore((s) => s.replayStep);
   const exitReplay = useUIStore((s) => s.exitReplay);
+  const enterReplay = useUIStore((s) => s.enterReplay);
 
-  const moveHistory = useGameStore((s) => s.moveHistory);
-  const status = useGameStore((s) => s.status);
+  const moveHistory   = useGameStore((s) => s.moveHistory);
+  const status        = useGameStore((s) => s.status);
+  const gameMode      = useGameStore((s) => s.gameMode);
+  const difficulty    = useGameStore((s) => s.difficulty);
+  const playerColor   = useGameStore((s) => s.playerColor);
+  const newGame       = useGameStore((s) => s.newGame);
 
   const boardContainerRef = useRef<HTMLDivElement>(null);
   const [boardHeight, setBoardHeight] = useState<number>(0);
+  const [resultDismissed, setResultDismissed] = useState(false);
+
+  // Reset dismissed flag whenever a new game starts
+  useEffect(() => {
+    if (status === 'playing' && moveHistory.length === 0) {
+      setResultDismissed(false);
+    }
+  }, [status, moveHistory.length]);
 
   useEffect(() => {
     const el = boardContainerRef.current;
     if (!el) return;
     const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        setBoardHeight(entry.contentRect.width);
-      }
+      for (const entry of entries) setBoardHeight(entry.contentRect.width);
     });
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
 
-  // Exit replay when a new game starts
   useEffect(() => {
-    if (status === 'playing' && moveHistory.length === 0 && replayMode) {
-      exitReplay();
-    }
+    if (status === 'playing' && moveHistory.length === 0 && replayMode) exitReplay();
   }, [status, moveHistory.length, replayMode, exitReplay]);
 
-  // Compute captured pieces (scoped to replayStep when in replay mode)
   const relevantMoves = useMemo(
     () => replayMode ? moveHistory.slice(0, replayStep) : moveHistory,
     [moveHistory, replayMode, replayStep]
@@ -66,9 +75,28 @@ export default function PlayPage() {
     [relevantMoves]
   );
 
-  // With boardFlipped (white at bottom): opponent (black) is at top, player (white) at bottom
-  const topCaptured   = boardFlipped ? blackCaptured : whiteCaptured;
+  const topCaptured    = boardFlipped ? blackCaptured : whiteCaptured;
   const bottomCaptured = boardFlipped ? whiteCaptured : blackCaptured;
+
+  const isOver = status !== 'playing';
+
+  // Who's who for the result modal
+  const whiteName = gameMode === 'bot'
+    ? (playerColor === 'white' ? 'You' : BOT_NAME)
+    : 'White';
+  const blackName = gameMode === 'bot'
+    ? (playerColor === 'black' ? 'You' : `${BOT_NAME} · ${DIFFICULTY_LABEL[difficulty]}`)
+    : 'Black';
+
+  const handleNewGame = () => {
+    setResultDismissed(true);
+    newGame({ mode: gameMode, difficulty, playerColor });
+  };
+
+  const handleReplay = () => {
+    setResultDismissed(true);
+    enterReplay(moveHistory.length);
+  };
 
   return (
     <>
@@ -81,28 +109,19 @@ export default function PlayPage() {
           <div className="flex flex-col lg:flex-row gap-0 lg:gap-6">
             {/* Board column */}
             <div className="w-full lg:flex-1 mx-auto lg:mx-0 space-y-1" style={{ maxWidth: 700 }}>
-              {/* Captured pieces — opponent's side (top) */}
               <div style={{ minHeight: 26 }}>
                 <CapturedPieces pieces={topCaptured} size={20} />
               </div>
 
-              <div
-                ref={boardContainerRef}
-                className="w-full"
-                style={{ aspectRatio: '1 / 1' }}
-              >
+              <div ref={boardContainerRef} className="w-full" style={{ aspectRatio: '1 / 1' }}>
                 <div
                   className="w-full h-full overflow-hidden"
-                  style={{
-                    borderRadius: 12,
-                    boxShadow: `0 8px 32px ${theme.shadow}, 0 2px 8px ${theme.shadow}`,
-                  }}
+                  style={{ borderRadius: 12, boxShadow: `0 8px 32px ${theme.shadow}, 0 2px 8px ${theme.shadow}` }}
                 >
                   <Board />
                 </div>
               </div>
 
-              {/* Captured pieces — your side (bottom) */}
               <div style={{ minHeight: 26 }}>
                 <CapturedPieces pieces={bottomCaptured} size={20} />
               </div>
@@ -122,6 +141,20 @@ export default function PlayPage() {
 
         <NewGameDialog />
       </main>
+
+      {/* Game result modal */}
+      {isOver && !resultDismissed && !replayMode && (
+        <GameResultModal
+          status={status as 'white_wins' | 'black_wins' | 'abandoned'}
+          myColor={gameMode === 'bot' ? playerColor : null}
+          whiteName={whiteName}
+          blackName={blackName}
+          moveCount={moveHistory.length}
+          onNewGame={handleNewGame}
+          onReplay={moveHistory.length > 0 ? handleReplay : undefined}
+          onClose={() => setResultDismissed(true)}
+        />
+      )}
     </>
   );
 }

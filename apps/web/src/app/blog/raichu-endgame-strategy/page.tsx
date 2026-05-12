@@ -1,5 +1,28 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { BlogBoardDemo } from '../../../components/blog/BlogBoardDemo';
+
+// Endgame: white Raichu systematically captures remaining black pieces
+const ENDGAME_BOARD =
+  '........' +
+  '........' +
+  '..b.....' +
+  '........' +
+  '....b...' +
+  '........' +
+  '......@.' +
+  '........';
+
+const ENDGAME_SEQ = [
+  // Raichu jumps over (4,4) to capture it, landing at (3,5)
+  { from: [6, 6] as [number,number], to: [3, 3] as [number,number], capture: [4, 4] as [number,number] },
+  // Raichu moves to threaten the second Pichu
+  { from: [3, 3] as [number,number], to: [3, 2] as [number,number] },
+  // Raichu captures the remaining Pichu
+  { from: [3, 2] as [number,number], to: [1, 2] as [number,number], capture: [2, 2] as [number,number] },
+  // Reset: move Raichu back
+  { from: [1, 2] as [number,number], to: [6, 6] as [number,number] },
+];
 import { pageMetadata, SITE_URL } from '../../../lib/seo';
 import { SchemaScript } from '../../../components/seo/SchemaScript';
 import { SeoFooter } from '../../../components/seo/SeoFooter';
@@ -47,6 +70,16 @@ export default function Article() {
         <h1 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, lineHeight: 1.2, marginBottom: '0.75rem' }}>
           Raichu Endgame Strategy: Converting Winning Positions
         </h1>
+        <div style={{ margin: '0 0 2rem', display: 'flex', justifyContent: 'center' }}>
+          <BlogBoardDemo
+            initialBoard={ENDGAME_BOARD}
+            sequence={ENDGAME_SEQ}
+            caption="White Raichu hunts down the remaining black pieces — one by one"
+            squareSize={46}
+            intervalMs={1600}
+          />
+        </div>
+
         <p style={{ color: 'var(--c-muted)', fontSize: '1.0625rem', lineHeight: 1.7, marginBottom: '2.5rem' }}>
           Having a material advantage in Raichu does not automatically win the game. Knowing how to convert that advantage into a forced win requires specific endgame understanding. Here is what matters.
         </p>

@@ -13,7 +13,7 @@ import { BoardProvider } from '../../../components/board/BoardContext';
 import { OnlineBoard } from '../../../components/board/OnlineBoard';
 import { OnlineGameSidebar } from '../../../components/game/OnlineGameSidebar';
 import { WaitingRoom } from '../../../components/game/WaitingRoom';
-import { GameOverOverlay } from '../../../components/game/GameOverOverlay';
+import { GameResultModal } from '../../../components/game/GameResultModal';
 import { PlayerBar } from '../../../components/game/PlayerBar';
 import { createInitialBoard, decodeBoard } from '@raichu/game-engine';
 import { BLACK_PIECES, WHITE_PIECES } from '@raichu/shared-types';
@@ -46,8 +46,8 @@ export default function OnlineGamePage() {
 
   const boardContainerRef = useRef<HTMLDivElement>(null);
   const [boardHeight, setBoardHeight] = useState(0);
-  // null = live; number = replay at that step
   const [replayStep, setReplayStep] = useState<number | null>(null);
+  const [resultDismissed, setResultDismissed] = useState(false);
   const autoReplayed = useRef(false);
 
   useGameSubscription(gameId);
@@ -234,13 +234,14 @@ export default function OnlineGamePage() {
                     </BoardProvider>
                   </div>
 
-                  {isFinished && replayStep === null && (
-                    <GameOverOverlay
-                      status={game.status}
-                      winnerId={game.winner_id}
-                      myId={user?.id || ''}
-                      onReplay={() => setReplayStep(0)}
-                    />
+                  {/* board-level replay step indicator */}
+                  {replayStep !== null && (
+                    <div
+                      className="absolute bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-semibold"
+                      style={{ backgroundColor: theme.accent + 'dd', color: '#fff', pointerEvents: 'none' }}
+                    >
+                      Move {replayStep} / {moves.length}
+                    </div>
                   )}
                 </div>
 
@@ -395,6 +396,27 @@ export default function OnlineGamePage() {
           </div>
         )}
       </main>
+
+      {/* Chess.com-style game result modal */}
+      {isFinished && !resultDismissed && replayStep === null && game && (
+        <GameResultModal
+          status={game.status as 'white_wins' | 'black_wins' | 'abandoned'}
+          myColor={myColor}
+          whiteName={game.white_player?.display_name || game.white_player?.username || 'White'}
+          blackName={game.black_player?.display_name || game.black_player?.username || 'Black'}
+          moveCount={moves.length}
+          eloChange={(() => {
+            if (!user || !myColor) return null;
+            const myIsWhite = myColor === 'white';
+            const myIsWinner = (game.status === 'white_wins' && myIsWhite) || (game.status === 'black_wins' && !myIsWhite);
+            return myIsWinner ? game.winner_elo_delta : game.loser_elo_delta;
+          })()}
+          newElo={null}
+          onReplay={() => { setResultDismissed(true); setReplayStep(0); }}
+          onPlayAgain={() => { setResultDismissed(true); }}
+          onClose={() => setResultDismissed(true)}
+        />
+      )}
     </div>
   );
 }

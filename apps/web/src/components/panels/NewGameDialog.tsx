@@ -6,6 +6,7 @@ import type { Difficulty, GameMode, Player } from '@raichu/shared-types';
 import { useGameStore } from '../../store/game-store';
 import { useUIStore } from '../../store/ui-store';
 import { THEMES } from '../../lib/themes';
+import { BOT_NAME } from '../../lib/constants';
 
 export function NewGameDialog() {
   const show = useUIStore((s) => s.showNewGameDialog);
@@ -68,7 +69,7 @@ export function NewGameDialog() {
           <div className="segmented-control" style={{ backgroundColor: theme.bgSecondary }}>
             {[
               { value: 'pvp' as GameMode, label: 'Local PvP' },
-              { value: 'bot' as GameMode, label: 'vs Bot' },
+              { value: 'bot' as GameMode, label: `vs ${BOT_NAME}` },
               { value: 'online' as GameMode, label: 'Online' },
             ].map(({ value, label }) => (
               <button key={value} style={segBtnStyle(mode === value)} onClick={() => setMode(value)}>
