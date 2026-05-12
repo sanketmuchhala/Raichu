@@ -1,112 +1,174 @@
 # Raichu
 
-A production-quality browser implementation of the Raichu strategy board game — a checkers variant with three piece types (Pichu, Pikachu, Raichu) on an 8x8 board.
+A chess-inspired abstract strategy game playable free in the browser. Two players, three piece types, zero luck, no draws.
+
+**Live:** [raichu.live](https://raichu.live)
+
+---
+
+## What is Raichu?
+
+Raichu is a two-player abstract strategy board game on an 8x8 grid. Each side commands three piece types: **Pichu** (pawn-like), **Pikachu** (rook-like), and **Raichu** (queen-like). The capture hierarchy is the core mechanic: Pichus can only take Pichus, Pikachus can take Pichus and Pikachus, Raichus can take anything. Promote pieces to the back rank to turn them into Raichus. Capture every enemy piece to win.
+
+No king. No draws. Games in 5-15 minutes.
+
+---
 
 ## Features
 
-- **Local PvP** — Play against a friend on the same device
-- **Bot Play** — Challenge the AI at Easy, Medium, or Hard difficulty
-- **3 Themes** — Classic, Slate, and Walnut board themes
-- **Click & Drag** — Both click-to-move and drag-and-drop interaction
-- **Move History** — Human-readable and coordinate notation
-- **Responsive** — Works on desktop and mobile browsers
-- **Shared Engine** — Pure TypeScript game logic reusable across platforms
+- Play vs AI at three difficulty levels (runs entirely in-browser, no server round-trip)
+- Online multiplayer with Supabase Realtime sync
+- ELO-based ranked matchmaking
+- Click-to-move and drag-and-drop
+- Move animations (chess.com-style piece slides)
+- Full move history in human and coordinate notation
+- Board themes
+- Mobile responsive
 
-## Architecture
+---
+
+## Stack
+
+| Layer | Technology |
+|-------|------------|
+| Frontend | Next.js 15, React 18, TypeScript, Zustand, Framer Motion, Tailwind CSS |
+| Backend | Express 4, TypeScript, Zod |
+| Database | Supabase (PostgreSQL + Realtime + Auth) |
+| Game engine | Pure TypeScript, zero dependencies |
+| AI | Minimax + alpha-beta pruning + iterative deepening |
+| Build | pnpm workspaces + Turborepo + esbuild |
+| Deploy | Vercel (web), Railway/Fly.io (api) |
+
+---
+
+## Repository Layout
 
 ```
-raichu/
+raichu.py/
 ├── apps/
-│   ├── web/           # Next.js 14 frontend
-│   ├── api/           # Express REST API
-│   └── ios/           # Future iOS placeholder
+│   ├── web/                  # Next.js 15 frontend
+│   └── api/                  # Express REST API + matchmaking worker
 ├── packages/
-│   ├── shared-types/  # TypeScript type definitions
-│   ├── game-engine/   # Pure TS game logic (board, moves, validation)
-│   ├── ai-engine/     # Minimax with alpha-beta pruning
-│   ├── ui/            # Shared UI components
-│   └── config/        # Shared configuration
-└── docs/              # Architecture documentation
+│   ├── shared-types/         # TypeScript types shared across all packages
+│   ├── game-engine/          # Board, moves, validation, promotion (no deps)
+│   ├── ai-engine/            # Minimax search + position evaluation
+│   ├── ui/                   # Shared React components
+│   └── config/               # Shared ESLint / TS config
+├── supabase/
+│   └── migrations/           # SQL migrations (run in order)
+└── docs/                     # Architecture and API documentation
 ```
+
+---
 
 ## Quick Start
 
-### Prerequisites
-
-- Node.js 18+
-- pnpm 9+
-
-### Setup
+**Prerequisites:** Node 18+, pnpm 9+, a Supabase project
 
 ```bash
+git clone https://github.com/sanketmuchhala/Raichu.git
+cd Raichu
 pnpm install
+
+# Copy and fill in env files
+cp apps/api/.env.example   apps/api/.env
+cp apps/web/.env.example   apps/web/.env.local
+
+# Run Supabase migrations (requires supabase CLI)
+supabase db push
+
+# Start everything
+pnpm dev
 ```
 
-### Development
+| Service | URL |
+|---------|-----|
+| Web frontend | http://localhost:3000 |
+| REST API | http://localhost:3001 |
 
-Start both the API server and web frontend:
+---
+
+## Environment Variables
+
+**apps/api/.env**
+```env
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=eyJ...
+PORT=3001
+NODE_ENV=development
+```
+
+**apps/web/.env.local**
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+NEXT_PUBLIC_API_URL=http://localhost:3001
+NEXT_PUBLIC_SITE_URL=https://raichu.live
+```
+
+---
+
+## Commands
 
 ```bash
-# Terminal 1: API server (port 3001)
-cd apps/api && pnpm dev
+pnpm dev              # start web + api in watch mode
+pnpm build            # build all packages and apps
+pnpm test             # run all test suites
+pnpm lint             # lint all packages
 
-# Terminal 2: Web frontend (port 3000)
-cd apps/web && pnpm dev
+# Scope to a single package
+pnpm --filter @raichu/game-engine test
+pnpm --filter @raichu/web         build
+pnpm --filter @raichu/api         dev
 ```
 
-Then open http://localhost:3000
-
-### Run Tests
-
-```bash
-# All tests
-pnpm test
-
-# Game engine tests only
-cd packages/game-engine && pnpm test
-
-# API tests only
-cd apps/api && pnpm test
-```
+---
 
 ## Game Rules
 
-- **Board**: 8x8 grid, white moves first (downward), black moves upward
-- **Pichu** (w/b): Moves 1 diagonal forward, captures by jumping over enemy Pichu only
-- **Pikachu** (W/B): Moves 1-2 forward/left/right, captures by jumping 2-3 over enemy Pichu/Pikachu
-- **Raichu** (@/$): Queen-like movement in 8 directions, captures by jumping over any enemy piece
-- **Promotion**: Pichu/Pikachu reaching the far edge becomes a Raichu
-- **Win**: Capture all opponent pieces
+| Piece | White / Black | Movement | Captures |
+|-------|--------------|----------|----------|
+| Pichu | `w` / `b` | 1 square diagonally forward | Pichu only (jump 2 diag) |
+| Pikachu | `W` / `B` | 1-2 squares forward, left, or right | Pichu and Pikachu (jump 2-3) |
+| Raichu | `@` / `$` | Any distance in any of 8 directions | Any piece (jump, land anywhere beyond) |
 
-### Capture Hierarchy
+- White moves first. White pieces move **down** the board (increasing row), Black moves **up**.
+- Captures are optional. One capture per move. No chain captures.
+- Pichu or Pikachu reaching the far back rank promotes to Raichu immediately.
+- Win by capturing all opponent pieces. No stalemate, no draws.
 
-| Attacker | Can Capture |
-|----------|-------------|
-| Pichu | Enemy Pichu only |
-| Pikachu | Enemy Pichu or Pikachu |
-| Raichu | Any enemy piece |
+Full rules: [docs/GAME_ENGINE.md](docs/GAME_ENGINE.md)
 
-## API
+---
 
-### Bot Move
+## Tests
 
-```bash
-curl -X POST http://localhost:3001/api/v1/bot/move \
-  -H "Content-Type: application/json" \
-  -d '{
-    "board": "........W.W.W.W..w.w.w.w................b.b.b.b..B.B.B.B........",
-    "player": "w",
-    "difficulty": "medium"
-  }'
+```
+packages/game-engine/__tests__/   68 tests  (board, pieces, moves, game logic)
+apps/api/__tests__/               10 tests  (bot endpoint, ELO, matchmaking)
 ```
 
-See [docs/api-contracts.md](docs/api-contracts.md) for full API documentation.
+All passing. Run with `pnpm test`.
 
-## Tech Stack
+---
 
-- **Frontend**: Next.js 14, TypeScript, Tailwind CSS, Zustand, Framer Motion
-- **Backend**: Express, TypeScript, Zod validation
-- **Engine**: Pure TypeScript, zero dependencies
-- **AI**: Minimax with alpha-beta pruning, iterative deepening
-- **Testing**: Vitest
-- **Build**: pnpm workspaces, Turborepo
+## Documentation
+
+| File | Contents |
+|------|----------|
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System design, component diagram, data flow |
+| [docs/GAME_ENGINE.md](docs/GAME_ENGINE.md) | Board encoding, move generation, capture rules |
+| [docs/AI_ENGINE.md](docs/AI_ENGINE.md) | Minimax, alpha-beta, evaluation function, difficulty |
+| [docs/API.md](docs/API.md) | All REST endpoints with request/response schemas |
+| [docs/DATABASE.md](docs/DATABASE.md) | Schema, indexes, RLS policies, realtime setup |
+| [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) | Local setup, code style, PR guide |
+
+---
+
+## License
+
+MIT
+
+---
+
+© 2026 Sanket Muchhala
