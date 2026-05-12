@@ -6,6 +6,7 @@ import type { PieceChar } from '@raichu/shared-types';
 import { useUIStore } from '../../store/ui-store';
 import { THEMES, type Theme } from '../../lib/themes';
 import { MiniBoard } from '../../components/rules/MiniBoard';
+import { AnimatedMiniBoard } from '../../components/rules/AnimatedMiniBoard';
 import { PieceSVG } from '../../components/pieces/PieceSVG';
 
 export default function RulesPage() {
@@ -109,27 +110,19 @@ export default function RulesPage() {
               <Strong theme={theme}>only capture other Pichus</Strong>.
             </p>
             <div className="flex flex-wrap justify-center gap-6 mt-6">
-              <MiniBoard
+              <AnimatedMiniBoard
                 gridSize={5}
-                pieces={[{ row: 2, col: 2, piece: 'w' as PieceChar }]}
-                highlights={[
-                  { row: 2, col: 2, type: 'selected' },
-                  { row: 3, col: 1, type: 'move' },
-                  { row: 3, col: 3, type: 'move' },
-                ]}
+                animPiece={{ piece: 'w' as PieceChar, fromRow: 2, fromCol: 2, toRow: 3, toCol: 3 }}
                 caption="Movement: one square diagonally forward"
+                phaseOffsetMs={0}
               />
-              <MiniBoard
+              <AnimatedMiniBoard
                 gridSize={5}
-                pieces={[
-                  { row: 1, col: 1, piece: 'w' as PieceChar },
-                  { row: 2, col: 2, piece: 'b' as PieceChar },
-                ]}
-                highlights={[
-                  { row: 1, col: 1, type: 'selected' },
-                  { row: 3, col: 3, type: 'capture' },
-                ]}
+                staticPieces={[{ row: 2, col: 2, piece: 'b' as PieceChar }]}
+                animPiece={{ piece: 'w' as PieceChar, fromRow: 1, fromCol: 1, toRow: 3, toCol: 3 }}
+                capture={{ piece: 'b' as PieceChar, row: 2, col: 2 }}
                 caption="Capture: jump over an enemy Pichu"
+                phaseOffsetMs={400}
               />
             </div>
           </PieceSection>
@@ -149,31 +142,19 @@ export default function RulesPage() {
               <Strong theme={theme}>Pichus and other Pikachus</Strong>, but not Raichus.
             </p>
             <div className="flex flex-wrap justify-center gap-6 mt-6">
-              <MiniBoard
+              <AnimatedMiniBoard
                 gridSize={5}
-                pieces={[{ row: 2, col: 2, piece: 'W' as PieceChar }]}
-                highlights={[
-                  { row: 2, col: 2, type: 'selected' },
-                  { row: 3, col: 2, type: 'move' },
-                  { row: 4, col: 2, type: 'move' },
-                  { row: 2, col: 1, type: 'move' },
-                  { row: 2, col: 0, type: 'move' },
-                  { row: 2, col: 3, type: 'move' },
-                  { row: 2, col: 4, type: 'move' },
-                ]}
-                caption="Movement: 1-2 squares forward, left, or right"
+                animPiece={{ piece: 'W' as PieceChar, fromRow: 2, fromCol: 2, toRow: 4, toCol: 2 }}
+                caption="Movement: 1-2 squares forward"
+                phaseOffsetMs={200}
               />
-              <MiniBoard
+              <AnimatedMiniBoard
                 gridSize={5}
-                pieces={[
-                  { row: 1, col: 2, piece: 'W' as PieceChar },
-                  { row: 2, col: 2, piece: 'b' as PieceChar },
-                ]}
-                highlights={[
-                  { row: 1, col: 2, type: 'selected' },
-                  { row: 3, col: 2, type: 'capture' },
-                ]}
+                staticPieces={[{ row: 2, col: 2, piece: 'b' as PieceChar }]}
+                animPiece={{ piece: 'W' as PieceChar, fromRow: 1, fromCol: 2, toRow: 3, toCol: 2 }}
+                capture={{ piece: 'b' as PieceChar, row: 2, col: 2 }}
                 caption="Capture: jump over an adjacent enemy"
+                phaseOffsetMs={600}
               />
             </div>
           </PieceSection>
@@ -193,42 +174,19 @@ export default function RulesPage() {
               Raichus can capture <Strong theme={theme}>any piece type</Strong>.
             </p>
             <div className="flex flex-wrap justify-center gap-6 mt-6">
-              <MiniBoard
+              <AnimatedMiniBoard
                 gridSize={5}
-                pieces={[{ row: 2, col: 2, piece: '@' as PieceChar }]}
-                highlights={[
-                  { row: 2, col: 2, type: 'selected' },
-                  { row: 1, col: 2, type: 'move' },
-                  { row: 0, col: 2, type: 'move' },
-                  { row: 3, col: 2, type: 'move' },
-                  { row: 4, col: 2, type: 'move' },
-                  { row: 2, col: 1, type: 'move' },
-                  { row: 2, col: 0, type: 'move' },
-                  { row: 2, col: 3, type: 'move' },
-                  { row: 2, col: 4, type: 'move' },
-                  { row: 1, col: 1, type: 'move' },
-                  { row: 0, col: 0, type: 'move' },
-                  { row: 1, col: 3, type: 'move' },
-                  { row: 0, col: 4, type: 'move' },
-                  { row: 3, col: 1, type: 'move' },
-                  { row: 4, col: 0, type: 'move' },
-                  { row: 3, col: 3, type: 'move' },
-                  { row: 4, col: 4, type: 'move' },
-                ]}
+                animPiece={{ piece: '@' as PieceChar, fromRow: 2, fromCol: 2, toRow: 0, toCol: 4 }}
                 caption="Movement: any direction, any distance"
+                phaseOffsetMs={100}
               />
-              <MiniBoard
+              <AnimatedMiniBoard
                 gridSize={5}
-                pieces={[
-                  { row: 0, col: 0, piece: '@' as PieceChar },
-                  { row: 2, col: 2, piece: 'B' as PieceChar },
-                ]}
-                highlights={[
-                  { row: 0, col: 0, type: 'selected' },
-                  { row: 3, col: 3, type: 'capture' },
-                  { row: 4, col: 4, type: 'capture' },
-                ]}
+                staticPieces={[{ row: 2, col: 2, piece: 'B' as PieceChar }]}
+                animPiece={{ piece: '@' as PieceChar, fromRow: 0, fromCol: 0, toRow: 4, toCol: 4 }}
+                capture={{ piece: 'B' as PieceChar, row: 2, col: 2 }}
                 caption="Capture: jump over enemy, land anywhere beyond"
+                phaseOffsetMs={500}
               />
             </div>
           </PieceSection>
@@ -352,6 +310,31 @@ export default function RulesPage() {
           </Link>
         </div>
       </div>
+
+      <footer
+        style={{
+          borderTop: `1px solid ${theme.border}`,
+          padding: '1.25rem 2rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '0.75rem',
+          flexWrap: 'wrap',
+        }}
+      >
+        <span style={{ fontSize: '0.8125rem', color: theme.textSecondary }}>
+          © 2026 Sanket Muchhala
+        </span>
+        <span style={{ color: theme.border }}>·</span>
+        <a
+          href="https://github.com/sanketmuchhala"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ fontSize: '0.8125rem', color: theme.textSecondary, textDecoration: 'none' }}
+        >
+          GitHub
+        </a>
+      </footer>
     </main>
   );
 }

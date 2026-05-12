@@ -217,6 +217,45 @@ export default function Home() {
           Read the full rules →
         </Link>
       </section>
+
+      {/* ── Footer ───────────────────────────────────── */}
+      <footer
+        style={{
+          padding: '1.25rem 2rem',
+          borderTop: `1px solid ${theme.border}`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '0.75rem',
+          flexWrap: 'wrap',
+        }}
+      >
+        <span style={{ fontSize: '0.8125rem', color: theme.textSecondary }}>
+          © 2026 Sanket Muchhala
+        </span>
+        <span style={{ color: theme.border }}>·</span>
+        <a
+          href="https://github.com/sanketmuchhala"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ fontSize: '0.8125rem', color: theme.textSecondary, textDecoration: 'none' }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = theme.textPrimary)}
+          onMouseLeave={(e) => (e.currentTarget.style.color = theme.textSecondary)}
+        >
+          GitHub
+        </a>
+        <span style={{ color: theme.border }}>·</span>
+        <a
+          href="https://github.com/sanketmuchhala/Raichu"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ fontSize: '0.8125rem', color: theme.textSecondary, textDecoration: 'none' }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = theme.textPrimary)}
+          onMouseLeave={(e) => (e.currentTarget.style.color = theme.textSecondary)}
+        >
+          View Source
+        </a>
+      </footer>
     </div>
   );
 }
