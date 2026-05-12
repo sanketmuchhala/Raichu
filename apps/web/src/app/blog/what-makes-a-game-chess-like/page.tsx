@@ -6,7 +6,7 @@ import { SeoNav, SeoFooter } from '../../../components/seo/SeoFooter';
 
 export const metadata: Metadata = pageMetadata({
   title:       'What Makes a Game Chess-Like? | Raichu Game Blog',
-  description: 'Piece hierarchy, no luck, perfect information — the qualities that make abstract strategy games feel like chess. Where Raichu fits in this family of games.',
+  description: 'Piece hierarchy, no luck, perfect information: the qualities that make abstract strategy games feel like chess. Where Raichu fits in this family of games.',
   path:        '/blog/what-makes-a-game-chess-like',
   type:        'article',
 });
@@ -51,7 +51,7 @@ export default function Article() {
         </h1>
 
         <p style={{ ...pStyle, fontSize: '1.0625rem' }}>
-          Not every game on a grid deserves the label. "Chess-like" has a real meaning — and understanding it helps you find games you will actually enjoy if chess is your reference point.
+          Not every game on a grid deserves the label. "Chess-like" has a real meaning, and understanding it helps you find games you will actually enjoy if chess is your reference point.
         </p>
 
         <section style={{ marginBottom: '2.5rem' }}>
@@ -64,11 +64,11 @@ export default function Article() {
             {[
               {
                 label: '1. Piece hierarchy',
-                text: 'Different pieces move differently and have different values. Weak pieces (like chess pawns) are abundant but limited; powerful pieces are scarce but dominant. This creates material tension — every capture is a decision with consequences.',
+                text: 'Different pieces move differently and have different values. Weak pieces (like chess pawns) are abundant but limited; powerful pieces are scarce but dominant. This creates material tension: every capture is a decision with consequences.',
               },
               {
                 label: '2. No luck or randomness',
-                text: 'No dice. No cards. No hidden information. Both players see the same board and make decisions based on pure analysis. The better decision-maker wins — consistently, not just sometimes.',
+                text: 'No dice. No cards. No hidden information. Both players see the same board and make decisions based on pure analysis. The better decision-maker wins, consistently, not just sometimes.',
               },
               {
                 label: '3. Perfect information',
@@ -76,7 +76,7 @@ export default function Article() {
               },
               {
                 label: '4. Tactical and positional depth',
-                text: 'Simple rules generate complex situations. Patterns recur, but no two games are identical. Mastery accumulates over many games — the game rewards study and punishes carelessness.',
+                text: 'Simple rules generate complex situations. Patterns recur, but no two games are identical. Mastery accumulates over many games: the game rewards study and punishes carelessness.',
               },
             ].map(({ label, text }) => (
               <div key={label} style={{ backgroundColor: 'var(--c-bg-1)', border: '1px solid var(--c-border)', borderLeft: '3px solid var(--c-green)', borderRadius: 10, padding: '1rem 1.25rem' }}>
@@ -93,19 +93,19 @@ export default function Article() {
             These games all qualify as chess-like in meaningful ways, though each has a distinct character:
           </p>
           <ul style={{ color: 'var(--c-muted)', lineHeight: 1.9, paddingLeft: '1.5rem' }}>
-            <li><strong style={{ color: 'var(--c-text)' }}>Chess</strong> — The defining example. Six piece types, 16 per side, checkmate win condition. The benchmark.</li>
-            <li><strong style={{ color: 'var(--c-text)' }}>Shogi (Japanese chess)</strong> — Piece hierarchy plus drops: captured pieces change sides and re-enter the board. More complex than chess.</li>
-            <li><strong style={{ color: 'var(--c-text)' }}>Xiangqi (Chinese chess)</strong> — 9×10 board, different piece set, river boundary limits movement. Faster-paced than Western chess.</li>
-            <li><strong style={{ color: 'var(--c-text)' }}>Onitama</strong> — Compact 5×5 board, movement determined by cards drawn at game start. Elegant and quick.</li>
-            <li><strong style={{ color: 'var(--c-text)' }}>Go</strong> — No piece hierarchy, but perfect information, no luck, and extraordinary depth. Tactically very different but spiritually adjacent.</li>
-            <li><strong style={{ color: 'var(--c-text)' }}>Raichu</strong> — Three piece types with a capture hierarchy, 8×8 board, promotion mechanic. Chess-inspired but wins by capturing all pieces, not checkmate.</li>
+            <li><strong style={{ color: 'var(--c-text)' }}>Chess</strong>. The defining example. Six piece types, 16 per side, checkmate win condition. The benchmark.</li>
+            <li><strong style={{ color: 'var(--c-text)' }}>Shogi (Japanese chess)</strong>. Piece hierarchy plus drops: captured pieces change sides and re-enter the board. More complex than chess.</li>
+            <li><strong style={{ color: 'var(--c-text)' }}>Xiangqi (Chinese chess)</strong>. 9×10 board, different piece set, river boundary limits movement. Faster-paced than Western chess.</li>
+            <li><strong style={{ color: 'var(--c-text)' }}>Onitama</strong>. Compact 5×5 board, movement determined by cards drawn at game start. Elegant and quick.</li>
+            <li><strong style={{ color: 'var(--c-text)' }}>Go</strong>. No piece hierarchy, but perfect information, no luck, and extraordinary depth. Tactically very different but spiritually adjacent.</li>
+            <li><strong style={{ color: 'var(--c-text)' }}>Raichu</strong>. Three piece types with a capture hierarchy, 8×8 board, promotion mechanic. Chess-inspired but wins by capturing all pieces, not checkmate.</li>
           </ul>
         </section>
 
         <section style={{ marginBottom: '2.5rem' }}>
           <h2 style={h2Style}>What Chess Players Transfer</h2>
           <p style={pStyle}>
-            Chess players who move to other chess-like games usually find their core instincts transferable: board control, tempo, piece coordination, and tactical pattern recognition. The specific patterns are different — a Raichu fork looks different from a chess fork — but the underlying thinking process is the same.
+            Chess players who move to other chess-like games usually find their core instincts transferable: board control, tempo, piece coordination, and tactical pattern recognition. The specific patterns are different: a Raichu fork looks different from a chess fork, but the underlying thinking process is the same.
           </p>
           <p style={pStyle}>
             The best chess-like games for chess players are those where the rule learning curve is short and the depth reveals itself quickly. Games with too many special cases feel like work; games with too few pieces feel shallow. The sweet spot is a game that surprises you in the first ten minutes and rewards continued play for months.
@@ -115,7 +115,7 @@ export default function Article() {
         <section style={{ marginBottom: '2.5rem' }}>
           <h2 style={h2Style}>Where Raichu Fits</h2>
           <p style={pStyle}>
-            Raichu is chess-inspired, not a chess variant. It shares chess's structural DNA — piece hierarchy, promotion, zero luck, two players, 8×8 board — but is its own complete game with different movement patterns, a capture hierarchy that restricts which pieces can take which, and a win condition of capturing all enemy pieces (not checkmate).
+            Raichu is chess-inspired, not a chess variant. It shares chess's structural DNA: piece hierarchy, promotion, zero luck, two players, 8×8 board. It is its own complete game with different movement patterns, a capture hierarchy that restricts which pieces can take which, and a win condition of capturing all enemy pieces (not checkmate).
           </p>
           <p style={pStyle}>
             For chess players, Raichu offers a way to apply chess-honed instincts in a fresh context where opening theory does not exist yet and tactical patterns are still being discovered. Games complete in 5–15 minutes, and you can play free in the browser.

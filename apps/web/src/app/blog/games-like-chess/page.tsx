@@ -44,19 +44,19 @@ const GAMES = [
   {
     rank: 3,
     name: 'Go',
-    why:  'Territorially the opposite of chess — you build influence with stones, not pieces — but the underlying skills transfer. Perfect information, zero luck, and a game tree so large that AI couldn\'t crack it until 2016. Played on a 19×19 grid.',
+    why:  'Territorially the opposite of chess: you build influence with stones, not pieces. The underlying skills transfer. Perfect information, zero luck, and a game tree so large that AI couldn\'t crack it until 2016. Played on a 19×19 grid.',
     note: 'Simple rules, deepest game on this list.',
   },
   {
     rank: 4,
     name: 'Hex',
-    why:  'Connect your two opposite sides of the board before your opponent connects theirs. No pieces, no captures — just territory. A famous mathematical result proves Hex can never draw. Two players, alternating, placing stones on a diamond grid.',
+    why:  'Connect your two opposite sides of the board before your opponent connects theirs. No pieces, no captures, just territory. A famous mathematical result proves Hex can never draw. Two players, alternating, placing stones on a diamond grid.',
     note: 'Quick to learn. Strategically subtle.',
   },
   {
     rank: 5,
     name: 'Hive',
-    why:  'No board required — the tiles form the playing area. Twelve insect types each move uniquely. The goal is to surround the opponent\'s Queen Bee. Hive is portable, has zero setup time, and rewards the same instincts as chess: piece coordination and tactical vision.',
+    why:  'No board required: the tiles form the playing area. Twelve insect types each move uniquely. The goal is to surround the opponent\'s Queen Bee. Hive is portable, has zero setup time, and rewards the same instincts as chess: piece coordination and tactical vision.',
     note: 'Excellent for travel. Strong app versions available.',
   },
   {
@@ -113,7 +113,7 @@ export default function Article() {
           Top 10 Strategy Games Like Chess
         </h1>
         <p style={{ color: 'var(--c-muted)', fontSize: '1.0625rem', lineHeight: 1.7, marginBottom: '2.5rem' }}>
-          If you love chess but want something fresh, this list is for you. Every game here shares chess&apos;s core appeal — no luck, pure skill, deep tactics — but each has a distinct identity and mechanics. Ordered roughly by familiarity to chess players.
+          If you love chess but want something fresh, this list is for you. Every game here shares chess&apos;s core appeal: no luck, pure skill, deep tactics. Each has a distinct identity and mechanics. Ordered roughly by familiarity to chess players.
         </p>
 
         <section style={{ marginBottom: '3rem' }}>
@@ -145,7 +145,7 @@ export default function Article() {
           <ul style={{ color: 'var(--c-muted)', lineHeight: 1.9, paddingLeft: '1.5rem' }}>
             <li><strong style={{ color: 'var(--c-text)' }}>Want chess with one twist?</strong> Try Chess960.</li>
             <li><strong style={{ color: 'var(--c-text)' }}>Want maximum depth?</strong> Commit to Shogi or Go.</li>
-            <li><strong style={{ color: 'var(--c-text)' }}>Want something quick and browser-playable?</strong> Raichu — free, no install, games in 5–15 minutes.</li>
+            <li><strong style={{ color: 'var(--c-text)' }}>Want something quick and browser-playable?</strong> Raichu. free, no install, games in 5–15 minutes.</li>
             <li><strong style={{ color: 'var(--c-text)' }}>Want portable, physical play?</strong> Hive or Onitama.</li>
             <li><strong style={{ color: 'var(--c-text)' }}>Want to learn abstract strategy from scratch?</strong> Checkers, then build up.</li>
           </ul>

@@ -6,7 +6,7 @@ import { SeoNav, SeoFooter } from '../../components/seo/SeoFooter';
 
 export const metadata: Metadata = pageMetadata({
   title:       'Abstract Strategy Games: Chess, Go, Hex, Shogi, and Raichu',
-  description: 'What are abstract strategy games? Learn the defining features — no luck, perfect information, tactical depth — and discover the best examples to play online.',
+  description: 'What are abstract strategy games? Learn the defining features. No luck, perfect information, tactical depth, and discover the best examples to play online.',
   path:        '/abstract-strategy-games',
   type:        'article',
 });
@@ -15,7 +15,7 @@ const schema = {
   '@context': 'https://schema.org',
   '@type':    'Article',
   headline:   'Abstract Strategy Games: Chess, Go, Hex, Shogi, and Raichu',
-  description:'A guide to abstract strategy games — their defining properties, examples, and how to get started.',
+  description:'A guide to abstract strategy games: their defining properties, examples, and how to get started.',
   author: { '@type': 'Organization', name: 'Raichu Game' },
   breadcrumb: {
     '@type': 'BreadcrumbList',
@@ -60,7 +60,7 @@ export default function AbstractStrategyGamesPage() {
             <li><strong style={{ color: 'var(--c-text)' }}>Deterministic.</strong> The same position with the same move always produces the same result. There are no dice to roll.</li>
           </ul>
           <p style={{ color: 'var(--c-muted)', lineHeight: 1.75 }}>
-            Abstract strategy games appeal to players who want pure skill competition — where the only variable is how well each player thinks.
+            Abstract strategy games appeal to players who want pure skill competition, where the only variable is how well each player thinks.
           </p>
         </section>
 
@@ -86,7 +86,7 @@ export default function AbstractStrategyGamesPage() {
               },
               {
                 name: 'Raichu',
-                desc: 'A modern browser-based abstract strategy game. Three piece types — Pichu, Pikachu, Raichu — with a movement and capture hierarchy. Played on an 8×8 board. The goal is to capture every enemy piece. Zero luck, no draws, free to play online.',
+                desc: 'A modern browser-based abstract strategy game. Three piece types: Pichu, Pikachu, Raichu. With a movement and capture hierarchy. Played on an 8×8 board. The goal is to capture every enemy piece. Zero luck, no draws, free to play online.',
                 cta: true,
               },
             ].map(({ name, desc, cta }) => (
@@ -108,7 +108,7 @@ export default function AbstractStrategyGamesPage() {
           <h2 style={h2Style}>Why Play Abstract Strategy Games?</h2>
           <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
             {[
-              { label: 'Pure skill',   text: 'No dice, no cards. The better player wins — consistently.' },
+              { label: 'Pure skill',   text: 'No dice, no cards. The better player wins, consistently.' },
               { label: 'Replayable',   text: 'The same rules produce near-infinite variety. A chess or Go position is rarely seen twice.' },
               { label: 'Transferable', text: 'Pattern recognition, planning, and tactical thinking developed in one abstract game carry over to others.' },
               { label: 'No fluff',     text: 'No story, no resource management, no luck mitigation. Just the pure strategic problem.' },

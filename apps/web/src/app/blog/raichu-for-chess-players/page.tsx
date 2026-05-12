@@ -6,7 +6,7 @@ import { SeoNav, SeoFooter } from '../../../components/seo/SeoFooter';
 
 export const metadata: Metadata = pageMetadata({
   title:       'Raichu for Chess Players: Why You Should Try It | Raichu Game Blog',
-  description: 'Chess players will recognize piece hierarchy, promotion tension, and positional depth. Here is what feels familiar in Raichu — and what is refreshingly different.',
+  description: 'Chess players will recognize piece hierarchy, promotion tension, and positional depth. Here is what feels familiar in Raichu, and what is refreshingly different.',
   path:        '/blog/raichu-for-chess-players',
   type:        'article',
 });
@@ -59,10 +59,10 @@ export default function Article() {
             Chess players come to Raichu with real advantages. The skills that make you good at chess are the skills that make you good at Raichu:
           </p>
           <ul style={{ color: 'var(--c-muted)', lineHeight: 1.9, paddingLeft: '1.5rem', marginBottom: '1rem' }}>
-            <li><strong style={{ color: 'var(--c-text)' }}>Pattern recognition.</strong> Tactical patterns — forks, skewers, zugzwang-like positions — exist in Raichu. The patterns look different but the underlying logic is the same. Experience at spotting chess tactics makes you faster at spotting Raichu tactics.</li>
+            <li><strong style={{ color: 'var(--c-text)' }}>Pattern recognition.</strong> Tactical patterns. forks, skewers, zugzwang-like positions. exist in Raichu. The patterns look different but the underlying logic is the same. Experience at spotting chess tactics makes you faster at spotting Raichu tactics.</li>
             <li><strong style={{ color: 'var(--c-text)' }}>Piece coordination.</strong> A single powerful piece is easier to deal with than two coordinated ones. This principle holds in Raichu: two Raichus working together are nearly unbeatable; one isolated Raichu is vulnerable.</li>
-            <li><strong style={{ color: 'var(--c-text)' }}>Promotion instinct.</strong> Chess players understand promotion pressure viscerally. Raichu's promotion mechanic is the central strategic goal of the game. A Pichu or Pikachu close to the back row is an urgent threat that demands an immediate response — exactly like a passed pawn in chess.</li>
-            <li><strong style={{ color: 'var(--c-text)' }}>Tempo.</strong> The concept of not wasting moves, of making threats that demand responses, of forcing rather than waiting — all of this carries over unchanged.</li>
+            <li><strong style={{ color: 'var(--c-text)' }}>Promotion instinct.</strong> Chess players understand promotion pressure viscerally. Raichu's promotion mechanic is the central strategic goal of the game. A Pichu or Pikachu close to the back row is an urgent threat that demands an immediate response. exactly like a passed pawn in chess.</li>
+            <li><strong style={{ color: 'var(--c-text)' }}>Tempo.</strong> The concept of not wasting moves, of making threats that demand responses, of forcing rather than waiting. all of this carries over unchanged.</li>
           </ul>
         </section>
 
@@ -102,7 +102,7 @@ export default function Article() {
         <section style={{ marginBottom: '2.5rem' }}>
           <h2 style={h2Style}>How Long Does It Take to Get Started?</h2>
           <p style={pStyle}>
-            A chess player can read the rules in five minutes. The piece movements are simpler than chess (three piece types vs six, no castling, no en passant). In the first game you will make tactical errors — the capture hierarchy trips up everyone initially — but you will be thinking strategically from the very first move.
+            A chess player can read the rules in five minutes. The piece movements are simpler than chess (three piece types vs six, no castling, no en passant). In the first game you will make tactical errors: the capture hierarchy trips up everyone initially, but you will be thinking strategically from the very first move.
           </p>
           <p style={pStyle}>
             By your third or fourth game, the unfamiliar mechanics become automatic and you start to see the deeper structure. At that point, your chess instincts take over and the game becomes genuinely challenging.

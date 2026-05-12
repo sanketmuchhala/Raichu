@@ -13,11 +13,11 @@ export const metadata: Metadata = pageMetadata({
 const faqs = [
   {
     q: 'What is Raichu Game?',
-    a: 'Raichu is a two-player abstract strategy board game played on an 8×8 board. Each player commands three piece types — Pichu, Pikachu, and Raichu — with different movement and capture rules. The goal is to capture all of your opponent\'s pieces.',
+    a: 'Raichu is a two-player abstract strategy board game played on an 8×8 board. Each player commands three piece types: Pichu, Pikachu, and Raichu, each with different movement and capture rules. The goal is to capture all of your opponent\'s pieces.',
   },
   {
     q: 'Is Raichu like chess?',
-    a: 'Raichu is chess-inspired but not a chess variant. It shares the 8×8 board, a hierarchy of piece types, a promotion mechanic, and tactical positional depth. However, there is no king, no check or checkmate, no en passant or castling, and you win by capturing every enemy piece — not just the king.',
+    a: 'Raichu is chess-inspired but not a chess variant. It shares the 8×8 board, a hierarchy of piece types, a promotion mechanic, and tactical positional depth. However, there is no king, no check or checkmate, no en passant or castling, and you win by capturing every enemy piece, not just the king.',
   },
   {
     q: 'Is Raichu free to play?',
@@ -33,7 +33,7 @@ const faqs = [
   },
   {
     q: 'Is Raichu a chess variant?',
-    a: 'No. Raichu is a chess-inspired abstract strategy game, not a formal chess variant. Chess variants change or extend the rules of standard chess. Raichu is an independent game that draws on similar tactical concepts — piece hierarchy, promotion, board control — but has its own complete rule set.',
+    a: 'No. Raichu is a chess-inspired abstract strategy game, not a formal chess variant. Chess variants change or extend the rules of standard chess. Raichu is an independent game that draws on similar tactical concepts: piece hierarchy, promotion, board control, but has its own complete rule set.',
   },
   {
     q: 'Is Raichu beginner friendly?',
@@ -90,7 +90,7 @@ export default function FaqPage() {
           Raichu Game FAQ
         </h1>
         <p style={{ color: 'var(--c-muted)', marginBottom: '2.5rem', fontSize: '1.0625rem' }}>
-          Common questions about Raichu — what it is, how it works, and how to get started.
+          Common questions about Raichu: what it is, how it works, and how to get started.
         </p>
 
         <dl style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>

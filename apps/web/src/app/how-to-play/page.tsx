@@ -20,8 +20,8 @@ const howToSchema = {
     { '@type': 'HowToStep', position: 2, name: 'Know your pieces',        text: 'Pichu moves one square diagonally forward. Pikachu moves 1–2 squares forward, left, or right. Raichu moves any direction any distance.' },
     { '@type': 'HowToStep', position: 3, name: 'White moves first',       text: 'White always takes the first turn. On each turn you move exactly one piece.' },
     { '@type': 'HowToStep', position: 4, name: 'Capture enemy pieces',    text: 'Capture by jumping over an adjacent enemy piece to the empty square beyond it. Pichu captures Pichus only. Pikachu captures Pichus and Pikachus. Raichu captures anything.' },
-    { '@type': 'HowToStep', position: 5, name: 'Promote to Raichu',       text: 'When a Pichu or Pikachu reaches the opponent\'s back row it immediately promotes to a Raichu — the most powerful piece.' },
-    { '@type': 'HowToStep', position: 6, name: 'Win the game',            text: 'Capture every one of your opponent\'s pieces. There are no draws in Raichu — every game has a winner.' },
+    { '@type': 'HowToStep', position: 5, name: 'Promote to Raichu',       text: 'When a Pichu or Pikachu reaches the opponent\'s back row it immediately promotes to a Raichu, the most powerful piece.' },
+    { '@type': 'HowToStep', position: 6, name: 'Win the game',            text: 'Capture every one of your opponent\'s pieces. There are no draws in Raichu, every game has a winner.' },
   ],
   breadcrumb: {
     '@type': 'BreadcrumbList',
@@ -39,7 +39,7 @@ const faqSchema = {
     {
       '@type':          'Question',
       name:             'How do you win in Raichu?',
-      acceptedAnswer: { '@type': 'Answer', text: 'Capture every one of your opponent\'s pieces. Unlike chess there is no king — you must eliminate the entire army.' },
+      acceptedAnswer: { '@type': 'Answer', text: 'Capture every one of your opponent\'s pieces. Unlike chess there is no king, you must eliminate the entire army.' },
     },
     {
       '@type':          'Question',
@@ -95,20 +95,20 @@ export default function HowToPlayPage() {
               title: 'Learn Your Three Piece Types',
               body: null,
               list: [
-                '<strong>Pichu</strong> — moves one square diagonally forward. Captures by jumping over an adjacent enemy Pichu, landing on the empty square beyond. Can only capture other Pichus.',
-                '<strong>Pikachu</strong> — moves 1 or 2 squares forward, left, or right (no diagonal, no backward). Captures Pichus and other Pikachus by jumping over them.',
-                '<strong>Raichu</strong> — moves any number of squares in any of the 8 directions. Captures any piece by jumping over it and can land anywhere along the line beyond it. Earned through promotion.',
+                '<strong>Pichu</strong>: moves one square diagonally forward. Captures by jumping over an adjacent enemy Pichu, landing on the empty square beyond. Can only capture other Pichus.',
+                '<strong>Pikachu</strong>: moves 1 or 2 squares forward, left, or right (no diagonal, no backward). Captures Pichus and other Pikachus by jumping over them.',
+                '<strong>Raichu</strong>: moves any number of squares in any of the 8 directions. Captures any piece by jumping over it and can land anywhere along the line beyond it. Earned through promotion.',
               ],
             },
             {
               n: 3,
               title: 'White Moves First',
-              body: 'White always takes the first turn. Players alternate turns. On each turn you move exactly one piece — either a quiet move to an empty square or a capture.',
+              body: 'White always takes the first turn. Players alternate turns. On each turn you move exactly one piece: either a quiet move to an empty square or a capture.',
             },
             {
               n: 4,
               title: 'Captures Are Optional',
-              body: 'Unlike checkers, captures are not mandatory. You may always choose any legal move on your turn. There is no chain capturing — one capture per move.',
+              body: 'Unlike checkers, captures are not mandatory. You may always choose any legal move on your turn. There is no chain capturing, one capture per move.',
             },
             {
               n: 5,
@@ -165,11 +165,11 @@ export default function HowToPlayPage() {
             Common Beginner Mistakes
           </h2>
           <ul style={{ color: 'var(--c-muted)', lineHeight: 1.9, paddingLeft: '1.5rem' }}>
-            <li><strong style={{ color: 'var(--c-text)' }}>Forgetting Pichu can only capture Pichus.</strong> A Pichu adjacent to an enemy Pikachu cannot capture it — it can only threaten Pichus.</li>
+            <li><strong style={{ color: 'var(--c-text)' }}>Forgetting Pichu can only capture Pichus.</strong> A Pichu adjacent to an enemy Pikachu cannot capture it. it can only threaten Pichus.</li>
             <li><strong style={{ color: 'var(--c-text)' }}>Ignoring promotion threats.</strong> A Pichu or Pikachu two squares from the back row is a serious threat. Defend or counter immediately.</li>
             <li><strong style={{ color: 'var(--c-text)' }}>Moving Pikachus sideways without a plan.</strong> Pikachus can move left and right, but aimless lateral movement wastes tempo.</li>
             <li><strong style={{ color: 'var(--c-text)' }}>Forgetting captures are optional.</strong> Sometimes the best move is a quiet development, not an available capture.</li>
-            <li><strong style={{ color: 'var(--c-text)' }}>Leaving promoted Raichus unprotected.</strong> A Raichu can capture anything — but so can the opponent's Raichus.</li>
+            <li><strong style={{ color: 'var(--c-text)' }}>Leaving promoted Raichus unprotected.</strong> A Raichu can capture anything, but so can the opponent's Raichus.</li>
           </ul>
         </section>
 
@@ -180,10 +180,10 @@ export default function HowToPlayPage() {
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {[
-              { q: 'How do you win?',                   a: 'Capture every one of your opponent\'s pieces. There is no king to checkmate — you must eliminate the entire army.' },
-              { q: 'Can pieces move backward?',          a: 'Only Raichus. Pichus always move diagonally forward. Pikachus move forward, left, or right — never backward.' },
+              { q: 'How do you win?',                   a: 'Capture every one of your opponent\'s pieces. There is no king to checkmate, you must eliminate the entire army.' },
+              { q: 'Can pieces move backward?',          a: 'Only Raichus. Pichus always move diagonally forward. Pikachus move forward, left, or right, never backward.' },
               { q: 'Is Raichu hard to learn?',           a: 'No. The rules fit on one page and most beginners are thinking tactically from the very first game.' },
-              { q: 'How long does a game take?',         a: 'Typically 5–15 minutes. Games are shorter than chess because there is no drawn-out endgame — once one side loses piece count advantage, the end comes quickly.' },
+              { q: 'How long does a game take?',         a: 'Typically 5–15 minutes. Games are shorter than chess because there is no drawn-out endgame. Once one side loses piece count advantage, the end comes quickly.' },
             ].map(({ q, a }) => (
               <div key={q} style={{ backgroundColor: 'var(--c-bg-1)', border: '1px solid var(--c-border)', borderRadius: 10, padding: '1rem 1.25rem' }}>
                 <dt style={{ fontWeight: 700, marginBottom: '0.25rem' }}>{q}</dt>

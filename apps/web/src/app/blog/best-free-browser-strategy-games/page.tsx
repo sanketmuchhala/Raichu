@@ -6,7 +6,7 @@ import { SeoNav, SeoFooter } from '../../../components/seo/SeoFooter';
 
 export const metadata: Metadata = pageMetadata({
   title:       'Best Free Browser Strategy Games You Can Play Now',
-  description: 'The best free abstract strategy games playable in a browser — Lichess, PlayStrategy, Raichu, and more. No download, no install. Pure skill competition.',
+  description: 'The best free abstract strategy games playable in a browser. Lichess, PlayStrategy, Raichu, and more. No download, no install. Pure skill competition.',
   path:        '/blog/best-free-browser-strategy-games',
   type:        'article',
 });
@@ -34,7 +34,7 @@ const GAMES = [
     url:      'https://raichu.live/play',
     internal: '/play',
     type:     'Chess-inspired abstract strategy',
-    free:     'Yes — no account needed for AI play',
+    free:     'Yes. No account needed for AI play',
     desc:     'A chess-inspired abstract strategy game with three piece types and a capture hierarchy. Play vs AI at three difficulty levels or create a free account to challenge other players online. Games last 5–15 minutes. Zero luck, no draws.',
     highlight: true,
   },
@@ -42,7 +42,7 @@ const GAMES = [
     name: 'Lichess',
     url:  'https://lichess.org',
     type: 'Chess and chess variants',
-    free: 'Yes — fully open source, always free',
+    free: 'Yes. fully open source, always free',
     desc: 'The gold standard for free online chess. Lichess offers standard chess, Chess960, Crazyhouse, King of the Hill, Three-Check, and more. No ads, no premium paywall. Arguably the best-designed chess site available.',
   },
   {
@@ -89,7 +89,7 @@ export default function Article() {
           Best Free Browser Strategy Games You Can Play Now
         </h1>
         <p style={{ color: 'var(--c-muted)', fontSize: '1.0625rem', lineHeight: 1.7, marginBottom: '2.5rem' }}>
-          All of these run in your browser — no installation, no download. Most require no account. All are zero-luck strategy games.
+          All of these run in your browser. No installation, no download. Most require no account. All are zero-luck strategy games.
         </p>
 
         <section style={{ marginBottom: '3rem' }}>
@@ -121,7 +121,7 @@ export default function Article() {
           <h2 style={h2Style}>Which Should You Start With?</h2>
           <ul style={{ color: 'var(--c-muted)', lineHeight: 1.9, paddingLeft: '1.5rem' }}>
             <li><strong style={{ color: 'var(--c-text)' }}>Already know chess?</strong> Lichess for more chess, Raichu for a new challenge.</li>
-            <li><strong style={{ color: 'var(--c-text)' }}>New to abstract strategy?</strong> Raichu — the rules fit on one page and the game rewards your first few hours immediately.</li>
+            <li><strong style={{ color: 'var(--c-text)' }}>New to abstract strategy?</strong> Raichu. the rules fit on one page and the game rewards your first few hours immediately.</li>
             <li><strong style={{ color: 'var(--c-text)' }}>Want variety?</strong> PlayStrategy has the broadest game selection.</li>
             <li><strong style={{ color: 'var(--c-text)' }}>Want pure no-luck games beyond chess?</strong> PlayAbstractGames.</li>
           </ul>

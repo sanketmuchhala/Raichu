@@ -82,7 +82,7 @@ export default function RulesPage() {
                 { row: 6, col: 5, piece: 'B' as PieceChar },
                 { row: 6, col: 7, piece: 'B' as PieceChar },
               ]}
-              caption="Starting position — White (top), Black (bottom)"
+              caption="Starting position. White top, Black bottom."
             />
           </div>
         </Section>
@@ -277,10 +277,10 @@ export default function RulesPage() {
         <Section title="Key Rules" theme={theme}>
           <ul className="space-y-3">
             {[
-              'Captures are not mandatory — you may choose any legal move on your turn.',
-              'Only one capture per move — there is no multi-jump or chain capture.',
+              'Captures are not mandatory. You may choose any legal move on your turn.',
+              'Only one capture per move. No multi-jump or chain capturing.',
               'Pieces cannot jump over or move through friendly pieces.',
-              'The board does not wrap around — pieces cannot move off one edge and appear on the other.',
+              'The board does not wrap around. Pieces cannot move off one edge and appear on the other.',
               'White always moves first.',
             ].map((rule, i) => (
               <li key={i} className="flex gap-3">

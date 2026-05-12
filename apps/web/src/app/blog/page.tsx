@@ -23,7 +23,7 @@ const ARTICLES = [
   {
     slug:    'what-makes-a-game-chess-like',
     title:   'What Makes a Game Chess-Like?',
-    excerpt: 'Piece hierarchy, no luck, perfect information. Defining the qualities that make abstract strategy games feel like chess — and where Raichu fits.',
+    excerpt: 'Piece hierarchy, no luck, perfect information. Defining the qualities that make abstract strategy games feel like chess. and where Raichu fits.',
     tags:    ['Chess', 'Abstract Strategy', 'Game Design'],
   },
   {
@@ -35,13 +35,13 @@ const ARTICLES = [
   {
     slug:    'raichu-for-chess-players',
     title:   'Raichu for Chess Players: Why You Should Try It',
-    excerpt: 'Chess players will recognize the piece hierarchy, promotion tension, and positional depth. Here is what is familiar — and what is refreshingly different.',
+    excerpt: 'Chess players will recognize the piece hierarchy, promotion tension, and positional depth. Here is what is familiar. and what is refreshingly different.',
     tags:    ['Chess', 'Raichu', 'Comparison'],
   },
   {
     slug:    'best-free-browser-strategy-games',
     title:   'Best Free Browser Strategy Games You Can Play Now',
-    excerpt: 'Lichess, PlayStrategy, PlayAbstractGames, and Raichu. The best abstract strategy games you can play free in a browser — no download, no account required.',
+    excerpt: 'Lichess, PlayStrategy, PlayAbstractGames, and Raichu. The best abstract strategy games you can play free in a browser. No download, no account required.',
     tags:    ['Browser Games', 'Free', 'Strategy'],
   },
   {

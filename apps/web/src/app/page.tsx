@@ -218,7 +218,7 @@ export default function Home() {
               What is Raichu?
             </h2>
             <p style={{ fontSize: '0.875rem', color: theme.textSecondary, lineHeight: 1.75 }}>
-              Raichu is a two-player abstract strategy game played on an 8×8 board. It is chess-inspired in spirit — a hierarchy of pieces, a promotion mechanic, no luck, no draws — but has its own complete ruleset and win condition. Capture every enemy piece to win.
+              Raichu is a two-player abstract strategy game played on an 8×8 board. Chess-inspired in spirit: piece hierarchy, promotion, no luck, no draws. But it has its own complete ruleset and win condition. Capture every enemy piece to win.
             </p>
           </div>
 
@@ -227,9 +227,9 @@ export default function Home() {
               Why chess players like it
             </h2>
             <ul style={{ fontSize: '0.875rem', color: theme.textSecondary, lineHeight: 1.8, paddingLeft: '1.25rem', margin: 0 }}>
-              <li>Zero luck — outcomes depend entirely on decision quality</li>
+              <li>Zero luck. Outcomes depend entirely on decision quality</li>
               <li>Deep tactics from a simple ruleset</li>
-              <li>Games finish in 5–15 minutes — no drawn-out endings</li>
+              <li>Games finish in 5–15 minutes, no drawn-out endings</li>
               <li>Promotion pressure creates chess-like middlegame tension</li>
             </ul>
           </div>
@@ -239,7 +239,7 @@ export default function Home() {
               How it differs from chess
             </h2>
             <ul style={{ fontSize: '0.875rem', color: theme.textSecondary, lineHeight: 1.8, paddingLeft: '1.25rem', margin: 0 }}>
-              <li>No king — win by capturing every piece</li>
+              <li>No king. Win by capturing every piece</li>
               <li>Capture hierarchy limits which pieces can take which</li>
               <li>Jump-style captures (like checkers), not displacement</li>
               <li>No draws, no en passant, no castling</li>

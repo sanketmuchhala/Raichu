@@ -90,7 +90,7 @@ export default function RaichuVsChessPage() {
           <ul style={{ color: 'var(--c-muted)', lineHeight: 1.9, paddingLeft: '1.5rem' }}>
             <li><strong style={{ color: 'var(--c-text)' }}>8×8 board.</strong> Same spatial scale, so positional intuitions transfer.</li>
             <li><strong style={{ color: 'var(--c-text)' }}>Piece hierarchy.</strong> Weak pieces (Pichu/pawn) alongside powerful pieces (Raichu/queen), requiring different treatment.</li>
-            <li><strong style={{ color: 'var(--c-text)' }}>Promotion mechanic.</strong> Advancing a weak piece to the back row earns a powerful piece — a central tactical goal in both games.</li>
+            <li><strong style={{ color: 'var(--c-text)' }}>Promotion mechanic.</strong> Advancing a weak piece to the back row earns a powerful piece. a central tactical goal in both games.</li>
             <li><strong style={{ color: 'var(--c-text)' }}>Board control.</strong> Controlling the center and creating threats in multiple directions rewards the same positional thinking.</li>
             <li><strong style={{ color: 'var(--c-text)' }}>Zero luck.</strong> Both are perfect-information games with no randomness. Outcomes depend entirely on decision quality.</li>
             <li><strong style={{ color: 'var(--c-text)' }}>Two-player, alternating turns.</strong> Same basic turn structure. White always moves first.</li>
@@ -101,7 +101,7 @@ export default function RaichuVsChessPage() {
         <section style={{ marginBottom: '3rem' }}>
           <h2 style={h2Style}>Key Differences</h2>
           <ul style={{ color: 'var(--c-muted)', lineHeight: 1.9, paddingLeft: '1.5rem' }}>
-            <li><strong style={{ color: 'var(--c-text)' }}>Win condition.</strong> Raichu: capture every enemy piece. Chess: checkmate the king. This changes the entire strategic calculus — in Raichu, every piece is equally important to defend.</li>
+            <li><strong style={{ color: 'var(--c-text)' }}>Win condition.</strong> Raichu: capture every enemy piece. Chess: checkmate the king. This changes the entire strategic calculus. in Raichu, every piece is equally important to defend.</li>
             <li><strong style={{ color: 'var(--c-text)' }}>Capture hierarchy.</strong> In Raichu, Pichus can only capture Pichus, Pikachus can only capture Pichus and Pikachus. In chess, any piece can take any piece.</li>
             <li><strong style={{ color: 'var(--c-text)' }}>Jump capture.</strong> Captures in Raichu are always jumps (the attacker lands beyond the target). In chess, the attacker moves to the target's square.</li>
             <li><strong style={{ color: 'var(--c-text)' }}>Fewer starting pieces.</strong> Eight per side vs. sixteen in chess. Games move faster and the tactical complexity ramps up sooner.</li>
@@ -115,7 +115,7 @@ export default function RaichuVsChessPage() {
           <h2 style={h2Style}>Who Should Play Raichu</h2>
           <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
             {[
-              { label: 'Chess players', text: 'Looking for a fresh tactical challenge with familiar ideas — piece hierarchy, promotion, board control — but a different win condition and no draws.' },
+              { label: 'Chess players', text: 'Looking for a fresh tactical challenge with familiar ideas: piece hierarchy, promotion, board control, but a different win condition and no draws.' },
               { label: 'Strategy newcomers', text: 'Want chess-like depth but prefer a shorter learning curve. The rules take minutes to learn; the depth keeps experienced players engaged.' },
               { label: 'Casual players', text: 'Want a complete game in 5–15 minutes. Raichu\'s shorter game length makes it easy to fit into a break without a half-finished position.' },
             ].map(({ label, text }) => (

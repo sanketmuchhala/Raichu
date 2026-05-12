@@ -42,7 +42,7 @@ const games = [
   {
     name: 'Go',
     tag: 'The oldest strategy game',
-    desc: 'Played on a 19×19 grid with black and white stones, Go is about territory — surrounding and capturing areas of the board. The rules are extremely simple (one of the simplest rule sets in abstract strategy), but the resulting depth dwarfs chess. Go has the largest game tree of any two-player board game.',
+    desc: 'Played on a 19×19 grid with black and white stones, Go is about territory: surrounding and capturing areas of the board. The rules are extremely simple (one of the simplest rule sets in abstract strategy), but the resulting depth dwarfs chess. Go has the largest game tree of any two-player board game.',
     chessLike: 'Perfect information, no luck, deep strategy. Very different mechanically but rewards the same analytical mindset.',
   },
   {
@@ -54,7 +54,7 @@ const games = [
   {
     name: 'Hive',
     tag: 'No board needed',
-    desc: 'A two-player abstract game played with hexagonal tiles, each representing an insect with a unique movement pattern. There is no board — the tiles form the playing surface. The goal is to surround the opponent\'s Queen Bee. Hive is portable, zero-luck, and surprisingly deep for how quickly it can be learned.',
+    desc: 'A two-player abstract game played with hexagonal tiles, each representing an insect with a unique movement pattern. There is no board: the tiles form the playing surface. The goal is to surround the opponent\'s Queen Bee. Hive is portable, zero-luck, and surprisingly deep for how quickly it can be learned.',
     chessLike: 'Piece types with distinct movement rules, tactical captures, strategic positioning.',
   },
   {
@@ -72,7 +72,7 @@ const games = [
   {
     name: 'Raichu',
     tag: 'Play free in your browser',
-    desc: 'Raichu is a chess-inspired abstract strategy game with three piece types — Pichu, Pikachu, and Raichu — each with distinct movement and a capture hierarchy. Played on an 8×8 board, the goal is to capture every opponent piece. No luck, no draws, no download required.',
+    desc: 'Raichu is a chess-inspired abstract strategy game with three piece types: Pichu, Pikachu, and Raichu, each with distinct movement and a capture hierarchy. Played on an 8×8 board, the goal is to capture every opponent piece. No luck, no draws, no download required.',
     chessLike: 'Piece hierarchy, promotion mechanic, board control, positional and tactical depth.',
     cta: true,
   },
@@ -103,7 +103,7 @@ export default function ChessLikeGamesPage() {
         <section style={{ marginBottom: '3rem' }}>
           <h2 style={h2Style}>What Makes a Game Chess-Like?</h2>
           <p style={{ color: 'var(--c-muted)', lineHeight: 1.75 }}>
-            A chess-like game typically features: two players taking turns on a grid, distinct piece types with different movement rules, no luck or randomness, and strategic depth that scales with experience. They reward the same analytical habits — pattern recognition, long-term planning, tactical calculation — that chess players develop.
+            A chess-like game typically features: two players taking turns on a grid, distinct piece types with different movement rules, no luck or randomness, and strategic depth that scales with experience. They reward the same analytical habits: pattern recognition, long-term planning, tactical calculation. Skills that chess players develop.
           </p>
         </section>
 

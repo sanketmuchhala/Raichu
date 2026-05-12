@@ -91,7 +91,7 @@ export default function StrategyPage() {
 
           <h3 style={h3Style}>Make threats that demand a response</h3>
           <p style={paraStyle}>
-            A <em>forcing move</em> is one that leaves the opponent with no good answer: a capture threat, a promotion threat, or a fork (attacking two pieces at once). When you string forcing moves together, your opponent must react rather than develop — and you steadily gain the initiative.
+            A <em>forcing move</em> is one that leaves the opponent with no good answer: a capture threat, a promotion threat, or a fork (attacking two pieces at once). When you string forcing moves together, your opponent must react rather than develop, and you steadily gain the initiative.
           </p>
 
           <h3 style={h3Style}>The fork with Raichu</h3>
@@ -99,7 +99,7 @@ export default function StrategyPage() {
             A promoted Raichu that simultaneously threatens two enemy pieces is a game-defining tactic. Because Raichus capture in all 8 directions, placing one on a square that attacks two targets from different angles forces a material loss. Look for these fork opportunities whenever you promote.
           </p>
 
-          <h3 style={h3Style}>Tempo counts — do not waste moves</h3>
+          <h3 style={h3Style}>Tempo counts. do not waste moves</h3>
           <p style={paraStyle}>
             Every move that does not advance your position hands tempo to the opponent. Avoid retreating pieces unless necessary. Moving the same piece twice in the opening without a concrete reason is usually a mistake.
           </p>
@@ -112,7 +112,7 @@ export default function StrategyPage() {
             {[
               { piece: 'Pichu', note: 'Expendable, but each loss matters. Losing a Pichu without gaining a promotion threat or capture is a mistake.' },
               { piece: 'Pikachu', note: 'Your core attacking unit. Losing both Pikachus before promoting anything leaves you severely disadvantaged.' },
-              { piece: 'Raichu', note: 'Winning. Protect promoted Raichus — the opponent\'s Raichus can capture yours. Two Raichus should be nearly unstoppable.' },
+              { piece: 'Raichu', note: 'Winning. Protect promoted Raichus: the opponent\'s Raichus can capture yours. Two Raichus should be nearly unstoppable.' },
             ].map(({ piece, note }) => (
               <div key={piece} style={{ backgroundColor: 'var(--c-bg-1)', border: '1px solid var(--c-border)', borderLeft: '3px solid var(--c-green)', borderRadius: 10, padding: '1rem' }}>
                 <div style={{ fontWeight: 700, marginBottom: '0.375rem' }}>{piece}</div>
@@ -128,7 +128,7 @@ export default function StrategyPage() {
 
           <h3 style={h3Style}>Two Raichus win</h3>
           <p style={paraStyle}>
-            If you have two Raichus and the opponent has only Pichus and Pikachus, the game is effectively over. Use one Raichu to cut off escape routes while the second captures. Coordinate rather than rush — a methodical approach eliminates the risk of a blunder.
+            If you have two Raichus and the opponent has only Pichus and Pikachus, the game is effectively over. Use one Raichu to cut off escape routes while the second captures. Coordinate rather than rush: a methodical approach eliminates the risk of a blunder.
           </p>
 
           <h3 style={h3Style}>Minority endgames</h3>
@@ -145,7 +145,7 @@ export default function StrategyPage() {
         {/* CTAs */}
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
           <Link href="/play" style={{ display: 'inline-block', padding: '0.75rem 1.75rem', backgroundColor: 'var(--c-green)', color: '#fff', borderRadius: 8, fontWeight: 700, textDecoration: 'none', fontSize: '0.9375rem' }}>
-            Apply It — Play Now
+            Apply It. Play Now
           </Link>
           <Link href="/rules" style={{ display: 'inline-block', padding: '0.75rem 1.75rem', backgroundColor: 'var(--c-bg-1)', color: 'var(--c-text)', border: '1px solid var(--c-border)', borderRadius: 8, fontWeight: 600, textDecoration: 'none', fontSize: '0.9375rem' }}>
             Rules Reference

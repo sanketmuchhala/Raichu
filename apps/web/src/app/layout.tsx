@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     template: '%s | Raichu Game',
   },
   description:
-    'Play Raichu — a fast, chess-inspired abstract strategy game playable free in your browser. Learn the rules, plan tactical moves, and challenge your mind.',
+    'Play Raichu, a fast chess-inspired abstract strategy game playable free in your browser. Learn the rules, plan tactical moves, and challenge your mind.',
   metadataBase: new URL(SITE_URL),
   alternates: { canonical: SITE_URL },
   openGraph: {
@@ -28,13 +28,13 @@ export const metadata: Metadata = {
     url:       SITE_URL,
     title:     'Raichu Game | Chess-Inspired Strategy Board Game Online',
     description:
-      'Play Raichu — a fast, chess-inspired abstract strategy game playable free in your browser.',
+      'Play Raichu, a fast chess-inspired abstract strategy game, free in your browser.',
   },
   twitter: {
     card:  'summary_large_image',
     title: 'Raichu Game | Chess-Inspired Strategy Board Game Online',
     description:
-      'Play Raichu — a fast, chess-inspired abstract strategy game playable free in your browser.',
+      'Play Raichu, a fast chess-inspired abstract strategy game, free in your browser.',
   },
   robots: { index: true, follow: true },
 };

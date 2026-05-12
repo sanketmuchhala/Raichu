@@ -58,7 +58,7 @@ export default function ChessVariantsPage() {
               },
               {
                 label: 'Chess-Inspired Game',
-                desc: 'An independent game that draws on chess-like concepts — piece hierarchy, board positioning, tactical combinations — but is not derived from chess. It stands alone as its own game with its own complete ruleset. Examples: Shogi, Chinese Chess (Xiangqi), Onitama, Raichu.',
+                desc: 'An independent game that draws on chess-like concepts: piece hierarchy, board positioning, tactical combinations. But it is not derived from chess. It stands alone as its own game with its own complete ruleset. Examples: Shogi, Chinese Chess (Xiangqi), Onitama, Raichu.',
               },
               {
                 label: 'Abstract Strategy Game',
