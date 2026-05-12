@@ -20,9 +20,11 @@ const SLIDE_EASE = [0.25, 0.46, 0.45, 0.94] as const;
 
 interface OnlineBoardProps {
   flipped?: boolean;
+  overrideBoard?: import('@raichu/shared-types').Board;
+  overrideLastMove?: import('@raichu/shared-types').Move | null;
 }
 
-export function OnlineBoard({ flipped = false }: OnlineBoardProps) {
+export function OnlineBoard({ flipped = false, overrideBoard, overrideLastMove }: OnlineBoardProps) {
   const boardRef = useRef<SVGSVGElement>(null);
   const theme      = useUIStore((s) => THEMES[s.theme]);
   const isDragging = useUIStore((s) => s.isDragging);
@@ -32,16 +34,20 @@ export function OnlineBoard({ flipped = false }: OnlineBoardProps) {
   const endDrag    = useUIStore((s) => s.endDrag);
 
   const {
-    board,
+    board: liveBoard,
     selectedPiece,
     legalMoves,
-    lastMove,
+    lastMove: liveLastMove,
     status,
-    canInteract,
+    canInteract: liveCanInteract,
     selectPiece,
     makeMove,
     clearSelection,
   } = useBoardContext();
+
+  const board = overrideBoard ?? liveBoard;
+  const lastMove = overrideLastMove !== undefined ? overrideLastMove : liveLastMove;
+  const canInteract = overrideBoard ? false : liveCanInteract;
 
   const toDisplayRow = useCallback((row: number) => flipped ? BOARD_SIZE - 1 - row : row, [flipped]);
   const toDisplayCol = useCallback((col: number) => flipped ? BOARD_SIZE - 1 - col : col, [flipped]);
@@ -142,9 +148,10 @@ export function OnlineBoard({ flipped = false }: OnlineBoardProps) {
     >
       <rect width={TOTAL_WIDTH} height={TOTAL_HEIGHT} fill={theme.bgSecondary} rx="4" />
 
-      {/* Column labels */}
+      {/* Column labels — correct orientation for current perspective */}
       {Array.from({ length: BOARD_SIZE }, (_, i) => {
         const displayCol = toDisplayCol(i);
+        const label = COL_LABELS[flipped ? BOARD_SIZE - 1 - i : i];
         return (
           <text
             key={`col-${i}`}
@@ -155,14 +162,15 @@ export function OnlineBoard({ flipped = false }: OnlineBoardProps) {
             fill={theme.textSecondary}
             fontFamily="system-ui, sans-serif"
           >
-            {COL_LABELS[i]}
+            {label}
           </text>
         );
       })}
 
-      {/* Row labels */}
+      {/* Row labels — 1 near white side, 8 near black side */}
       {Array.from({ length: BOARD_SIZE }, (_, i) => {
         const displayRow = toDisplayRow(i);
+        const label = flipped ? i + 1 : BOARD_SIZE - i;
         return (
           <text
             key={`row-${i}`}
@@ -173,7 +181,7 @@ export function OnlineBoard({ flipped = false }: OnlineBoardProps) {
             fill={theme.textSecondary}
             fontFamily="system-ui, sans-serif"
           >
-            {BOARD_SIZE - i}
+            {label}
           </text>
         );
       })}

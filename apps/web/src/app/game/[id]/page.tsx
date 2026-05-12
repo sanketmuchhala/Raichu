@@ -15,6 +15,9 @@ import { OnlineGameSidebar } from '../../../components/game/OnlineGameSidebar';
 import { WaitingRoom } from '../../../components/game/WaitingRoom';
 import { GameOverOverlay } from '../../../components/game/GameOverOverlay';
 import { PlayerBar } from '../../../components/game/PlayerBar';
+import { createInitialBoard, decodeBoard } from '@raichu/game-engine';
+import { BLACK_PIECES, WHITE_PIECES } from '@raichu/shared-types';
+import type { PieceChar } from '@raichu/shared-types';
 
 export default function OnlineGamePage() {
   const params = useParams();
@@ -22,37 +25,37 @@ export default function OnlineGamePage() {
   const theme = useUIStore((s) => THEMES[s.theme]);
   const user = useAuthStore((s) => s.user);
 
-  const game = useOnlineGameStore((s) => s.game);
-  const board = useOnlineGameStore((s) => s.board);
-  const currentPlayer = useOnlineGameStore((s) => s.currentPlayer);
-  const status = useOnlineGameStore((s) => s.status);
-  const selectedPiece = useOnlineGameStore((s) => s.selectedPiece);
-  const legalMoves = useOnlineGameStore((s) => s.legalMoves);
-  const lastMove = useOnlineGameStore((s) => s.lastMove);
-  const isThinking = useOnlineGameStore((s) => s.isThinking);
-  const myColor = useOnlineGameStore((s) => s.myColor);
-  const loading = useOnlineGameStore((s) => s.loading);
-  const error = useOnlineGameStore((s) => s.error);
-  const loadGame = useOnlineGameStore((s) => s.loadGame);
-  const selectPiece = useOnlineGameStore((s) => s.selectPiece);
-  const submitMove = useOnlineGameStore((s) => s.submitMove);
-  const clearSelection = useOnlineGameStore((s) => s.clearSelection);
-  const resign = useOnlineGameStore((s) => s.resign);
-  const reset = useOnlineGameStore((s) => s.reset);
+  const game            = useOnlineGameStore((s) => s.game);
+  const board           = useOnlineGameStore((s) => s.board);
+  const currentPlayer   = useOnlineGameStore((s) => s.currentPlayer);
+  const status          = useOnlineGameStore((s) => s.status);
+  const selectedPiece   = useOnlineGameStore((s) => s.selectedPiece);
+  const legalMoves      = useOnlineGameStore((s) => s.legalMoves);
+  const lastMove        = useOnlineGameStore((s) => s.lastMove);
+  const isThinking      = useOnlineGameStore((s) => s.isThinking);
+  const myColor         = useOnlineGameStore((s) => s.myColor);
+  const loading         = useOnlineGameStore((s) => s.loading);
+  const error           = useOnlineGameStore((s) => s.error);
+  const moves           = useOnlineGameStore((s) => s.moves);
+  const loadGame        = useOnlineGameStore((s) => s.loadGame);
+  const selectPiece     = useOnlineGameStore((s) => s.selectPiece);
+  const submitMove      = useOnlineGameStore((s) => s.submitMove);
+  const clearSelection  = useOnlineGameStore((s) => s.clearSelection);
+  const resign          = useOnlineGameStore((s) => s.resign);
+  const reset           = useOnlineGameStore((s) => s.reset);
 
   const boardContainerRef = useRef<HTMLDivElement>(null);
   const [boardHeight, setBoardHeight] = useState(0);
+  // null = live; number = replay at that step
+  const [replayStep, setReplayStep] = useState<number | null>(null);
 
-  // Subscribe to Realtime updates
   useGameSubscription(gameId);
 
-  // Load game on mount
   useEffect(() => {
     loadGame(gameId);
     return () => reset();
   }, [gameId, loadGame, reset]);
 
-  // Set myColor once game + user are available (guard to avoid redundant updates)
   useEffect(() => {
     if (!game || !user) return;
     const current = useOnlineGameStore.getState().myColor;
@@ -63,22 +66,24 @@ export default function OnlineGamePage() {
     }
   }, [game?.white_player_id, game?.black_player_id, user]);
 
-  // Track board height for sidebar sizing
   useEffect(() => {
     const el = boardContainerRef.current;
     if (!el) return;
     const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        setBoardHeight(entry.contentRect.width);
-      }
+      for (const entry of entries) setBoardHeight(entry.contentRect.width);
     });
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
 
-  const canInteract = !isThinking && myColor === currentPlayer && status === 'playing';
+  // Board states for replay: [initial, ...after each move]
+  const replayBoards = useMemo(() => {
+    if (moves.length === 0) return [createInitialBoard()];
+    return [createInitialBoard(), ...moves.map((m) => decodeBoard(m.board_after))];
+  }, [moves]);
 
-  // useMemo must be called before any early returns (React hooks rules)
+  const canInteract = !isThinking && myColor === currentPlayer && status === 'playing' && replayStep === null;
+
   const boardContextValue = useMemo(() => ({
     board,
     currentPlayer,
@@ -92,6 +97,44 @@ export default function OnlineGamePage() {
     makeMove: submitMove,
     clearSelection,
   }), [board, currentPlayer, status, selectedPiece, legalMoves, lastMove, isThinking, canInteract, selectPiece, submitMove, clearSelection]);
+
+  // Captured pieces from moves list
+  const whiteCaptured = useMemo(
+    () => {
+      const src = replayStep !== null ? moves.slice(0, replayStep) : moves;
+      return src
+        .filter((m) => m.captured_piece && (BLACK_PIECES as readonly string[]).includes(m.captured_piece))
+        .map((m) => m.captured_piece as PieceChar);
+    },
+    [moves, replayStep]
+  );
+  const blackCaptured = useMemo(
+    () => {
+      const src = replayStep !== null ? moves.slice(0, replayStep) : moves;
+      return src
+        .filter((m) => m.captured_piece && (WHITE_PIECES as readonly string[]).includes(m.captured_piece))
+        .map((m) => m.captured_piece as PieceChar);
+    },
+    [moves, replayStep]
+  );
+
+  // Replay board / last move overrides
+  const replayBoard    = replayStep !== null ? (replayBoards[replayStep] ?? board) : undefined;
+  const replayLastMove = replayStep !== null && replayStep > 0
+    ? (() => {
+        const m = moves[replayStep - 1];
+        if (!m) return null;
+        return {
+          from: { row: m.from_row, col: m.from_col },
+          to:   { row: m.to_row,   col: m.to_col },
+          piece: m.piece as import('@raichu/shared-types').Move['piece'],
+          captured: m.captured_piece
+            ? { position: { row: m.captured_row!, col: m.captured_col! }, piece: m.captured_piece as import('@raichu/shared-types').Move['piece'] }
+            : undefined,
+          promotion: m.promotion as import('@raichu/shared-types').Move['promotion'],
+        };
+      })()
+    : replayStep === 0 ? null : undefined;
 
   if (loading) {
     return (
@@ -120,14 +163,16 @@ export default function OnlineGamePage() {
 
   if (!game) return null;
 
-  const isWaiting = game.status === 'waiting';
+  const isWaiting  = game.status === 'waiting';
   const isFinished = game.status !== 'waiting' && game.status !== 'playing';
 
-  // Determine which player is on top / bottom based on myColor
-  const topPlayer = myColor === 'black' ? game.white_player : game.black_player;
-  const bottomPlayer = myColor === 'black' ? game.black_player : game.white_player;
-  const topColor: 'white' | 'black' = myColor === 'black' ? 'white' : 'black';
+  const topColor:    'white' | 'black' = myColor === 'black' ? 'white' : 'black';
   const bottomColor: 'white' | 'black' = myColor === 'black' ? 'black' : 'white';
+  const topPlayer    = myColor === 'black' ? game.white_player : game.black_player;
+  const bottomPlayer = myColor === 'black' ? game.black_player : game.white_player;
+
+  const topCaptured    = topColor    === 'white' ? whiteCaptured : blackCaptured;
+  const bottomCaptured = bottomColor === 'white' ? whiteCaptured : blackCaptured;
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: theme.bgPrimary }}>
@@ -146,7 +191,6 @@ export default function OnlineGamePage() {
           </div>
         ) : (
           <div className="w-full mx-auto" style={{ maxWidth: 1100 }}>
-            {/* Two-column layout: board + sidebar */}
             <div className="flex flex-col lg:flex-row gap-0 lg:gap-6">
               {/* Board column */}
               <div className="flex-1 lg:max-w-[700px] mx-auto lg:mx-0 space-y-2">
@@ -155,8 +199,9 @@ export default function OnlineGamePage() {
                   <PlayerBar
                     username={topPlayer.display_name || topPlayer.username}
                     elo={topPlayer.elo_rating}
-                    isCurrentTurn={currentPlayer === topColor}
+                    isCurrentTurn={currentPlayer === topColor && replayStep === null}
                     color={topColor}
+                    capturedPieces={topCaptured}
                   />
                 )}
 
@@ -170,12 +215,15 @@ export default function OnlineGamePage() {
                     }}
                   >
                     <BoardProvider value={boardContextValue}>
-                      <OnlineBoard flipped={myColor === 'black'} />
+                      <OnlineBoard
+                        flipped={myColor === 'black'}
+                        overrideBoard={replayBoard}
+                        overrideLastMove={replayLastMove}
+                      />
                     </BoardProvider>
                   </div>
 
-                  {/* Game over overlay */}
-                  {isFinished && (
+                  {isFinished && replayStep === null && (
                     <GameOverOverlay
                       status={game.status}
                       winnerId={game.winner_id}
@@ -189,12 +237,13 @@ export default function OnlineGamePage() {
                   <PlayerBar
                     username={bottomPlayer.display_name || bottomPlayer.username}
                     elo={bottomPlayer.elo_rating}
-                    isCurrentTurn={currentPlayer === bottomColor}
+                    isCurrentTurn={currentPlayer === bottomColor && replayStep === null}
                     color={bottomColor}
+                    capturedPieces={bottomCaptured}
                   />
                 )}
 
-                {/* Mobile resign button (hidden on desktop where sidebar has it) */}
+                {/* Mobile resign */}
                 {game.status === 'playing' && (
                   <div className="flex justify-center pt-2 lg:hidden">
                     <button
@@ -216,7 +265,11 @@ export default function OnlineGamePage() {
                   minHeight: 400,
                 }}
               >
-                <OnlineGameSidebar onResign={resign} />
+                <OnlineGameSidebar
+                  onResign={resign}
+                  replayStep={replayStep ?? undefined}
+                  onReplayStep={setReplayStep}
+                />
               </div>
             </div>
           </div>

@@ -17,6 +17,7 @@ interface GameStore {
   currentPlayer: Player;
   status: GameStatus;
   moveHistory: Move[];
+  boardHistory: Board[];
   lastMove: Move | null;
 
   // Game config
@@ -44,6 +45,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   currentPlayer: 'white',
   status: 'playing',
   moveHistory: [],
+  boardHistory: [createInitialBoard()],
   lastMove: null,
   gameMode: 'pvp',
   difficulty: 'medium',
@@ -76,7 +78,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   makeMove: (move: Move) => {
-    const { board, currentPlayer, moveHistory, gameMode, playerColor } = get();
+    const { board, currentPlayer, moveHistory, boardHistory, gameMode, playerColor } = get();
 
     const newBoard = applyMove(board, move);
     const nextPlayer: Player = currentPlayer === 'white' ? 'black' : 'white';
@@ -87,6 +89,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       currentPlayer: nextPlayer,
       status: newStatus,
       moveHistory: [...moveHistory, move],
+      boardHistory: [...boardHistory, newBoard],
       lastMove: move,
       selectedPiece: null,
       legalMoves: [],
@@ -104,11 +107,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   newGame: (config) => {
+    const initial = createInitialBoard();
     set({
-      board: createInitialBoard(),
+      board: initial,
       currentPlayer: 'white',
       status: 'playing',
       moveHistory: [],
+      boardHistory: [initial],
       lastMove: null,
       gameMode: config.mode,
       difficulty: config.difficulty,
