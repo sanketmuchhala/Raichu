@@ -39,8 +39,7 @@ export default function PlayPage() {
           <Link
             href="/"
             style={{
-              fontFamily: 'var(--font-display, Georgia, serif)',
-              fontStyle: 'italic',
+              fontFamily: 'var(--font-sans, system-ui)',
               fontSize: '1.375rem',
               fontWeight: 700,
               color: theme.textPrimary,

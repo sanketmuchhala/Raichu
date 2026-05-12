@@ -6,114 +6,226 @@ import { THEMES } from '../lib/themes';
 import { UserMenu } from '../components/auth/UserMenu';
 
 const CDN = 'https://images.chesscomfiles.com/chess-themes/pieces/neo/150';
-const P   = (code: string) => `${CDN}/${code}.png`;
+const P   = (c: string) => `${CDN}/${c}.png`;
 
 export default function Home() {
   const theme  = useUIStore((s) => THEMES[s.theme]);
-  const accent = theme.accent;
-
-  // Derived: a dimmed version of the accent for subtle borders (hex + alpha)
-  const accentDim = accent + '3A';
-
-  const cssVars = {
-    '--lp3-accent':     accent,
-    '--lp3-accent-dim': accentDim,
-  } as React.CSSProperties;
 
   return (
-    <div className="lp3" style={cssVars}>
+    <div
+      className="lp"
+      style={{ backgroundColor: theme.bgPrimary, color: theme.textPrimary }}
+    >
+      {/* ── Nav ──────────────────────────────────────── */}
+      <header
+        className="lp-nav"
+        style={{ borderBottom: `1px solid ${theme.border}` }}
+      >
+        <Link
+          href="/"
+          className="lp-nav-logo"
+          style={{ color: theme.textPrimary }}
+        >
+          Raichu
+        </Link>
 
-      {/* ── Nav ─────────────────────────────────────────── */}
-      <header className="lp3-nav">
-        <Link href="/" className="lp3-nav-logo">Raichu</Link>
-        <nav className="lp3-nav-links">
-          <Link href="/rules"       className="lp3-nav-link">Rules</Link>
-          <Link href="/leaderboard" className="lp3-nav-link">Leaderboard</Link>
-          <Link href="/puzzles"     className="lp3-nav-link">Puzzles</Link>
+        <nav className="lp-nav-links">
+          <Link href="/rules"       className="lp-nav-link" style={{ color: theme.textSecondary }}>Rules</Link>
+          <Link href="/leaderboard" className="lp-nav-link" style={{ color: theme.textSecondary }}>Leaderboard</Link>
+          <Link href="/puzzles"     className="lp-nav-link" style={{ color: theme.textSecondary }}>Puzzles</Link>
           <UserMenu />
         </nav>
       </header>
 
-      {/* ── Hero ────────────────────────────────────────── */}
-      <section className="lp3-hero">
-        <div className="lp3-board-bg"     aria-hidden="true" />
-        <div className="lp3-hero-vignette" aria-hidden="true" />
+      {/* ── Hero ─────────────────────────────────────── */}
+      <section className="lp-hero">
 
-        {/* Floating piece showcase */}
-        <div className="lp3-pieces lp3-r1">
-          <div className="lp3-piece lp3-p1"><img src={P('bp')} width={58}  height={58}  alt="" draggable={false} /></div>
-          <div className="lp3-piece lp3-p2"><img src={P('br')} width={72}  height={72}  alt="" draggable={false} /></div>
-          <div className="lp3-piece lp3-p3"><img src={P('bq')} width={100} height={100} alt="" draggable={false} /></div>
-          <div className="lp3-piece lp3-p4"><img src={P('wr')} width={72}  height={72}  alt="" draggable={false} /></div>
-          <div className="lp3-piece lp3-p5"><img src={P('wp')} width={58}  height={58}  alt="" draggable={false} /></div>
+        {/* Pieces */}
+        <div
+          className="r1"
+          style={{ display: 'flex', alignItems: 'flex-end', gap: '0.75rem', marginBottom: '2.5rem' }}
+        >
+          {[
+            { code: 'bp', size: 52 },
+            { code: 'br', size: 64 },
+            { code: 'bq', size: 80 },
+            { code: 'wq', size: 80 },
+            { code: 'wr', size: 64 },
+            { code: 'wp', size: 52 },
+          ].map(({ code, size }) => (
+            <img
+              key={code}
+              src={P(code)}
+              width={size}
+              height={size}
+              alt=""
+              draggable={false}
+              style={{ filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.5))' }}
+            />
+          ))}
         </div>
 
-        <h1 className="lp3-title lp3-r2">Raichu</h1>
-        <div className="lp3-rule lp3-r3" />
+        {/* Wordmark */}
+        <h1
+          className="r2"
+          style={{
+            fontSize: 'clamp(3rem, 10vw, 5.5rem)',
+            fontWeight: 800,
+            letterSpacing: '-0.03em',
+            lineHeight: 1,
+            marginBottom: '0.875rem',
+          }}
+        >
+          Raichu
+        </h1>
 
-        <p className="lp3-subtitle lp3-r3">
-          A strategy board game with three piece types.<br />
-          Capture every enemy piece to win.
+        <p
+          className="r3"
+          style={{
+            fontSize: '1rem',
+            color: theme.textSecondary,
+            marginBottom: '2.25rem',
+            maxWidth: '40ch',
+            lineHeight: 1.6,
+          }}
+        >
+          A strategy board game with three piece types.
+          Capture every opponent piece to win.
         </p>
 
-        <div className="lp3-ctas lp3-r4">
-          <Link href="/play"  className="lp3-btn-primary">▶ Play vs AI</Link>
-          <Link href="/lobby" className="lp3-btn-ghost">Play Online</Link>
+        {/* CTAs */}
+        <div
+          className="r4"
+          style={{ display: 'flex', gap: '0.625rem', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '1.5rem' }}
+        >
+          <Link
+            href="/play"
+            className="lp-btn lp-btn-primary"
+            style={{ backgroundColor: theme.accent }}
+          >
+            Play vs AI
+          </Link>
+          <Link
+            href="/lobby"
+            className="lp-btn lp-btn-ghost"
+            style={{
+              color: theme.textPrimary,
+              border: `1px solid ${theme.border}`,
+            }}
+          >
+            Play Online
+          </Link>
         </div>
 
-        <nav className="lp3-aux lp3-r5">
-          <Link href="/rules"       className="lp3-aux-link">How to Play</Link>
-          <Link href="/puzzles"     className="lp3-aux-link">Puzzles</Link>
-          <Link href="/leaderboard" className="lp3-aux-link">Leaderboard</Link>
-          <Link href="/history"     className="lp3-aux-link">History</Link>
+        {/* Utility links */}
+        <nav
+          className="r5"
+          style={{ display: 'flex', gap: '1.75rem' }}
+        >
+          {[
+            { href: '/rules',       label: 'How to Play' },
+            { href: '/puzzles',     label: 'Puzzles'     },
+            { href: '/leaderboard', label: 'Leaderboard' },
+            { href: '/history',     label: 'History'     },
+          ].map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              style={{ fontSize: '0.8125rem', color: theme.textSecondary, textDecoration: 'none' }}
+            >
+              {label}
+            </Link>
+          ))}
         </nav>
       </section>
 
-      {/* ── Piece Cards ─────────────────────────────────── */}
-      <section className="lp3-section">
-        <p className="lp3-section-eyebrow">The Pieces</p>
-        <h2 className="lp3-section-heading">Three types. Three powers.</h2>
+      {/* ── Piece Guide ──────────────────────────────── */}
+      <section style={{ borderTop: `1px solid ${theme.border}`, maxWidth: 900, margin: '0 auto', width: '100%' }}>
+        <div style={{ padding: '3rem 2rem 1.5rem', textAlign: 'center' }}>
+          <h2
+            style={{
+              fontSize: '1rem',
+              fontWeight: 700,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color: theme.textSecondary,
+            }}
+          >
+            The Pieces
+          </h2>
+        </div>
 
-        <div className="lp3-cards">
-          {PIECES.map((p) => (
-            <div key={p.name} className="lp3-card">
-              <div className="lp3-card-imgs">
-                <img src={P(p.wCode)} width={54} height={54} alt={`White ${p.name}`} draggable={false} />
-                <img src={P(p.bCode)} width={54} height={54} alt={`Black ${p.name}`} draggable={false} />
+        <div
+          className="lp-cards"
+          style={{ borderTop: `1px solid ${theme.border}`, marginBottom: '2rem' }}
+        >
+          {PIECES.map((p, i) => (
+            <div
+              key={p.name}
+              className="lp-card"
+              style={{
+                backgroundColor: theme.bgPanel,
+                borderRight: i < PIECES.length - 1 ? `1px solid ${theme.border}` : undefined,
+              }}
+            >
+              <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                <img src={P(p.wCode)} width={48} height={48} alt="" draggable={false} />
+                <img src={P(p.bCode)} width={48} height={48} alt="" draggable={false} />
               </div>
-              <div className="lp3-card-name">{p.name}</div>
-              <div className="lp3-card-role">{p.role}</div>
-              <p className="lp3-card-desc">{p.desc}</p>
+              <div style={{ fontWeight: 700, fontSize: '1rem', color: theme.textPrimary }}>
+                {p.name}
+              </div>
+              <div
+                style={{
+                  fontSize: '0.7rem',
+                  fontWeight: 600,
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  color: theme.accent,
+                }}
+              >
+                {p.role}
+              </div>
+              <p style={{ fontSize: '0.8125rem', color: theme.textSecondary, lineHeight: 1.6, maxWidth: '28ch' }}>
+                {p.desc}
+              </p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ── Finale ──────────────────────────────────────── */}
-      <section className="lp3-finale">
-        <div className="lp3-finale-card">
-          <h2 className="lp3-finale-heading">How to Win</h2>
-          <p className="lp3-finale-body">
-            Capture every one of your opponent&apos;s pieces.
-            Promote Pichus and Pikachus to Raichu by reaching the far edge.
-            White moves first. No draws — every game has a winner.
-          </p>
-          <div className="lp3-finale-btns">
-            <Link href="/play"  className="lp3-btn-primary">Start Playing</Link>
-            <Link href="/lobby" className="lp3-btn-ghost">Play Online</Link>
-          </div>
-        </div>
+      {/* ── Footer CTA ───────────────────────────────── */}
+      <section
+        style={{
+          padding: '3rem 2rem 5rem',
+          textAlign: 'center',
+          borderTop: `1px solid ${theme.border}`,
+        }}
+      >
+        <p style={{ color: theme.textSecondary, fontSize: '0.9rem', marginBottom: '1.25rem' }}>
+          White moves first. Capture all enemy pieces to win. No draws.
+        </p>
+        <Link
+          href="/rules"
+          style={{
+            fontSize: '0.875rem',
+            fontWeight: 600,
+            color: theme.accent,
+            textDecoration: 'none',
+          }}
+        >
+          Read the full rules →
+        </Link>
       </section>
-
     </div>
   );
 }
 
 const PIECES = [
-  { wCode:'wp', bCode:'bp', name:'Pichu',   role:'The Pawn',
-    desc:'Moves one square diagonally forward. Can only capture other Pichus by jumping.' },
-  { wCode:'wr', bCode:'br', name:'Pikachu', role:'The Rook',
-    desc:'Moves 1–2 squares forward or sideways. Captures Pichus and Pikachus, not Raichu.' },
-  { wCode:'wq', bCode:'bq', name:'Raichu',  role:'The Queen',
-    desc:'Moves any direction, any distance. Captures anything. Earned through promotion.' },
+  { wCode:'wp', bCode:'bp', name:'Pichu',   role:'Pawn',
+    desc:'Moves one square diagonally forward. Can only capture other Pichus.' },
+  { wCode:'wr', bCode:'br', name:'Pikachu', role:'Rook',
+    desc:'Moves 1–2 squares forward or sideways. Captures Pichus and Pikachus.' },
+  { wCode:'wq', bCode:'bq', name:'Raichu',  role:'Queen',
+    desc:'Moves any direction, any distance. Captures any piece. Earned through promotion.' },
 ];

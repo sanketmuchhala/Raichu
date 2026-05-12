@@ -50,8 +50,7 @@ export default function AuthPage() {
           <Link
             href="/"
             style={{
-              fontFamily: 'var(--font-display, Georgia, serif)',
-              fontStyle: 'italic',
+              fontFamily: 'var(--font-sans, system-ui)',
               fontWeight: 700,
               fontSize: '2.25rem',
               color: theme.textPrimary,
@@ -64,7 +63,7 @@ export default function AuthPage() {
           </Link>
           <p
             className="text-sm mt-2"
-            style={{ color: theme.textSecondary, fontFamily: 'var(--font-body, system-ui)' }}
+            style={{ color: theme.textSecondary }}
           >
             {mode === 'login' ? 'Welcome back' : 'Create your account'}
           </p>

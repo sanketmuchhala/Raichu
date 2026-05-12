@@ -1,21 +1,13 @@
 import type { Metadata, Viewport } from 'next';
-import { Cormorant_Garamond, Nunito } from 'next/font/google';
+import { Figtree } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
 import { AuthProvider } from '../components/auth/AuthProvider';
 
-const cormorant = Cormorant_Garamond({
+const figtree = Figtree({
   subsets: ['latin'],
-  weight: ['600', '700'],
-  style: ['normal', 'italic'],
-  variable: '--font-display',
-  display: 'swap',
-});
-
-const nunito = Nunito({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-body',
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-sans',
   display: 'swap',
 });
 
@@ -31,17 +23,11 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${cormorant.variable} ${nunito.variable}`}>
+    <html lang="en" className={figtree.variable}>
       <body className="min-h-screen antialiased overflow-x-hidden">
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <AuthProvider>{children}</AuthProvider>
         <Analytics />
       </body>
     </html>

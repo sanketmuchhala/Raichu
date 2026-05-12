@@ -54,8 +54,7 @@ export function NewGameDialog() {
           className="text-xl font-bold"
           style={{
             color: theme.textPrimary,
-            fontFamily: 'var(--font-display, Georgia, serif)',
-            fontStyle: 'italic',
+            fontFamily: 'var(--font-sans, system-ui)',
           }}
         >
           New Game

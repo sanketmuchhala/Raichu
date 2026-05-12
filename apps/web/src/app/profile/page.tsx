@@ -26,11 +26,11 @@ function RankProgress({ elo, rank }: { elo: number; rank: Rank }) {
   const pct = Math.round(((elo - rank.min) / (next.min - rank.min)) * 100);
   return (
     <div>
-      <div className="flex justify-between text-xs mb-1.5" style={{ color: '#6a7090' }}>
+      <div className="flex justify-between text-xs mb-1.5" style={{ color: '#7a7a7a' }}>
         <span style={{ color: rank.color }}>{rank.label}</span>
         <span>{elo} / {next.min} → {next.label}</span>
       </div>
-      <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: '#1d2130' }}>
+      <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: '#2e2e2e' }}>
         <div
           className="h-full rounded-full transition-all duration-700"
           style={{ width: `${pct}%`, backgroundColor: rank.color }}
@@ -111,8 +111,7 @@ export default function ProfilePage() {
                   background: `linear-gradient(135deg, ${theme.accent}CC, ${theme.accentHover})`,
                   color: '#fff',
                   boxShadow: `0 4px 20px ${theme.accent}40`,
-                  fontFamily: 'var(--font-display, Georgia, serif)',
-                  fontStyle: 'italic',
+                  fontFamily: 'var(--font-sans, system-ui)',
                 }}
               >
                 {initial}
@@ -123,8 +122,7 @@ export default function ProfilePage() {
                   className="text-xl font-bold truncate leading-tight"
                   style={{
                     color: theme.textPrimary,
-                    fontFamily: 'var(--font-display, Georgia, serif)',
-                    fontStyle: 'italic',
+                    fontFamily: 'var(--font-sans, system-ui)',
                   }}
                 >
                   {name}
@@ -145,7 +143,7 @@ export default function ProfilePage() {
               <div className="text-right shrink-0">
                 <div
                   className="text-3xl font-bold tabular-nums"
-                  style={{ color: theme.accent, fontFamily: 'var(--font-display, Georgia, serif)' }}
+                  style={{ color: theme.accent, fontFamily: 'var(--font-sans, system-ui)' }}
                 >
                   {profile.elo_rating}
                 </div>
