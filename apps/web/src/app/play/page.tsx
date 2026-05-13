@@ -29,6 +29,7 @@ export default function PlayPage() {
   const gameMode      = useGameStore((s) => s.gameMode);
   const difficulty    = useGameStore((s) => s.difficulty);
   const playerColor   = useGameStore((s) => s.playerColor);
+  const drawReason    = useGameStore((s) => s.drawReason);
   const newGame       = useGameStore((s) => s.newGame);
 
   const boardContainerRef = useRef<HTMLDivElement>(null);
@@ -145,7 +146,8 @@ export default function PlayPage() {
       {/* Game result modal */}
       {isOver && !resultDismissed && !replayMode && (
         <GameResultModal
-          status={status as 'white_wins' | 'black_wins' | 'abandoned'}
+          status={status as 'white_wins' | 'black_wins' | 'abandoned' | 'draw'}
+          drawReason={drawReason}
           myColor={gameMode === 'bot' ? playerColor : null}
           whiteName={whiteName}
           blackName={blackName}

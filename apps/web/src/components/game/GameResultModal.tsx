@@ -7,7 +7,8 @@ import { THEMES } from '../../lib/themes';
 // ─── types ────────────────────────────────────────────────────────────────
 
 export interface GameResultModalProps {
-  status: 'white_wins' | 'black_wins' | 'abandoned';
+  status: 'white_wins' | 'black_wins' | 'abandoned' | 'draw';
+  drawReason?: string | null;
 
   // Who is the viewer — determines "You Won" vs "You Lost"
   myColor?: 'white' | 'black' | null;
@@ -56,6 +57,7 @@ function Avatar({ name, color, size = 44 }: { name: string; color: 'white' | 'bl
 
 export function GameResultModal({
   status,
+  drawReason,
   myColor,
   whiteName,
   blackName,
@@ -69,33 +71,38 @@ export function GameResultModal({
 }: GameResultModalProps) {
   const theme = useUIStore((s) => THEMES[s.theme]);
 
+  const isDraw      = status === 'draw';
   const isAbandoned = status === 'abandoned';
   const whiteWon    = status === 'white_wins';
   const blackWon    = status === 'black_wins';
 
-  // Personal result
   const iWon  = myColor ? (myColor === 'white' ? whiteWon : blackWon) : false;
-  const iLost = myColor ? (myColor === 'white' ? blackWon : whiteWon) : false;
 
-  const resultTitle = isAbandoned
-    ? 'Game Abandoned'
-    : myColor
-      ? (iWon ? 'You Won!' : 'You Lost')
-      : (whiteWon ? 'White Wins' : 'Black Wins');
+  const resultTitle = isDraw
+    ? 'Draw'
+    : isAbandoned
+      ? 'Game Abandoned'
+      : myColor
+        ? (iWon ? 'You Won!' : 'You Lost')
+        : (whiteWon ? 'White Wins' : 'Black Wins');
 
-  const resultColor = isAbandoned
-    ? theme.textSecondary
-    : (iWon || (!myColor && whiteWon)) ? '#22c55e' : '#ef4444';
+  const resultColor = isDraw
+    ? '#f59e0b'   // amber for draw
+    : isAbandoned
+      ? theme.textSecondary
+      : (iWon || (!myColor && whiteWon)) ? '#22c55e' : '#ef4444';
 
-  const topBarColor = isAbandoned ? theme.border : resultColor;
+  const topBarColor = resultColor;
 
-  const resultSubtitle = isAbandoned
-    ? 'by abandonment'
-    : 'by no legal moves';
+  const resultSubtitle = isDraw
+    ? (drawReason ?? 'by agreement')
+    : isAbandoned
+      ? 'by abandonment'
+      : 'by no legal moves';
 
-  // Score display
-  const scoreLeft  = whiteWon ? '1' : (blackWon ? '0' : '½');
-  const scoreRight = blackWon ? '1' : (whiteWon ? '0' : '½');
+  // Score display: ½-½ for draw, 1-0 or 0-1 otherwise
+  const scoreLeft  = isDraw ? '½' : whiteWon ? '1' : '0';
+  const scoreRight = isDraw ? '½' : blackWon ? '1' : '0';
 
   return (
     <div
@@ -168,14 +175,14 @@ export function GameResultModal({
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{
                   fontSize: '1.75rem', fontWeight: 900, lineHeight: 1,
-                  color: whiteWon ? '#22c55e' : (isAbandoned ? theme.textSecondary : '#ef4444'),
+                  color: isDraw ? '#f59e0b' : (whiteWon ? '#22c55e' : (isAbandoned ? theme.textSecondary : '#ef4444')),
                 }}>
                   {scoreLeft}
                 </span>
                 <span style={{ fontSize: '1rem', color: theme.textSecondary, fontWeight: 400 }}>-</span>
                 <span style={{
                   fontSize: '1.75rem', fontWeight: 900, lineHeight: 1,
-                  color: blackWon ? '#22c55e' : (isAbandoned ? theme.textSecondary : '#ef4444'),
+                  color: isDraw ? '#f59e0b' : (blackWon ? '#22c55e' : (isAbandoned ? theme.textSecondary : '#ef4444')),
                 }}>
                   {scoreRight}
                 </span>

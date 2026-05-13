@@ -8,6 +8,7 @@ import {
   generateMovesForPiece,
   applyMove,
   getGameStatus,
+  encodeBoard,
 } from '@raichu/game-engine';
 import { findBestMove } from '@raichu/ai-engine';
 import { analytics } from '../lib/analytics';
@@ -20,6 +21,11 @@ interface GameStore {
   moveHistory: Move[];
   boardHistory: Board[];
   lastMove: Move | null;
+
+  // Draw detection
+  positionCounts: Record<string, number>;  // "boardEncoded:player" → occurrences
+  halfMovesSinceProgress: number;          // resets on capture or promotion
+  drawReason: string | null;
 
   // Game config
   gameMode: GameMode;
@@ -48,6 +54,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
   moveHistory: [],
   boardHistory: [createInitialBoard()],
   lastMove: null,
+  positionCounts: { [`${encodeBoard(createInitialBoard())}:white`]: 1 },
+  halfMovesSinceProgress: 0,
+  drawReason: null,
   gameMode: 'pvp',
   difficulty: 'medium',
   playerColor: 'white',
@@ -79,34 +88,64 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   makeMove: (move: Move) => {
-    const { board, currentPlayer, moveHistory, boardHistory, gameMode, playerColor } = get();
+    const {
+      board, currentPlayer, moveHistory, boardHistory, gameMode, playerColor,
+      positionCounts, halfMovesSinceProgress,
+    } = get();
 
-    const newBoard = applyMove(board, move);
+    const newBoard    = applyMove(board, move);
     const nextPlayer: Player = currentPlayer === 'white' ? 'black' : 'white';
-    const newStatus = getGameStatus(newBoard, nextPlayer);
+
+    // Base status from engine (piece count + no-legal-moves)
+    let finalStatus: GameStatus = getGameStatus(newBoard, nextPlayer);
+
+    // ── Draw detection ────────────────────────────────────────────────────
+
+    // 1) Track half-moves without capture or promotion (50-move rule)
+    const newHalfMoves = (move.captured || move.promotion) ? 0 : halfMovesSinceProgress + 1;
+
+    // 2) Threefold repetition — position key = board encoding + side to move
+    const posKey = `${encodeBoard(newBoard)}:${nextPlayer}`;
+    const newPosCount = (positionCounts[posKey] ?? 0) + 1;
+    const newPositionCounts = { ...positionCounts, [posKey]: newPosCount };
+
+    let drawReason: string | null = null;
+    if (finalStatus === 'playing') {
+      if (newPosCount >= 3) {
+        finalStatus = 'draw';
+        drawReason  = 'Threefold repetition';
+      } else if (newHalfMoves >= 100) {
+        // 50 full moves without capture or promotion
+        finalStatus = 'draw';
+        drawReason  = '50-move rule';
+      }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
 
     set({
       board: newBoard,
       currentPlayer: nextPlayer,
-      status: newStatus,
+      status: finalStatus,
       moveHistory: [...moveHistory, move],
       boardHistory: [...boardHistory, newBoard],
       lastMove: move,
+      positionCounts: newPositionCounts,
+      halfMovesSinceProgress: newHalfMoves,
+      drawReason,
       selectedPiece: null,
       legalMoves: [],
     });
 
-    // Track game end
-    if (newStatus !== 'playing') {
+    if (finalStatus !== 'playing') {
       analytics.gameEnded({
         mode:      gameMode,
-        status:    newStatus,
+        status:    finalStatus,
         moveCount: moveHistory.length + 1,
       });
     }
 
-    // If bot mode and it's now the bot's turn, request a move
-    if (gameMode === 'bot' && newStatus === 'playing' && nextPlayer !== playerColor) {
+    if (gameMode === 'bot' && finalStatus === 'playing' && nextPlayer !== playerColor) {
       setTimeout(() => get().requestBotMove(), 300);
     }
   },
@@ -129,6 +168,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       moveHistory: [],
       boardHistory: [initial],
       lastMove: null,
+      positionCounts: { [`${encodeBoard(initial)}:white`]: 1 },
+      halfMovesSinceProgress: 0,
+      drawReason: null,
       gameMode: config.mode,
       difficulty: config.difficulty,
       playerColor: config.playerColor,

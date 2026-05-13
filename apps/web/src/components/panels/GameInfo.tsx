@@ -17,6 +17,7 @@ export function GameInfo() {
   const statusText = (() => {
     if (status === 'white_wins') return 'White wins!';
     if (status === 'black_wins') return 'Black wins!';
+    if (status === 'draw') return 'Draw!';
     if (isThinking) return 'Thinking…';
     return `${currentPlayer === 'white' ? 'White' : 'Black'} to move`;
   })();

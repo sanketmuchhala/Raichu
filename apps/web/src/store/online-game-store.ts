@@ -3,7 +3,7 @@
 import { create } from 'zustand';
 import type { Board, Move, Player, GameStatus } from '@raichu/shared-types';
 import type { OnlineGameDetail, GameMove } from '@raichu/shared-types';
-import { decodeBoard, generateMovesForPiece } from '@raichu/game-engine';
+import { decodeBoard, generateMovesForPiece, encodeBoard, createInitialBoard } from '@raichu/game-engine';
 import { gamesApi } from '../lib/api';
 
 interface OnlineGameStore {
@@ -178,7 +178,6 @@ export const useOnlineGameStore = create<OnlineGameStore>((set, get) => ({
 
   handleNewMove: (move: GameMove) => {
     const { moves } = get();
-    // Deduplicate
     if (moves.some((m) => m.id === move.id)) return;
 
     const board = decodeBoard(move.board_after);
@@ -196,14 +195,38 @@ export const useOnlineGameStore = create<OnlineGameStore>((set, get) => ({
     };
 
     const nextPlayer: Player = move.player === 'white' ? 'black' : 'white';
+    const updatedMoves = [...moves, move];
+
+    // ── Client-side draw detection ────────────────────────────────────────
+    let drawStatus: GameStatus | null = null;
+
+    // Threefold repetition
+    const posKey = `${encodeBoard(board)}:${nextPlayer}`;
+    const allKeys = [
+      `${encodeBoard(createInitialBoard())}:white`,
+      ...updatedMoves.map((m) => `${encodeBoard(decodeBoard(m.board_after))}:${m.player === 'white' ? 'black' : 'white'}`),
+    ];
+    if (allKeys.filter(k => k === posKey).length >= 3) drawStatus = 'draw';
+
+    // 50-move rule
+    if (!drawStatus) {
+      let halfMoves = 0;
+      for (let i = updatedMoves.length - 1; i >= 0; i--) {
+        if (updatedMoves[i].captured_piece || updatedMoves[i].promotion) break;
+        halfMoves++;
+      }
+      if (halfMoves >= 100) drawStatus = 'draw';
+    }
+    // ─────────────────────────────────────────────────────────────────────
 
     set({
-      moves: [...moves, move],
+      moves: updatedMoves,
       board,
       lastMove,
       currentPlayer: nextPlayer,
       selectedPiece: null,
       legalMoves: [],
+      ...(drawStatus ? { status: drawStatus } : {}),
     });
   },
 

@@ -2,7 +2,7 @@ import type { Board } from './board';
 import type { Move } from './moves';
 import type { Player } from './pieces';
 
-export type GameStatus = 'playing' | 'white_wins' | 'black_wins';
+export type GameStatus = 'playing' | 'white_wins' | 'black_wins' | 'draw';
 
 export type GameMode = 'pvp' | 'bot' | 'online';
 export type Difficulty = 'easy' | 'medium' | 'hard';
