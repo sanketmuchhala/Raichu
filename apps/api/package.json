@@ -13,20 +13,20 @@
     "@raichu/ai-engine": "workspace:*",
     "@raichu/game-engine": "workspace:*",
     "@raichu/shared-types": "workspace:*",
-    "@supabase/supabase-js": "^2.99.3",
+    "@supabase/supabase-js": "^2.105.4",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/node": "^22.0.0",
     "cors": "^2.8.5",
-    "dotenv": "^17.3.1",
-    "esbuild": "^0.25.0",
+    "dotenv": "^17.4.2",
+    "esbuild": "^0.28.0",
     "express": "^4.21.0",
     "typescript": "^5.7.0",
     "zod": "^3.23.0"
   },
   "devDependencies": {
-    "supabase": "^2.82.0",
-    "tsx": "^4.19.0",
+    "supabase": "^2.98.2",
+    "tsx": "^4.22.0",
     "vitest": "^3.2.4"
   }
 }
