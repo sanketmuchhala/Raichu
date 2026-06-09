@@ -190,7 +190,7 @@ bundle is present, then do a Xcode build to confirm no compile errors.
 > - `AuthStore.swift` — Supabase SDK calls stubbed; needs supabase-swift package added
 > - `OnlineGameStore.swift` — Realtime subscription stubbed; token/userId return nil until AuthStore wired
 
-### Prompt 2.1 — Verify GameStore (Offline)
+### Prompt 2.1 — Verify GameStore (Offline) ✓ COMPLETE
 
 ```
 VERIFY (do not recreate) `Raichu/Raichu/Stores/GameStore.swift`.
@@ -220,7 +220,7 @@ Read the file. Confirm against `apps/web/src/store/game-store.ts` and `ios app/0
 Fix any discrepancies. Do NOT reformat correct code.
 ```
 
-### Prompt 2.2 — Verify OnlineGameStore (Multiplayer)
+### Prompt 2.2 — Verify OnlineGameStore (Multiplayer) ✓ COMPLETE
 
 ```
 VERIFY (do not recreate) `Raichu/Raichu/Stores/OnlineGameStore.swift`.
@@ -246,7 +246,7 @@ Note known gaps for Phase 3: Realtime subscription, token injection.
 Fix any logic errors found. Do NOT implement the Realtime stub yet.
 ```
 
-### Prompt 2.3 — Verify AuthStore, MatchmakingStore, UIStore
+### Prompt 2.3 — Verify AuthStore, MatchmakingStore, UIStore ✓ COMPLETE
 
 ```
 VERIFY (do not recreate) the three remaining stores in `Raichu/Raichu/Stores/`.
