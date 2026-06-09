@@ -63,13 +63,6 @@ struct BoardView: View {
             .gesture(tapGesture(squareSize: squareSize))
         }
         .aspectRatio(1, contentMode: .fit)
-        // Board flip: 3D Y-axis rotation, 400ms spring (spec 6.2)
-        // Pieces counter-rotate so they stay readable after flip
-        .rotation3DEffect(
-            .degrees(flipped ? 0 : 180),
-            axis: (x: 0, y: 1, z: 0),
-            perspective: 0.5
-        )
         .animation(.spring(response: 0.4, dampingFraction: 0.85), value: flipped)
     }
 
@@ -153,12 +146,6 @@ struct BoardView: View {
                         .opacity(draggedPiece == pos && isDragging ? 0 : 1)
                         .animation(.easeOut(duration: 0.18), value: piece)
                         .animation(slideAnimation, value: pos)
-                        // Counter-rotate pieces so they stay readable when board flips (spec 6.2)
-                        .rotation3DEffect(
-                            .degrees(flipped ? 0 : 180),
-                            axis: (x: 0, y: 1, z: 0),
-                            perspective: 0.5
-                        )
                         .gesture(dragGesture(for: pos, squareSize: squareSize, boardWidth: boardWidth))
                         .zIndex(draggedPiece == pos ? 1 : 0)
                 }
