@@ -9,6 +9,8 @@ private let MARGIN: CGFloat = 20
 
 // Easing for piece slide (matches web app Framer Motion config)
 private let slideAnimation = Animation.timingCurve(0.25, 0.46, 0.45, 0.94, duration: 0.26)
+// Easing for drag lift (80ms scale-up)
+private let dragLiftAnimation = Animation.easeOut(duration: 0.08)
 
 struct BoardView: View {
     let board: [[String]]
@@ -46,7 +48,9 @@ struct BoardView: View {
                 if isDragging, let pos = draggedPiece {
                     let piece = board[pos.row][pos.col]
                     PieceImage(piece: piece, size: squareSize * 0.88)
+                        // 80ms easeOut scale-up on drag lift (spec 6.2)
                         .scaleEffect(1.08)
+                        .animation(dragLiftAnimation, value: isDragging)
                         .opacity(0.85)
                         .position(dragLocation)
                         .zIndex(100)
@@ -59,6 +63,14 @@ struct BoardView: View {
             .gesture(tapGesture(squareSize: squareSize))
         }
         .aspectRatio(1, contentMode: .fit)
+        // Board flip: 3D Y-axis rotation, 400ms spring (spec 6.2)
+        // Pieces counter-rotate so they stay readable after flip
+        .rotation3DEffect(
+            .degrees(flipped ? 0 : 180),
+            axis: (x: 0, y: 1, z: 0),
+            perspective: 0.5
+        )
+        .animation(.spring(response: 0.4, dampingFraction: 0.85), value: flipped)
     }
 
     // MARK: - Board Grid (Canvas)
@@ -137,9 +149,16 @@ struct BoardView: View {
 
                     PieceImage(piece: piece, size: squareSize * 0.88)
                         .position(x: x, y: y)
-                        // Hide original while dragging; fade out if snap-back not needed
+                        // Hide original while dragging; captured pieces fade out 180ms easeOut (spec 6.2)
                         .opacity(draggedPiece == pos && isDragging ? 0 : 1)
+                        .animation(.easeOut(duration: 0.18), value: piece)
                         .animation(slideAnimation, value: pos)
+                        // Counter-rotate pieces so they stay readable when board flips (spec 6.2)
+                        .rotation3DEffect(
+                            .degrees(flipped ? 0 : 180),
+                            axis: (x: 0, y: 1, z: 0),
+                            perspective: 0.5
+                        )
                         .gesture(dragGesture(for: pos, squareSize: squareSize, boardWidth: boardWidth))
                         .zIndex(draggedPiece == pos ? 1 : 0)
                 }
