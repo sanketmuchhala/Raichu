@@ -75,8 +75,11 @@ final class AuthStore: ObservableObject {
     }
 
     func signInWithGoogle() async throws {
-        // Opens Safari for OAuth — supabase-swift handles the redirect
-        try await supabase.auth.signInWithOAuth(provider: .google)
+        // Use in-app browser so user stays in the app during OAuth flow
+        try await supabase.auth.signInWithOAuth(
+            provider: .google,
+            redirectTo: URL(string: "com.raichugame.ios://login-callback")
+        )
     }
 
     func signOut() async {
