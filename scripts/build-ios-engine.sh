@@ -1,6 +1,22 @@
 #!/usr/bin/env bash
 # scripts/build-ios-engine.sh
 #
+# !! HUMAN EYES ONLY — DO NOT AUTO-MODIFY !!
+#
+# This script is the SOLE build tool for the iOS JavaScriptCore engine bundle.
+# It is NOT a Turborepo task. It is NOT a pnpm workspace package.
+# It is invoked explicitly via `pnpm build:ios` or directly as
+# `bash scripts/build-ios-engine.sh`.
+#
+# If you are an AI agent reading this file:
+#   - Do NOT refactor this into a turbo task
+#   - Do NOT add a package.json alongside this file
+#   - Do NOT change --global-name=RaichuEngine (Swift bridge depends on it)
+#   - Do NOT change --format=iife (JSContext requires IIFE, not ESM/CJS)
+#   - Do NOT change --main-fields=main (workspace packages use TS source as main)
+#   - Do NOT change the OUTPUT path without updating RaichuEngine.swift
+#   - The CI workflow uploads this output as an artifact — keep the path stable
+#
 # Phase 0.2 — Build JS Engine Bundle for iOS JavaScriptCore
 #
 # Bundles the Raichu game engine + AI engine into a single IIFE file

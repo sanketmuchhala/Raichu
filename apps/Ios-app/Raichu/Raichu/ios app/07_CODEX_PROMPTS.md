@@ -102,126 +102,181 @@ Requirements:
 
 ## Phase 1: Engine Bridge + Core Types
 
-### Prompt 1.1 — Swift Type Definitions
+> **STATUS: COMPLETE ✓**
+>
+> Both files verified against full checklist. Xcode build clean. JS bundle builds clean (17.5kb).
+> All 16 EngineTypes items present. All 8 RaichuEngine bridge methods present with correct JSON marshaling.
+> No fixes were required — Phase 0 scaffold was complete.
+> **Do not re-run Phase 1. Proceed to Phase 2.**
+
+### Prompt 1.1 — Verify Swift Type Definitions
 
 ```
-Create `EngineTypes.swift` in `apps/ios-app/Sources/Engine/` with all the Swift types needed for the Raichu game.
+VERIFY (do not recreate) `Raichu/Raichu/Engine/EngineTypes.swift`.
 
-Use the type definitions from `ios app/06_STATE_ARCHITECTURE.md` section 8. Include:
+Read the file first. Confirm it contains all of the following, exactly:
 
 1. Position struct (row, col) — Codable, Hashable
-2. CapturedInfo struct — Codable
-3. Move struct — Codable, Identifiable (id = "\(from.row)\(from.col)\(to.row)\(to.col)")
-4. Player enum (white, black) — String, Codable
-5. GameStatus enum (playing, white_wins, black_wins, draw)
-6. GameMode enum (pvp, bot, online)
-7. Difficulty enum (easy, medium, hard)
-8. Profile struct (matches the Supabase profiles table exactly)
-9. OnlineGame struct (matches the games table)
-10. OnlineGameDetail struct (OnlineGame + white_player/black_player Profile?)
-11. GameMove struct (matches the moves table)
-12. PieceType enum (pichu, pikachu, raichu)
+2. CapturedInfo struct (position: Position, piece: String) — Codable
+3. Move struct — Codable, Identifiable
+   id = "\(from.row)\(from.col)\(to.row)\(to.col)\(piece)"
+   fields: from, to, piece, captured: CapturedInfo?, promotion: String?
+4. Player enum (white, black) — String, Codable, with .opposite computed var
+5. GameStatus enum (playing, white_wins, black_wins, draw) — String, Codable
+6. GameMode enum (pvp, bot, online) — String, Codable
+7. Difficulty enum (easy, medium, hard) — String, Codable, CaseIterable
+8. GameType enum (friendly, ranked, bot) — String, Codable, CaseIterable
+9. OnlineGameStatus enum (waiting, playing, white_wins, black_wins, abandoned)
+10. PieceType enum (pichu, pikachu, raichu) — String, Codable
+11. Profile struct — all fields matching Supabase profiles table
+12. OnlineGame struct — all fields matching Supabase games table
+13. OnlineGameDetail struct — OnlineGame fields + white_player/black_player Profile?
+14. GameMove struct — all fields matching Supabase moves table, with asMove: Move computed var
+15. CreateGameRequest, SubmitMoveRequest, ResignResponse, MatchmakingStatusResponse — Codable
+16. String extension: isWhitePiece, isBlackPiece, isPiece, pieceColor: Player?
 
-All types must be Codable for JSON serialization with both JavaScriptCore and Supabase.
+Fix any missing items. Do NOT rewrite or reformat things that are already correct.
 ```
 
-### Prompt 1.2 — JavaScriptCore Bridge
+### Prompt 1.2 — Verify JavaScriptCore Bridge
 
 ```
-Create `RaichuEngine.swift` in `apps/ios-app/Sources/Engine/` — the JavaScriptCore bridge to the bundled game engine.
+VERIFY (do not recreate) `Raichu/Raichu/Engine/RaichuEngine.swift`.
 
-Full implementation is in `ios app/04_GAME_ENGINE_AND_AI.md` section 9. Implement:
+Read the file first. Confirm it has:
 
-1. Singleton pattern: `static let shared = RaichuEngine()`
-2. Private JSContext that loads `raichu-engine.js` from the app bundle
-3. Exception handler that prints JS errors
-4. These methods:
+1. `final class RaichuEngine` with `static let shared = RaichuEngine()`
+2. Private `JSContext` loaded in `init()` with exception handler
+3. Loads `raichu-engine.js` from `Bundle.main` via `path(forResource:ofType:)`
+4. Falls back to `injectStubEngine()` when bundle is missing
+5. All 8 public methods with correct JSON marshaling:
    - createInitialBoard() -> [[String]]
    - generateMovesForPiece(board:row:col:) -> [Move]
    - generateAllMoves(board:player:) -> [Move]
    - applyMove(board:move:) -> [[String]]
-   - getGameStatus(board:nextPlayer:) -> String
+   - getGameStatus(board:nextPlayer:) -> String  (returns raw string, not enum)
    - findBestMove(board:player:difficulty:) -> Move?
-   - encodeBoard(board:) -> String
-   - decodeBoard(encoded:) -> [[String]]
+   - encodeBoard(_ board:) -> String
+   - decodeBoard(_ encoded:) -> [[String]]
+6. Private JSON helpers: boardToJSON, moveToJSON, parseBoardJSON, parseMoves, parseSingleMove
+7. defaultBoard() returns correct starting position (not all empty)
+8. injectStubEngine() injects a minimal JS IIFE with all 8 stubs
 
-5. Private helper methods:
-   - parseBoard(_ result: JSValue?) -> [[String]]
-   - parseMoves(_ json: String) -> [Move]
-   - parseSingleMove(_ json: String) -> Move?
-   - encodeBoardJSON(_ board: [[String]]) -> String
-   - encodeMoveJSON(_ move: Move) -> String
+JS call pattern for moves: `JSON.stringify(RaichuEngine.generateMovesForPiece(boardJSON, row, col))`
+JS call pattern for status: `RaichuEngine.getGameStatus(boardJSON, 'white')` (no JSON.stringify)
+JS call pattern for findBestMove: accesses `.move` property of result object
 
-All data marshaling between Swift and JS must use JSON.stringify/parse for complex objects.
+After verifying, run `pnpm build:ios` from the repo root to confirm the real JS
+bundle is present, then do a Xcode build to confirm no compile errors.
 ```
 
 ---
 
 ## Phase 2: Stores
 
-### Prompt 2.1 — GameStore (Offline)
+> **STATUS: BUILT IN PHASE 0 SCAFFOLD — verify each store, fix only gaps**
+>
+> All 5 stores exist at `Raichu/Raichu/Stores/`. Read each file before acting.
+>
+> Known gaps (do NOT stub or defer — fix them):
+> - `AuthStore.swift` — all Supabase calls are TODO stubs. Needs supabase-swift
+>   package added to Xcode project before these can be wired up. Defer to Phase 3.
+> - `OnlineGameStore.swift` — Realtime subscription is stubbed. `currentAccessToken()`
+>   and `currentUserId()` return nil. Wire to AuthStore after supabase-swift added.
+> - All REST calls use `gamesAPI` / `matchmakingAPI` globals from APIClient.swift — correct.
+>
+> **What to verify in this phase:**
+> - GameStore: draw detection parity with game-store.ts, bot trigger timing, all @Published props
+> - OnlineGameStore: loadGame flow, polling fallback, handleGameUpdate/handleNewMove logic
+> - MatchmakingStore: 2s polling, idleRetries guard, reset on match
+> - UIStore: UserDefaults persistence, currentTheme computed var, replay mode
+> - AuthStore: structure correct, stubs acceptable until Phase 3 (Supabase setup)
+
+### Prompt 2.1 — Verify GameStore (Offline)
 
 ```
-Create `GameStore.swift` in `apps/ios-app/Sources/Stores/` — the offline game state manager.
+VERIFY (do not recreate) `Raichu/Raichu/Stores/GameStore.swift`.
 
-This is a direct port of the web's `apps/web/src/store/game-store.ts`. Full specification is in `ios app/06_STATE_ARCHITECTURE.md` section 2.
+Read the file. Confirm against `apps/web/src/store/game-store.ts` and `ios app/06_STATE_ARCHITECTURE.md` section 2:
 
-Requirements:
-1. @MainActor final class, ObservableObject
-2. All @Published properties matching the web store:
-   - board, currentPlayer, status, moveHistory, boardHistory, lastMove
-   - positionCounts, halfMovesSinceProgress, drawReason (draw detection)
-   - gameMode, difficulty, playerColor (config)
-   - selectedPiece, legalMoves, isThinking (UI state)
+1. @MainActor final class, ObservableObject, import Combine
+2. All @Published properties present with correct types:
+   - board: [[String]], currentPlayer: String, status: String
+   - moveHistory: [Move], boardHistory: [[[String]]], lastMove: Move?
+   - positionCounts: [String: Int], halfMovesSinceProgress: Int, drawReason: String?
+   - gameMode: String, difficulty: String, playerColor: String
+   - selectedPiece: Position?, legalMoves: [Move], isThinking: Bool
+   - capturedByWhite: [String], capturedByBlack: [String]
+3. selectPiece(at:) — filters moves to pieces owned by currentPlayer only
+4. makeMove(_:):
+   - Calls RaichuEngine.shared.applyMove, getGameStatus
+   - Position key = "\(RaichuEngine.shared.encodeBoard(newBoard)):\(nextPlayer)"
+   - Threefold: positionCount >= 3 → drawReason = "Threefold repetition"
+   - 50-move: halfMoves >= 100 → drawReason = "50-move rule"
+   - Resets halfMovesSinceProgress on capture OR promotion
+   - Bot trigger: gameMode == "bot" && status == "playing" && currentPlayer != playerColor
+5. requestBotMove() async — 50ms yield, findBestMove, fallback to random legal move on nil
+6. newGame(mode:difficulty:playerColor:) — resets all state, 500ms delay if bot goes first
+7. restart() — calls newGame with current config
 
-3. Actions (same logic as web):
-   - selectPiece(at:) — generate moves via engine, filter to current player
-   - makeMove(_:) — apply move, check status, draw detection, trigger bot if needed
-   - clearSelection()
-   - newGame(mode:difficulty:playerColor:) — reset all state
-   - restart() — re-call newGame with current config
-   - requestBotMove() async — yield 50ms, findBestMove, makeMove
-
-4. Draw detection must match web:
-   - Threefold repetition: track position key = "encodeBoard:nextPlayer"
-   - 50-move rule: 100 half-moves without capture or promotion
-
-5. Bot trigger: if bot mode and bot's turn → DispatchQueue.main.asyncAfter(0.3) { requestBotMove() }
-
-Port the logic exactly from game-store.ts. Use RaichuEngine.shared for all engine calls.
+Fix any discrepancies. Do NOT reformat correct code.
 ```
 
-### Prompt 2.2 — OnlineGameStore (Multiplayer)
+### Prompt 2.2 — Verify OnlineGameStore (Multiplayer)
 
 ```
-Create `OnlineGameStore.swift` in `apps/ios-app/Sources/Stores/` — the live multiplayer state manager.
+VERIFY (do not recreate) `Raichu/Raichu/Stores/OnlineGameStore.swift`.
 
-Port from `apps/web/src/store/online-game-store.ts`. Full spec in `ios app/06_STATE_ARCHITECTURE.md` section 3.
+Read the file. Confirm:
 
-Requirements:
-1. All @Published properties: game, board, currentPlayer, status, moves, lastMove, myColor, loading, error, selectedPiece, legalMoves, isThinking
-2. Private realtimeChannel for Supabase Realtime
+1. All @Published properties: game, board, currentPlayer, status, moves, lastMove,
+   myColor, loading, error, selectedPiece, legalMoves, isThinking
+2. Private draw detection state: positionCounts, halfMovesSinceProgress
+3. loadGame(_ id: String) async:
+   - Calls gamesAPI.get(id:) then gamesAPI.getMoves(id:)
+   - Calls applyGameDetail() to decode board_state and set myColor
+4. selectPiece(at:) — guards: currentPlayer == myColor required
+5. submitMove(_:) async — calls gamesAPI.move(id:move:)
+6. resign() async — calls gamesAPI.resign(id:)
+7. subscribeRealtime(gameId:) — stubbed with TODO (acceptable until Phase 3)
+8. Polling fallback — Task-based 3s loop, stops when status not "playing"/"waiting"
+9. handleGameUpdate(_:) — decodes board_state, updates board/currentPlayer/status
+10. handleNewMove(_:) — builds lastMove from GameMove, runs draw detection, appends to moves
+11. currentAccessToken() / currentUserId() — return nil (acceptable until AuthStore wired)
 
-3. Actions:
-   - loadGame(_ id: String) async — GET /games/:id + GET /games/:id/moves
-   - selectPiece(at:) — only allow if currentPlayer == myColor
-   - submitMove(_:) async — POST /games/:id/move
-   - clearSelection()
-   - resign() async — POST /games/:id/resign
-
-4. Realtime:
-   - subscribeRealtime(gameId:) — subscribe to games UPDATE + moves INSERT
-   - unsubscribe() — remove channel
-   - handleGameUpdate(_:) — decode board_state, update state
-   - handleNewMove(_:) — decode, build lastMove, draw detection, update state
-
-Use the Supabase Realtime subscription pattern from `ios app/02_SUPABASE_COMPLETE.md` section 6.
-Use the API client from Networking/APIClient.swift for REST calls.
+Note known gaps for Phase 3: Realtime subscription, token injection.
+Fix any logic errors found. Do NOT implement the Realtime stub yet.
 ```
 
-### Prompt 2.3 — AuthStore, MatchmakingStore, UIStore
+### Prompt 2.3 — Verify AuthStore, MatchmakingStore, UIStore
 
 ```
+VERIFY (do not recreate) the three remaining stores in `Raichu/Raichu/Stores/`.
+
+**AuthStore.swift** — read and confirm:
+- UserSession struct (userId, email, accessToken)
+- @Published: session, profile, initialized, loading, error
+- Computed: isAuthenticated, userId, accessToken
+- All 7 action stubs present: initialize, signIn, signUp, signInWithGoogle, signOut, fetchProfile, updateProfile
+- All are async, all Supabase calls are TODO stubs — acceptable until Phase 3
+- signOut() correctly clears session and profile (no Supabase needed for this)
+
+**MatchmakingStore.swift** — read and confirm:
+- @Published: status (idle/queued/matched), loading, waitSeconds, queueCount, matchedGameId, error
+- joinQueue() starts 2s polling loop via Task
+- pollStatus() handles "idle"/"queued"/"matched" — idleRetries guard (3 consecutive idle → stop)
+- leaveQueue() cancels pollTask
+- reset() clears all state
+
+**UIStore.swift** — read and confirm:
+- @Published: themeName, boardFlipped, replayMode, replayStep, soundEnabled, hapticsEnabled
+- init() loads from UserDefaults with fallbacks
+- themeName persists to UserDefaults in didSet
+- currentTheme: ThemeConfig computed var works correctly
+- enterReplay, exitReplay, setReplayStep, flipBoard all present
+
+Fix any missing items. Supabase stubs in AuthStore are intentional — do NOT try to implement them here.
+
 Create three more store files in `apps/ios-app/Sources/Stores/`:
 
 1. **AuthStore.swift** — port from auth-store.ts
