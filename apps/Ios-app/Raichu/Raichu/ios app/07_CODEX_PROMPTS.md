@@ -418,7 +418,7 @@ See `ios app/05_UI_AND_DESIGN_SYSTEM.md` section 7 for specs.
 
 ## Phase 5: Screens
 
-### Prompt 5.1 — PlayView (Offline Game)
+### Prompt 5.1 — PlayView (Offline Game) ✓ COMPLETE
 
 ```
 Create `PlayView.swift` — the offline game screen (vs AI or local PvP).
