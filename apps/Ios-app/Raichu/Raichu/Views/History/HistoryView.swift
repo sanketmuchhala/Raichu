@@ -179,6 +179,11 @@ struct HistoryGameRow: View {
                     Text("\(game.move_count) moves")
                         .font(.caption)
                         .foregroundColor(theme.textSecondary)
+                    Text("·")
+                        .foregroundColor(theme.textSecondary)
+                    Text(formattedDate(game.created_at))
+                        .font(.caption)
+                        .foregroundColor(theme.textSecondary)
                 }
 
                 Text(abandoned ? "Abandoned" : (won ? "Won" : "Lost"))
@@ -195,6 +200,20 @@ struct HistoryGameRow: View {
         }
         .background(theme.bgPanel)
         .cornerRadius(10)
+    }
+
+    private func formattedDate(_ iso: String) -> String {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let date: Date?
+        if let d = formatter.date(from: iso) {
+            date = d
+        } else {
+            formatter.formatOptions = [.withInternetDateTime]
+            date = formatter.date(from: iso)
+        }
+        guard let d = date else { return "" }
+        return RelativeDateTimeFormatter().localizedString(for: d, relativeTo: Date())
     }
 }
 

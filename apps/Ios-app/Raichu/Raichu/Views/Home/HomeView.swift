@@ -14,37 +14,43 @@ struct HomeView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 32) {
-                    // Logo + title
+                    // 1. Logo + title
                     logoSection
                         .opacity(appeared ? 1 : 0)
                         .offset(y: appeared ? 0 : 20)
                         .animation(.easeOut(duration: 0.5), value: appeared)
 
-                    // CTAs
+                    // 2. CTAs
                     ctaSection
                         .opacity(appeared ? 1 : 0)
                         .offset(y: appeared ? 0 : 20)
                         .animation(.easeOut(duration: 0.5).delay(0.15), value: appeared)
 
-                    // Stats strip
+                    // 3. Stats strip (with count-up)
                     statsStrip
                         .opacity(appeared ? 1 : 0)
                         .offset(y: appeared ? 0 : 20)
                         .animation(.easeOut(duration: 0.5).delay(0.30), value: appeared)
 
-                    // Piece guide
+                    // 4. Piece guide (with scale-in)
                     pieceGuideSection
                         .opacity(appeared ? 1 : 0)
                         .offset(y: appeared ? 0 : 20)
                         .animation(.easeOut(duration: 0.5).delay(0.45), value: appeared)
 
-                    // How to Play
-                    howToPlaySection
+                    // 5. Capture hierarchy table
+                    captureHierarchySection
                         .opacity(appeared ? 1 : 0)
                         .offset(y: appeared ? 0 : 20)
                         .animation(.easeOut(duration: 0.5).delay(0.60), value: appeared)
 
-                    // Final CTA
+                    // 6. How to Play
+                    howToPlaySection
+                        .opacity(appeared ? 1 : 0)
+                        .offset(y: appeared ? 0 : 20)
+                        .animation(.easeOut(duration: 0.5).delay(0.75), value: appeared)
+
+                    // 7. Final CTA
                     Button(action: { navigateToPlay = true }) {
                         Text("Start Playing")
                             .font(.headline)
@@ -56,7 +62,7 @@ struct HomeView: View {
                     }
                     .padding(.horizontal)
                     .opacity(appeared ? 1 : 0)
-                    .animation(.easeOut(duration: 0.5).delay(0.75), value: appeared)
+                    .animation(.easeOut(duration: 0.5).delay(0.90), value: appeared)
                 }
                 .padding(.vertical, 24)
             }
@@ -72,7 +78,7 @@ struct HomeView: View {
         .onAppear { appeared = true }
     }
 
-    // MARK: - Sections
+    // MARK: - Logo
 
     private var logoSection: some View {
         VStack(spacing: 12) {
@@ -99,6 +105,8 @@ struct HomeView: View {
         }
         .padding(.top, 16)
     }
+
+    // MARK: - CTAs
 
     private var ctaSection: some View {
         HStack(spacing: 12) {
@@ -132,15 +140,19 @@ struct HomeView: View {
         .padding(.horizontal)
     }
 
+    // MARK: - Stats Strip (count-up on numeric values)
+
     private var statsStrip: some View {
         HStack(spacing: 8) {
-            StatCard(value: "5–15", label: "min")
-            StatCard(value: "0", label: "luck")
-            StatCard(value: "3", label: "pieces")
-            StatCard(value: "Free", label: "always")
+            AnimatedStatCard(targetValue: nil, staticValue: "5–15", label: "min", animate: appeared)
+            AnimatedStatCard(targetValue: 0, staticValue: nil, label: "luck", animate: appeared)
+            AnimatedStatCard(targetValue: 3, staticValue: nil, label: "piece types", animate: appeared)
+            AnimatedStatCard(targetValue: nil, staticValue: "Free", label: "always", animate: appeared)
         }
         .padding(.horizontal)
     }
+
+    // MARK: - Piece Guide (scale-in)
 
     private var pieceGuideSection: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -153,22 +165,62 @@ struct HomeView: View {
                 PieceCard(
                     piece: "w",
                     name: "Pichu",
-                    description: "Moves 1 diag forward.\nCaptures Pichu only."
+                    description: "Moves 1 diag forward.\nCaptures Pichu only.",
+                    animate: appeared
                 )
                 PieceCard(
                     piece: "W",
                     name: "Pikachu",
-                    description: "Moves 1–2 forward/side.\nCaptures Pichu + Pikachu."
+                    description: "Moves 1–2 forward/side.\nCaptures Pichu + Pikachu.",
+                    animate: appeared
                 )
                 PieceCard(
                     piece: "@",
                     name: "Raichu",
-                    description: "Queen-like movement.\nCaptures anything."
+                    description: "Queen-like movement.\nCaptures anything.",
+                    animate: appeared
                 )
             }
             .padding(.horizontal)
         }
     }
+
+    // MARK: - Capture Hierarchy
+
+    private var captureHierarchySection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Capture Hierarchy")
+                .font(.title3.bold())
+                .foregroundColor(theme.textPrimary)
+
+            VStack(spacing: 8) {
+                CaptureRow(
+                    attackerPiece: "@",
+                    attackerName: "Raichu",
+                    captures: ["@", "W", "w"],
+                    captureLabel: "captures everything"
+                )
+                CaptureRow(
+                    attackerPiece: "W",
+                    attackerName: "Pikachu",
+                    captures: ["W", "w"],
+                    captureLabel: "captures Pikachu + Pichu"
+                )
+                CaptureRow(
+                    attackerPiece: "w",
+                    attackerName: "Pichu",
+                    captures: ["w"],
+                    captureLabel: "captures Pichu only"
+                )
+            }
+        }
+        .padding()
+        .background(theme.bgPanel)
+        .cornerRadius(16)
+        .padding(.horizontal)
+    }
+
+    // MARK: - How to Play
 
     private var howToPlaySection: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -210,18 +262,30 @@ struct HomeView: View {
     ]
 }
 
-// MARK: - Sub-components
+// MARK: - AnimatedStatCard (count-up for numeric values)
 
-struct StatCard: View {
+struct AnimatedStatCard: View {
     @Environment(\.theme) var theme
-    let value: String
+    let targetValue: Int?    // nil = use staticValue as-is
+    let staticValue: String? // used when targetValue is nil
     let label: String
+    let animate: Bool
+
+    @State private var displayedValue: Int = 0
+
+    private var displayText: String {
+        if targetValue != nil {
+            return "\(displayedValue)"
+        }
+        return staticValue ?? ""
+    }
 
     var body: some View {
         VStack(spacing: 4) {
-            Text(value)
+            Text(displayText)
                 .font(.title2.bold())
                 .foregroundColor(theme.accent)
+                .monospacedDigit()
             Text(label)
                 .font(.caption)
                 .foregroundColor(theme.textSecondary)
@@ -231,14 +295,28 @@ struct StatCard: View {
         .background(theme.bgPanel)
         .cornerRadius(12)
         .overlay(RoundedRectangle(cornerRadius: 12).stroke(theme.border, lineWidth: 1))
+        .onChange(of: animate) { _, newValue in
+            guard newValue, let target = targetValue, target > 0 else { return }
+            // Count up from 0 to target over 0.8s using a timer
+            let interval = 0.8 / Double(target)
+            var current = 0
+            Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { timer in
+                current += 1
+                displayedValue = current
+                if current >= target { timer.invalidate() }
+            }
+        }
     }
 }
+
+// MARK: - PieceCard (scale-in on appear)
 
 struct PieceCard: View {
     @Environment(\.theme) var theme
     let piece: String
     let name: String
     let description: String
+    let animate: Bool
 
     var body: some View {
         VStack(spacing: 8) {
@@ -256,6 +334,53 @@ struct PieceCard: View {
         .background(theme.bgPanel)
         .cornerRadius(12)
         .overlay(RoundedRectangle(cornerRadius: 12).stroke(theme.border, lineWidth: 1))
+        .scaleEffect(animate ? 1.0 : 0.9)
+        .animation(.easeOut(duration: 0.4).delay(0.50), value: animate)
+    }
+}
+
+// MARK: - CaptureRow
+
+struct CaptureRow: View {
+    @Environment(\.theme) var theme
+    let attackerPiece: String
+    let attackerName: String
+    let captures: [String]   // white piece chars to show as targets
+    let captureLabel: String
+
+    var body: some View {
+        HStack(spacing: 10) {
+            // Attacker
+            HStack(spacing: 6) {
+                PieceImage(piece: attackerPiece, size: 28)
+                Text(attackerName)
+                    .font(.caption.bold())
+                    .foregroundColor(theme.textPrimary)
+            }
+            .frame(width: 90, alignment: .leading)
+
+            Image(systemName: "arrow.right")
+                .font(.caption)
+                .foregroundColor(theme.accent)
+
+            // Targets
+            HStack(spacing: 4) {
+                ForEach(captures, id: \.self) { piece in
+                    PieceImage(piece: piece, size: 22)
+                }
+            }
+
+            Spacer()
+
+            Text(captureLabel)
+                .font(.caption2)
+                .foregroundColor(theme.textSecondary)
+                .multilineTextAlignment(.trailing)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .background(theme.bgSecondary)
+        .cornerRadius(8)
     }
 }
 
