@@ -174,69 +174,109 @@ bundle is present, then do a Xcode build to confirm no compile errors.
 
 ## Phase 2: Stores
 
-### Prompt 2.1 — GameStore (Offline)
+> **STATUS: BUILT IN PHASE 0 SCAFFOLD — verify each store, fix only gaps**
+>
+> All 5 stores exist at `Raichu/Raichu/Stores/`. Read each file before acting.
+>
+> Known gaps (do NOT stub or defer — fix them):
+> - `AuthStore.swift` — all Supabase calls are TODO stubs. Needs supabase-swift
+>   package added to Xcode project before these can be wired up. Defer to Phase 3.
+> - `OnlineGameStore.swift` — Realtime subscription is stubbed. `currentAccessToken()`
+>   and `currentUserId()` return nil. Wire to AuthStore after supabase-swift added.
+> - All REST calls use `gamesAPI` / `matchmakingAPI` globals from APIClient.swift — correct.
+>
+> **What to verify in this phase:**
+> - GameStore: draw detection parity with game-store.ts, bot trigger timing, all @Published props
+> - OnlineGameStore: loadGame flow, polling fallback, handleGameUpdate/handleNewMove logic
+> - MatchmakingStore: 2s polling, idleRetries guard, reset on match
+> - UIStore: UserDefaults persistence, currentTheme computed var, replay mode
+> - AuthStore: structure correct, stubs acceptable until Phase 3 (Supabase setup)
+
+### Prompt 2.1 — Verify GameStore (Offline)
 
 ```
-Create `GameStore.swift` in `apps/ios-app/Sources/Stores/` — the offline game state manager.
+VERIFY (do not recreate) `Raichu/Raichu/Stores/GameStore.swift`.
 
-This is a direct port of the web's `apps/web/src/store/game-store.ts`. Full specification is in `ios app/06_STATE_ARCHITECTURE.md` section 2.
+Read the file. Confirm against `apps/web/src/store/game-store.ts` and `ios app/06_STATE_ARCHITECTURE.md` section 2:
 
-Requirements:
-1. @MainActor final class, ObservableObject
-2. All @Published properties matching the web store:
-   - board, currentPlayer, status, moveHistory, boardHistory, lastMove
-   - positionCounts, halfMovesSinceProgress, drawReason (draw detection)
-   - gameMode, difficulty, playerColor (config)
-   - selectedPiece, legalMoves, isThinking (UI state)
+1. @MainActor final class, ObservableObject, import Combine
+2. All @Published properties present with correct types:
+   - board: [[String]], currentPlayer: String, status: String
+   - moveHistory: [Move], boardHistory: [[[String]]], lastMove: Move?
+   - positionCounts: [String: Int], halfMovesSinceProgress: Int, drawReason: String?
+   - gameMode: String, difficulty: String, playerColor: String
+   - selectedPiece: Position?, legalMoves: [Move], isThinking: Bool
+   - capturedByWhite: [String], capturedByBlack: [String]
+3. selectPiece(at:) — filters moves to pieces owned by currentPlayer only
+4. makeMove(_:):
+   - Calls RaichuEngine.shared.applyMove, getGameStatus
+   - Position key = "\(RaichuEngine.shared.encodeBoard(newBoard)):\(nextPlayer)"
+   - Threefold: positionCount >= 3 → drawReason = "Threefold repetition"
+   - 50-move: halfMoves >= 100 → drawReason = "50-move rule"
+   - Resets halfMovesSinceProgress on capture OR promotion
+   - Bot trigger: gameMode == "bot" && status == "playing" && currentPlayer != playerColor
+5. requestBotMove() async — 50ms yield, findBestMove, fallback to random legal move on nil
+6. newGame(mode:difficulty:playerColor:) — resets all state, 500ms delay if bot goes first
+7. restart() — calls newGame with current config
 
-3. Actions (same logic as web):
-   - selectPiece(at:) — generate moves via engine, filter to current player
-   - makeMove(_:) — apply move, check status, draw detection, trigger bot if needed
-   - clearSelection()
-   - newGame(mode:difficulty:playerColor:) — reset all state
-   - restart() — re-call newGame with current config
-   - requestBotMove() async — yield 50ms, findBestMove, makeMove
-
-4. Draw detection must match web:
-   - Threefold repetition: track position key = "encodeBoard:nextPlayer"
-   - 50-move rule: 100 half-moves without capture or promotion
-
-5. Bot trigger: if bot mode and bot's turn → DispatchQueue.main.asyncAfter(0.3) { requestBotMove() }
-
-Port the logic exactly from game-store.ts. Use RaichuEngine.shared for all engine calls.
+Fix any discrepancies. Do NOT reformat correct code.
 ```
 
-### Prompt 2.2 — OnlineGameStore (Multiplayer)
+### Prompt 2.2 — Verify OnlineGameStore (Multiplayer)
 
 ```
-Create `OnlineGameStore.swift` in `apps/ios-app/Sources/Stores/` — the live multiplayer state manager.
+VERIFY (do not recreate) `Raichu/Raichu/Stores/OnlineGameStore.swift`.
 
-Port from `apps/web/src/store/online-game-store.ts`. Full spec in `ios app/06_STATE_ARCHITECTURE.md` section 3.
+Read the file. Confirm:
 
-Requirements:
-1. All @Published properties: game, board, currentPlayer, status, moves, lastMove, myColor, loading, error, selectedPiece, legalMoves, isThinking
-2. Private realtimeChannel for Supabase Realtime
+1. All @Published properties: game, board, currentPlayer, status, moves, lastMove,
+   myColor, loading, error, selectedPiece, legalMoves, isThinking
+2. Private draw detection state: positionCounts, halfMovesSinceProgress
+3. loadGame(_ id: String) async:
+   - Calls gamesAPI.get(id:) then gamesAPI.getMoves(id:)
+   - Calls applyGameDetail() to decode board_state and set myColor
+4. selectPiece(at:) — guards: currentPlayer == myColor required
+5. submitMove(_:) async — calls gamesAPI.move(id:move:)
+6. resign() async — calls gamesAPI.resign(id:)
+7. subscribeRealtime(gameId:) — stubbed with TODO (acceptable until Phase 3)
+8. Polling fallback — Task-based 3s loop, stops when status not "playing"/"waiting"
+9. handleGameUpdate(_:) — decodes board_state, updates board/currentPlayer/status
+10. handleNewMove(_:) — builds lastMove from GameMove, runs draw detection, appends to moves
+11. currentAccessToken() / currentUserId() — return nil (acceptable until AuthStore wired)
 
-3. Actions:
-   - loadGame(_ id: String) async — GET /games/:id + GET /games/:id/moves
-   - selectPiece(at:) — only allow if currentPlayer == myColor
-   - submitMove(_:) async — POST /games/:id/move
-   - clearSelection()
-   - resign() async — POST /games/:id/resign
-
-4. Realtime:
-   - subscribeRealtime(gameId:) — subscribe to games UPDATE + moves INSERT
-   - unsubscribe() — remove channel
-   - handleGameUpdate(_:) — decode board_state, update state
-   - handleNewMove(_:) — decode, build lastMove, draw detection, update state
-
-Use the Supabase Realtime subscription pattern from `ios app/02_SUPABASE_COMPLETE.md` section 6.
-Use the API client from Networking/APIClient.swift for REST calls.
+Note known gaps for Phase 3: Realtime subscription, token injection.
+Fix any logic errors found. Do NOT implement the Realtime stub yet.
 ```
 
-### Prompt 2.3 — AuthStore, MatchmakingStore, UIStore
+### Prompt 2.3 — Verify AuthStore, MatchmakingStore, UIStore
 
 ```
+VERIFY (do not recreate) the three remaining stores in `Raichu/Raichu/Stores/`.
+
+**AuthStore.swift** — read and confirm:
+- UserSession struct (userId, email, accessToken)
+- @Published: session, profile, initialized, loading, error
+- Computed: isAuthenticated, userId, accessToken
+- All 7 action stubs present: initialize, signIn, signUp, signInWithGoogle, signOut, fetchProfile, updateProfile
+- All are async, all Supabase calls are TODO stubs — acceptable until Phase 3
+- signOut() correctly clears session and profile (no Supabase needed for this)
+
+**MatchmakingStore.swift** — read and confirm:
+- @Published: status (idle/queued/matched), loading, waitSeconds, queueCount, matchedGameId, error
+- joinQueue() starts 2s polling loop via Task
+- pollStatus() handles "idle"/"queued"/"matched" — idleRetries guard (3 consecutive idle → stop)
+- leaveQueue() cancels pollTask
+- reset() clears all state
+
+**UIStore.swift** — read and confirm:
+- @Published: themeName, boardFlipped, replayMode, replayStep, soundEnabled, hapticsEnabled
+- init() loads from UserDefaults with fallbacks
+- themeName persists to UserDefaults in didSet
+- currentTheme: ThemeConfig computed var works correctly
+- enterReplay, exitReplay, setReplayStep, flipBoard all present
+
+Fix any missing items. Supabase stubs in AuthStore are intentional — do NOT try to implement them here.
+
 Create three more store files in `apps/ios-app/Sources/Stores/`:
 
 1. **AuthStore.swift** — port from auth-store.ts
