@@ -302,7 +302,15 @@ Full specifications in `ios app/06_STATE_ARCHITECTURE.md` sections 4-6.
 
 ## Phase 3: Supabase & Networking
 
-### Prompt 3.1 — Supabase Client + API Client
+> **STATUS: 3.1 COMPLETE ✓**
+>
+> - `supabase-swift` package added to Xcode and linked to Raichu target
+> - `SupabaseClient.swift` — `import Supabase` + `supabase` module-level singleton
+> - `AuthStore.swift` — all stubs replaced with real SDK calls: session restore from Keychain,
+>   authStateChanges listener, signIn/signUp/signOut/fetchProfile/updateProfile
+> - Xcode build clean. Proceed to Phase 3.2 (wire OnlineGameStore Realtime + inject tokens).
+
+### Prompt 3.1 — Supabase Client + API Client ✓ COMPLETE
 
 ```
 Create two files:

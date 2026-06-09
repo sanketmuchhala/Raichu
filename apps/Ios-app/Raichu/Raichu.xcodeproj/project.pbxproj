@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		A897E19A2FD81E7500513981 /* Algorithms in Frameworks */ = {isa = PBXBuildFile; productRef = A897E1992FD81E7500513981 /* Algorithms */; };
+		A897E19D2FD8214E00513981 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = A897E19C2FD8214E00513981 /* Supabase */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		A8A0532F2FB3B60200BEF013 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +57,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A897E19D2FD8214E00513981 /* Supabase in Frameworks */,
+				A897E19A2FD81E7500513981 /* Algorithms in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,12 +79,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		A897E19B2FD8214E00513981 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		A8A053182FB3B5FF00BEF013 = {
 			isa = PBXGroup;
 			children = (
 				A8A053232FB3B60000BEF013 /* Raichu */,
 				A8A053312FB3B60200BEF013 /* RaichuTests */,
 				A8A0533B2FB3B60200BEF013 /* RaichuUITests */,
+				A897E19B2FD8214E00513981 /* Frameworks */,
 				A8A053222FB3B60000BEF013 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -112,6 +127,8 @@
 			);
 			name = Raichu;
 			packageProductDependencies = (
+				A897E1992FD81E7500513981 /* Algorithms */,
+				A897E19C2FD8214E00513981 /* Supabase */,
 			);
 			productName = Raichu;
 			productReference = A8A053212FB3B60000BEF013 /* Raichu.app */;
@@ -195,6 +212,10 @@
 			);
 			mainGroup = A8A053182FB3B5FF00BEF013;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				A897E1972FD81E0000513981 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+				A897E1982FD81E7500513981 /* XCRemoteSwiftPackageReference "swift-algorithms" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = A8A053222FB3B60000BEF013 /* Products */;
 			projectDirPath = "";
@@ -578,6 +599,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A897E1972FD81E0000513981 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.1;
+			};
+		};
+		A897E1982FD81E7500513981 /* XCRemoteSwiftPackageReference "swift-algorithms" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-algorithms.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A897E1992FD81E7500513981 /* Algorithms */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A897E1982FD81E7500513981 /* XCRemoteSwiftPackageReference "swift-algorithms" */;
+			productName = Algorithms;
+		};
+		A897E19C2FD8214E00513981 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A897E1972FD81E0000513981 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = A8A053192FB3B5FF00BEF013 /* Project object */;
 }

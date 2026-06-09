@@ -3,6 +3,7 @@
 // Singleton Supabase client. The anon key must be set before shipping.
 
 import Foundation
+import Supabase
 
 // MARK: - Configuration
 
@@ -18,3 +19,10 @@ enum AppConfig {
     static let apiBaseURL = "https://raichu.live/api/v1"
     #endif
 }
+
+// MARK: - Supabase singleton
+
+let supabase = SupabaseClient(
+    supabaseURL: URL(string: AppConfig.supabaseURL)!,
+    supabaseKey: AppConfig.supabaseAnonKey
+)
