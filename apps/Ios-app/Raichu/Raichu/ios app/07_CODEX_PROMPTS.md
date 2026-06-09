@@ -102,12 +102,12 @@ Requirements:
 
 ## Phase 1: Engine Bridge + Core Types
 
-> **STATUS: BUILT IN PHASE 0 SCAFFOLD — verify and test, do not recreate**
+> **STATUS: COMPLETE ✓**
 >
-> `EngineTypes.swift` and `RaichuEngine.swift` already exist at
-> `Raichu/Raichu/Engine/`. Phase 1 work is verification, not creation.
-> Read both files before doing anything. The prompts below describe what
-> they must contain — check against reality and fix gaps only.
+> Both files verified against full checklist. Xcode build clean. JS bundle builds clean (17.5kb).
+> All 16 EngineTypes items present. All 8 RaichuEngine bridge methods present with correct JSON marshaling.
+> No fixes were required — Phase 0 scaffold was complete.
+> **Do not re-run Phase 1. Proceed to Phase 2.**
 
 ### Prompt 1.1 — Verify Swift Type Definitions
 
