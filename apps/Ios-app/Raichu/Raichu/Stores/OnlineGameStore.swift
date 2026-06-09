@@ -179,7 +179,7 @@ final class OnlineGameStore: ObservableObject {
 
         realtimeChannel = channel
 
-        Task { await channel.subscribe() }
+        Task { try? await channel.subscribeWithError() }
 
         // Also run polling fallback in case Realtime drops
         startPollingFallback(gameId: gameId)

@@ -60,11 +60,7 @@ final class RaichuUITests: XCTestCase {
     /// Board region is present when on PlayView.
     @MainActor
     func testBoardGridHas64Squares() throws {
-        // Re-launch to ensure a clean state regardless of test order
-        app.terminate()
-        app.launch()
-
-        // Give board time to render
+        // Give board time to render (app already launched in setUp)
         _ = app.otherElements.firstMatch.waitForExistence(timeout: 5)
 
         // Each cell has an accessibility identifier "cell-R-C" set by BoardView

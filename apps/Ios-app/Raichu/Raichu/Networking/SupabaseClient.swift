@@ -24,5 +24,12 @@ enum AppConfig {
 
 let supabase = SupabaseClient(
     supabaseURL: URL(string: AppConfig.supabaseURL)!,
-    supabaseKey: AppConfig.supabaseAnonKey
+    supabaseKey: AppConfig.supabaseAnonKey,
+    options: SupabaseClientOptions(
+        auth: SupabaseClientOptions.AuthOptions(
+            // Opt in to new behavior: emit locally stored session without network refresh
+            // Silences the deprecation warning from supabase-swift
+            emitLocalSessionAsInitialSession: true
+        )
+    )
 )

@@ -15,7 +15,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         _ application: UIApplication,
         didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
-        Task { await NotificationManager.shared.didRegisterForRemoteNotifications(deviceToken: deviceToken) }
+        Task { NotificationManager.shared.didRegisterForRemoteNotifications(deviceToken: deviceToken) }
     }
 
     func application(
@@ -27,7 +27,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
 
     func applicationDidBecomeActive(_ application: UIApplication) {
         // Clear badge when app comes to foreground (spec 6.4 item 5)
-        Task { await NotificationManager.shared.clearBadge() }
+        Task { NotificationManager.shared.clearBadge() }
     }
 }
 
