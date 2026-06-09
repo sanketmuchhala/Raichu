@@ -102,57 +102,72 @@ Requirements:
 
 ## Phase 1: Engine Bridge + Core Types
 
-### Prompt 1.1 — Swift Type Definitions
+> **STATUS: BUILT IN PHASE 0 SCAFFOLD — verify and test, do not recreate**
+>
+> `EngineTypes.swift` and `RaichuEngine.swift` already exist at
+> `Raichu/Raichu/Engine/`. Phase 1 work is verification, not creation.
+> Read both files before doing anything. The prompts below describe what
+> they must contain — check against reality and fix gaps only.
+
+### Prompt 1.1 — Verify Swift Type Definitions
 
 ```
-Create `EngineTypes.swift` in `apps/ios-app/Sources/Engine/` with all the Swift types needed for the Raichu game.
+VERIFY (do not recreate) `Raichu/Raichu/Engine/EngineTypes.swift`.
 
-Use the type definitions from `ios app/06_STATE_ARCHITECTURE.md` section 8. Include:
+Read the file first. Confirm it contains all of the following, exactly:
 
 1. Position struct (row, col) — Codable, Hashable
-2. CapturedInfo struct — Codable
-3. Move struct — Codable, Identifiable (id = "\(from.row)\(from.col)\(to.row)\(to.col)")
-4. Player enum (white, black) — String, Codable
-5. GameStatus enum (playing, white_wins, black_wins, draw)
-6. GameMode enum (pvp, bot, online)
-7. Difficulty enum (easy, medium, hard)
-8. Profile struct (matches the Supabase profiles table exactly)
-9. OnlineGame struct (matches the games table)
-10. OnlineGameDetail struct (OnlineGame + white_player/black_player Profile?)
-11. GameMove struct (matches the moves table)
-12. PieceType enum (pichu, pikachu, raichu)
+2. CapturedInfo struct (position: Position, piece: String) — Codable
+3. Move struct — Codable, Identifiable
+   id = "\(from.row)\(from.col)\(to.row)\(to.col)\(piece)"
+   fields: from, to, piece, captured: CapturedInfo?, promotion: String?
+4. Player enum (white, black) — String, Codable, with .opposite computed var
+5. GameStatus enum (playing, white_wins, black_wins, draw) — String, Codable
+6. GameMode enum (pvp, bot, online) — String, Codable
+7. Difficulty enum (easy, medium, hard) — String, Codable, CaseIterable
+8. GameType enum (friendly, ranked, bot) — String, Codable, CaseIterable
+9. OnlineGameStatus enum (waiting, playing, white_wins, black_wins, abandoned)
+10. PieceType enum (pichu, pikachu, raichu) — String, Codable
+11. Profile struct — all fields matching Supabase profiles table
+12. OnlineGame struct — all fields matching Supabase games table
+13. OnlineGameDetail struct — OnlineGame fields + white_player/black_player Profile?
+14. GameMove struct — all fields matching Supabase moves table, with asMove: Move computed var
+15. CreateGameRequest, SubmitMoveRequest, ResignResponse, MatchmakingStatusResponse — Codable
+16. String extension: isWhitePiece, isBlackPiece, isPiece, pieceColor: Player?
 
-All types must be Codable for JSON serialization with both JavaScriptCore and Supabase.
+Fix any missing items. Do NOT rewrite or reformat things that are already correct.
 ```
 
-### Prompt 1.2 — JavaScriptCore Bridge
+### Prompt 1.2 — Verify JavaScriptCore Bridge
 
 ```
-Create `RaichuEngine.swift` in `apps/ios-app/Sources/Engine/` — the JavaScriptCore bridge to the bundled game engine.
+VERIFY (do not recreate) `Raichu/Raichu/Engine/RaichuEngine.swift`.
 
-Full implementation is in `ios app/04_GAME_ENGINE_AND_AI.md` section 9. Implement:
+Read the file first. Confirm it has:
 
-1. Singleton pattern: `static let shared = RaichuEngine()`
-2. Private JSContext that loads `raichu-engine.js` from the app bundle
-3. Exception handler that prints JS errors
-4. These methods:
+1. `final class RaichuEngine` with `static let shared = RaichuEngine()`
+2. Private `JSContext` loaded in `init()` with exception handler
+3. Loads `raichu-engine.js` from `Bundle.main` via `path(forResource:ofType:)`
+4. Falls back to `injectStubEngine()` when bundle is missing
+5. All 8 public methods with correct JSON marshaling:
    - createInitialBoard() -> [[String]]
    - generateMovesForPiece(board:row:col:) -> [Move]
    - generateAllMoves(board:player:) -> [Move]
    - applyMove(board:move:) -> [[String]]
-   - getGameStatus(board:nextPlayer:) -> String
+   - getGameStatus(board:nextPlayer:) -> String  (returns raw string, not enum)
    - findBestMove(board:player:difficulty:) -> Move?
-   - encodeBoard(board:) -> String
-   - decodeBoard(encoded:) -> [[String]]
+   - encodeBoard(_ board:) -> String
+   - decodeBoard(_ encoded:) -> [[String]]
+6. Private JSON helpers: boardToJSON, moveToJSON, parseBoardJSON, parseMoves, parseSingleMove
+7. defaultBoard() returns correct starting position (not all empty)
+8. injectStubEngine() injects a minimal JS IIFE with all 8 stubs
 
-5. Private helper methods:
-   - parseBoard(_ result: JSValue?) -> [[String]]
-   - parseMoves(_ json: String) -> [Move]
-   - parseSingleMove(_ json: String) -> Move?
-   - encodeBoardJSON(_ board: [[String]]) -> String
-   - encodeMoveJSON(_ move: Move) -> String
+JS call pattern for moves: `JSON.stringify(RaichuEngine.generateMovesForPiece(boardJSON, row, col))`
+JS call pattern for status: `RaichuEngine.getGameStatus(boardJSON, 'white')` (no JSON.stringify)
+JS call pattern for findBestMove: accesses `.move` property of result object
 
-All data marshaling between Swift and JS must use JSON.stringify/parse for complex objects.
+After verifying, run `pnpm build:ios` from the repo root to confirm the real JS
+bundle is present, then do a Xcode build to confirm no compile errors.
 ```
 
 ---
