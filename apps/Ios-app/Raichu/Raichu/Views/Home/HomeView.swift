@@ -82,17 +82,11 @@ struct HomeView: View {
 
     private var logoSection: some View {
         VStack(spacing: 12) {
-            if UIImage(named: "RaichuLogo") != nil {
-                Image("RaichuLogo")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 80, height: 80)
-                    .cornerRadius(16)
-            } else {
-                Image(systemName: "crown.fill")
-                    .font(.system(size: 60))
-                    .foregroundColor(theme.accent)
-            }
+            Image("RaichuLogo")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 80, height: 80)
+                .cornerRadius(16)
 
             Text("Raichu")
                 .font(.system(size: 44, weight: .black))
