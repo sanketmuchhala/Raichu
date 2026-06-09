@@ -22,6 +22,9 @@ final class AuthStore: ObservableObject {
         // Restore existing session from Keychain (supabase-swift handles storage)
         session = try? await supabase.auth.session
 
+        // Load cached profile immediately for offline display (spec 6.3)
+        profile = loadCachedProfile()
+
         if session != nil {
             await fetchProfile()
         }
@@ -76,6 +79,8 @@ final class AuthStore: ObservableObject {
         try? await supabase.auth.signOut()
         session = nil
         profile = nil
+        // Clear cached profile on sign out
+        UserDefaults.standard.removeObject(forKey: "cachedProfile")
     }
 
     func fetchProfile() async {
@@ -90,9 +95,20 @@ final class AuthStore: ObservableObject {
                 .execute()
                 .value
             profile = p
+            // Cache profile for offline display (spec 6.3)
+            if let data = try? JSONEncoder().encode(p) {
+                UserDefaults.standard.set(data, forKey: "cachedProfile")
+            }
         } catch {
-            // Profile fetch failure is non-fatal — user can still play offline
+            // Profile fetch failure is non-fatal — use cached value if present
         }
+    }
+
+    // MARK: - Cache helpers
+
+    private func loadCachedProfile() -> Profile? {
+        guard let data = UserDefaults.standard.data(forKey: "cachedProfile") else { return nil }
+        return try? JSONDecoder().decode(Profile.self, from: data)
     }
 
     func updateProfile(displayName: String? = nil, avatarUrl: String? = nil) async throws {
