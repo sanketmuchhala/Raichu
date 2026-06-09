@@ -3,12 +3,15 @@
   "private": true,
   "scripts": {
     "build": "turbo build",
+    "build:ios": "bash scripts/build-ios-engine.sh",
+    "build:ios:minify": "bash scripts/build-ios-engine.sh --minify",
     "dev": "turbo dev",
     "test": "turbo test",
     "lint": "turbo lint",
     "clean": "turbo clean"
   },
   "devDependencies": {
+    "esbuild": "^0.25.0",
     "turbo": "^2.3.0",
     "typescript": "^5.7.0"
   },

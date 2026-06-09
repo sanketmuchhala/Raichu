@@ -11,6 +11,12 @@
 #
 # apps/web declares a test script but has no test files today;
 # vitest exits 0 in that case so it is safe to include.
+#
+# iOS engine bundle (Phase 0.2):
+#   After the full build, `pnpm build:ios` uses esbuild to bundle
+#   @raichu/game-engine + @raichu/ai-engine into a single IIFE JS
+#   file (raichu-engine.js) for JavaScriptCore on iOS.
+#   The bundle is uploaded as a workflow artifact on every main push.
 # ──────────────────────────────────────────────────────────────
 
 name: CI
@@ -73,3 +79,20 @@ jobs:
       # (web has no test files yet — vitest exits 0 safely)
       - name: Test
         run: pnpm test
+
+      # ── 8. Build iOS JavaScriptCore engine bundle ───────────
+      # Bundles @raichu/game-engine + @raichu/ai-engine into a
+      # single IIFE for JSContext. Requires step 6 (packages built).
+      # esbuild is a root devDependency installed in step 4.
+      - name: Build iOS engine bundle
+        run: pnpm build:ios
+
+      # ── 9. Upload iOS bundle as workflow artifact ───────────
+      # Lets you download raichu-engine.js from the Actions UI
+      # and drop it into Xcode without running the build locally.
+      - name: Upload iOS engine bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: raichu-engine-js
+          path: apps/Ios-app/Raichu/Raichu/Engine/raichu-engine.js
+          if-no-files-found: error

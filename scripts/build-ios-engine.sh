@@ -44,12 +44,15 @@ mkdir -p "$(dirname "$OUTPUT")"
 # - global-name=RaichuEngine exposes the exports as window.RaichuEngine (JSContext global)
 # - bundle resolves all workspace: imports (@raichu/shared-types, @raichu/game-engine)
 # - target=es2020 is safe for JavaScriptCore on iOS 17+
+# - main-fields=main is required because platform=neutral ignores "main" by default;
+#   workspace packages expose TypeScript source via "main": "./src/index.ts"
 npx esbuild "$ENTRY" \
   --bundle \
   --format=iife \
   --global-name=RaichuEngine \
   --target=es2020 \
   --platform=neutral \
+  --main-fields=main \
   --outfile="$OUTPUT" \
   $MINIFY_FLAG
 
