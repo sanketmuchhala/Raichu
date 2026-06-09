@@ -302,13 +302,18 @@ Full specifications in `ios app/06_STATE_ARCHITECTURE.md` sections 4-6.
 
 ## Phase 3: Supabase & Networking
 
-> **STATUS: 3.1 COMPLETE ✓**
+> **STATUS: 3.1 + 3.2 COMPLETE ✓**
 >
 > - `supabase-swift` package added to Xcode and linked to Raichu target
 > - `SupabaseClient.swift` — `import Supabase` + `supabase` module-level singleton
 > - `AuthStore.swift` — all stubs replaced with real SDK calls: session restore from Keychain,
 >   authStateChanges listener, signIn/signUp/signOut/fetchProfile/updateProfile
-> - Xcode build clean. Proceed to Phase 3.2 (wire OnlineGameStore Realtime + inject tokens).
+> - `OnlineGameStore.swift` — token/userId read live from `supabase.auth.session`;
+>   Realtime wired via `supabase.realtimeV2.channel()` with `onPostgresChange` for
+>   games UPDATE and moves INSERT; polling fallback retained
+> - `MatchmakingStore.swift` — token read from `supabase.auth.session`; callers no longer pass token
+> - `OnlineGameView.swift` / `LobbyView.swift` — updated call sites to match new signatures
+> - Xcode build clean. Proceed to Phase 4 (BoardView UI).
 
 ### Prompt 3.1 — Supabase Client + API Client ✓ COMPLETE
 

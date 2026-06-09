@@ -40,9 +40,7 @@ struct OnlineGameView: View {
         }
         .navigationBarHidden(true)
         .task {
-            guard let token = authStore.accessToken,
-                  let userId = authStore.userId else { return }
-            await onlineGameStore.loadGame(gameId, accessToken: token, userId: userId)
+            await onlineGameStore.loadGame(gameId)
             onlineGameStore.subscribeRealtime(gameId: gameId)
         }
         .onDisappear {
