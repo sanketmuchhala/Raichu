@@ -52,6 +52,8 @@ final class AuthStore: ObservableObject {
         let result = try await supabase.auth.signIn(email: email, password: password)
         session = result
         await fetchProfile()
+        // Request push notification permission on first sign-in (spec 6.4 item 1)
+        NotificationManager.shared.requestPermission()
     }
 
     func signUp(email: String, password: String, username: String) async throws {
@@ -67,6 +69,8 @@ final class AuthStore: ObservableObject {
         session = result.session
         if result.session != nil {
             await fetchProfile()
+            // Request push notification permission on first sign-up (spec 6.4 item 1)
+            NotificationManager.shared.requestPermission()
         }
     }
 
