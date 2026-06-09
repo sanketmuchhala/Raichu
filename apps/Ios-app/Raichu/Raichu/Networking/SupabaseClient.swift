@@ -10,8 +10,8 @@ import Supabase
 enum AppConfig {
     static let supabaseURL = "https://jfqofulsmcjqudwnxekb.supabase.co"
 
-    // Replace with actual anon key from Supabase Dashboard → Settings → API
-    static let supabaseAnonKey = "YOUR_SUPABASE_ANON_KEY"
+    // Read from Xcode scheme environment variable SUPABASE_ANON_KEY
+    static let supabaseAnonKey = ProcessInfo.processInfo.environment["SUPABASE_ANON_KEY"] ?? "YOUR_SUPABASE_ANON_KEY"
 
     #if DEBUG
     static let apiBaseURL = "http://localhost:3001/api/v1"
