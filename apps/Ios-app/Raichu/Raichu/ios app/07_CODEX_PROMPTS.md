@@ -174,23 +174,21 @@ bundle is present, then do a Xcode build to confirm no compile errors.
 
 ## Phase 2: Stores
 
-> **STATUS: BUILT IN PHASE 0 SCAFFOLD — verify each store, fix only gaps**
+> **STATUS: COMPLETE ✓**
 >
-> All 5 stores exist at `Raichu/Raichu/Stores/`. Read each file before acting.
+> All 5 stores verified. Two fixes applied in Phase 2.1 (GameStore). Phases 2.2/2.3 all pass with no changes needed.
 >
-> Known gaps (do NOT stub or defer — fix them):
-> - `AuthStore.swift` — all Supabase calls are TODO stubs. Needs supabase-swift
->   package added to Xcode project before these can be wired up. Defer to Phase 3.
-> - `OnlineGameStore.swift` — Realtime subscription is stubbed. `currentAccessToken()`
->   and `currentUserId()` return nil. Wire to AuthStore after supabase-swift added.
-> - All REST calls use `gamesAPI` / `matchmakingAPI` globals from APIClient.swift — correct.
+> - `GameStore` — fixed: `@Published` on gameMode/difficulty/playerColor; random fallback in requestBotMove()
+> - `OnlineGameStore` — all logic correct; loadGame/polling/handleGameUpdate/handleNewMove all verified
+> - `MatchmakingStore` — 2s polling, idleRetries guard, reset all verified
+> - `UIStore` — UserDefaults persistence, currentTheme, replay mode all verified
+> - `AuthStore` — structure correct; Supabase stubs intentional until Phase 3
 >
-> **What to verify in this phase:**
-> - GameStore: draw detection parity with game-store.ts, bot trigger timing, all @Published props
-> - OnlineGameStore: loadGame flow, polling fallback, handleGameUpdate/handleNewMove logic
-> - MatchmakingStore: 2s polling, idleRetries guard, reset on match
-> - UIStore: UserDefaults persistence, currentTheme computed var, replay mode
-> - AuthStore: structure correct, stubs acceptable until Phase 3 (Supabase setup)
+> **Do not re-run Phase 2. Proceed to Phase 3 (Supabase setup).**
+>
+> Remaining known gaps (Phase 3 work):
+> - `AuthStore.swift` — Supabase SDK calls stubbed; needs supabase-swift package added
+> - `OnlineGameStore.swift` — Realtime subscription stubbed; token/userId return nil until AuthStore wired
 
 ### Prompt 2.1 — Verify GameStore (Offline)
 
