@@ -82,8 +82,8 @@ struct HomeView: View {
 
     private var logoSection: some View {
         VStack(spacing: 12) {
-            if UIImage(named: "raichu logo") != nil {
-                Image("raichu logo")
+            if UIImage(named: "RaichuLogo") != nil {
+                Image("RaichuLogo")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 80, height: 80)
