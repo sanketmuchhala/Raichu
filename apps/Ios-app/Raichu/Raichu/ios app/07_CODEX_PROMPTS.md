@@ -355,7 +355,7 @@ See `ios app/03_API_REFERENCE.md` for all endpoint details and response schemas.
 
 ## Phase 4: Board UI
 
-### Prompt 4.1 — BoardView
+### Prompt 4.1 — BoardView ✓ COMPLETE
 
 ```
 Create `BoardView.swift` in `apps/ios-app/Sources/Views/Shared/` — the core game board component used everywhere.
