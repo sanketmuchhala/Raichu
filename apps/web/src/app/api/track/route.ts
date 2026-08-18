@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { createHash } from 'crypto';
 
 // ─── UA parsing helpers ────────────────────────────────────────────────────
 
@@ -56,6 +57,21 @@ function extractIP(req: NextRequest): string | null {
   );
 }
 
+/**
+ * Hash the IP rather than storing it.
+ *
+ * A raw address is personal data under GDPR/CCPA and this app has no consent
+ * mechanism. The salted hash still distinguishes visitors and supports abuse
+ * detection, while country/region/city below keep the geo analytics intact.
+ * Returns null when no salt is configured so a misconfiguration cannot
+ * silently degrade into storing an unsalted (reversible) hash.
+ */
+function hashIP(ip: string | null): string | null {
+  const salt = process.env.ANALYTICS_IP_SALT;
+  if (!ip || !salt) return null;
+  return createHash('sha256').update(`${salt}:${ip}`).digest('hex').slice(0, 32);
+}
+
 // ─── Route handler ─────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
@@ -98,7 +114,7 @@ export async function POST(req: NextRequest) {
       event_type:         body.event_type,
       page:               body.page ?? null,
       referrer:           body.referrer ?? null,
-      ip_address:         ip,
+      ip_hash:            hashIP(ip),
       country:            country,
       region:             region,
       city:               city,
