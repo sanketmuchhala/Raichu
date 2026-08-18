@@ -11,15 +11,24 @@
 -- =============================================
 
 -- ---------------------------------------------
--- 1. Privacy
+-- 1. Privacy — expand phase
 --
 -- `ip_address INET` is personal data under GDPR/CCPA and the app has no consent
 -- mechanism. Country/region/city (captured from Vercel headers) are what the
 -- dashboards actually query, so dropping the raw address loses no analysis.
 -- The salted hash still supports unique-visitor counting and abuse detection.
+--
+-- This migration only ADDS ip_hash. It deliberately does not drop ip_address,
+-- because there is no safe ordering if it does: applying the migration first
+-- breaks the currently deployed code (which still writes ip_address), and
+-- deploying first breaks the new code (which writes ip_hash). Both columns are
+-- nullable, so with only the additive change either order works and no event
+-- is ever rejected.
+--
+-- `007_drop_ip_address.sql` performs the contract phase once the code writing
+-- ip_hash is live.
 -- ---------------------------------------------
 
-ALTER TABLE analytics_events DROP COLUMN IF EXISTS ip_address;
 ALTER TABLE analytics_events ADD COLUMN IF NOT EXISTS ip_hash TEXT;
 
 CREATE INDEX IF NOT EXISTS idx_analytics_ip_hash

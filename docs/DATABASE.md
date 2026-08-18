@@ -202,7 +202,8 @@ Run in order:
 | `003_fix_profile_trigger.sql` | Fixes edge case in auto-profile creation on signup |
 | `004_enable_realtime.sql` | Sets REPLICA IDENTITY FULL, adds tables to supabase_realtime publication |
 | `005_analytics.sql` | Creates `analytics_events` plus 5 dashboard views |
-| `006_analytics_expansion.sql` | Replaces `ip_address` with `ip_hash`, adds `app`, adds play-style and dashboard views, adds `prune_analytics_events()` |
+| `006_analytics_expansion.sql` | Adds `ip_hash` and `app`, adds play-style and dashboard views, adds `prune_analytics_events()` |
+| `007_drop_ip_address.sql` | Drops `ip_address`. Run only after the code writing `ip_hash` is deployed |
 
 ---
 
@@ -240,9 +241,14 @@ through `src/lib/analytics.ts`. RLS is deny-all, so no client can read it.
 
 Migration `006` adds:
 
-- **`ip_hash`** replacing `ip_address`. Raw IPs are personal data and the app
+- **`ip_hash`** alongside `ip_address`. Raw IPs are personal data and the app
   has no consent mechanism; the salted hash (`ANALYTICS_IP_SALT`) still supports
   unique-visitor counting, and country/region/city are unaffected.
+  `006` only adds the column — dropping `ip_address` in the same migration
+  would break ingestion whichever order you deploy in, since the old code
+  writes `ip_address` and the new code writes `ip_hash`. Both are nullable, so
+  the additive step is safe in either order; `007` drops the old column once
+  the new code is live.
 - **`app`** (`web` | `api` | `ios`) distinguishing browser events from
   server-authoritative ones. `analytics_dau` and `analytics_devices` are
   restricted to `app = 'web'` so server events cannot inflate session counts.
