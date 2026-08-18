@@ -6,10 +6,91 @@
 
 ## How to Use These Prompts
 
-1. Start a new Codex session with the Raichu repository cloned
-2. Feed each prompt in order (Phase 0 → Phase 6)
-3. Each prompt references docs in the `ios app/` directory for full specifications
-4. Test after each phase before proceeding
+### Which tool to use
+
+These prompts are designed for **Claude Code** (the CLI). They also work in Cursor, Windsurf, or any AI editor that has access to the full repository.
+
+**Claude Code (recommended):**
+```bash
+# From the monorepo root
+cd /path/to/raichu.py
+claude
+```
+Then paste the prompt text directly into the chat. Claude Code reads the whole repo so it has context on every file referenced in the prompt.
+
+**Cursor / Windsurf:**
+Open the monorepo root as the project. Use the Agent/Composer panel. Paste the prompt — the agent will read referenced docs automatically if they are in the workspace.
+
+**OpenAI Codex CLI (codex):**
+```bash
+codex "paste prompt here"
+```
+Or open an interactive session: `codex` then paste.
+
+---
+
+### Step-by-step workflow
+
+**1. Clone the repo and install dependencies**
+```bash
+git clone https://github.com/sanketmuchhala/Raichu
+cd Raichu
+pnpm install
+```
+
+**2. Open the Xcode project alongside your AI tool**
+```bash
+open apps/Ios-app/Raichu/Raichu.xcodeproj
+```
+
+**3. Feed prompts one phase at a time**
+
+Copy the full text inside a prompt's ` ``` ` block (including all bullet points). Paste it into Claude Code or your editor's agent panel. Let the agent complete before moving to the next phase.
+
+**4. After each phase: build in Xcode**
+
+Press `Cmd+B`. Fix any compile errors before continuing. The prompts are designed to produce compilable code, but agent output sometimes needs minor fixes.
+
+**5. After Phase 0.2: build the JS engine bundle**
+```bash
+pnpm build:ios
+```
+This must exist before Phase 1 tests pass and before running the app.
+
+**6. After Phase 3: add Supabase Swift package in Xcode**
+
+File → Add Package Dependencies → `https://github.com/supabase/supabase-swift` (from 2.0.0).
+The agent cannot do this for you — it requires Xcode UI.
+
+**7. After Phase 7: run all tests**
+
+`Cmd+U` in Xcode. All tests must pass before considering the phase done.
+
+---
+
+### Prompt format tips
+
+- Each prompt is **self-contained** — you do not need to explain what Raichu is or paste prior context.
+- The prompts reference docs like `ios app/04_GAME_ENGINE_AND_AI.md`. Claude Code reads those automatically. In other tools, you may need to paste the relevant doc section if the agent misses detail.
+- If the agent stops early or asks a question, just reply: *"Continue. Follow the spec in the referenced doc exactly."*
+- If a file already exists from a previous phase, the agent will edit it rather than overwrite — that's correct.
+
+---
+
+### Phase status (as of last update)
+
+| Phase | Status |
+|-------|--------|
+| Phase 0 — Scaffolding + JS bundle | ✅ Done |
+| Phase 1 — Engine bridge + types | ✅ Done |
+| Phase 2 — Stores | ✅ Done |
+| Phase 3 — Supabase + API client | ✅ Done |
+| Phase 4 — Board UI | ✅ Done |
+| Phase 5 — All screens | ✅ Done |
+| Phase 6 — Themes, animations, haptics, offline, push | ✅ Done |
+| Phase 7 — Tests | ✅ Done |
+
+If starting fresh, run phases in order. If picking up mid-way, check which Swift files already exist (`find Raichu/Raichu -name "*.swift"`) and skip completed phases.
 
 ---
 
@@ -662,6 +743,126 @@ Implement push notification registration and handling:
 5. Badge management: clear badge on app foreground
 
 Note: The backend notification endpoint doesn't exist yet. Create the registration request structure for future implementation.
+```
+
+---
+
+## Phase 7: Testing
+
+### Prompt 7.1 — Unit Tests (Engine Bridge + GameStore)
+
+```
+Write a complete unit test suite for the Raichu iOS app in `RaichuTests/RaichuTests.swift`.
+
+Framework: Swift Testing (iOS 17+) — use `@Suite`, `@Test`, `#expect(...)`, `#require(...)`.
+Import: `import Testing` and `@testable import Raichu`.
+
+Organize into four @Suite groups:
+
+1. **EngineBridgeTests** — tests for `RaichuEngine.shared`
+   - `initialBoardIs8x8` — createInitialBoard() returns 8×8 grid
+   - `initialBoardHasCorrectPieces` — rows 1/2 white, rows 5/6 black (exact piece chars)
+   - `encodeBoardLength` — encodeBoard produces exactly 64 chars
+   - `decodeBoardRoundtrip` — encodeBoard then decodeBoard equals original
+   - `initialBoardEncoding` — matches "........W.W.W.W..w.w.w.w................b.b.b.b..B.B.B.B........"
+   - `noMovesForEmptySquare` — generateMovesForPiece at (0,0) returns []
+   - `whitePichuMovesAtStart` — Pichu at (2,1) has exactly 2 moves: (3,0) and (3,2)
+   - `blackPichuMovesAtStart` — Pichu at (5,0) has exactly 1 move: (4,1)
+   - `pichuCaptureMove` — white Pichu at (2,0) with black Pichu at (3,1) generates capture to (4,2)
+   - `pikachuForwardMoves` — Pikachu at (1,0) can reach (2,0) and (3,0)
+   - `pikachuCannotCaptureRaichu` — Pikachu adjacent to enemy Raichu has no capture of Raichu
+   - `raichuQueenlikeMoves` — Raichu at (3,3) has >10 moves including all 4 cardinal directions
+   - `applyMoveUpdatesPiece` — piece is at new position, old position is "."
+   - `applyCaptureClearsCapturedSquare` — captured position becomes "."
+   - `applyMoveDoesNotMutate` — original board unchanged after applyMove
+   - `promotionApplied` — Pichu reaching back rank has "@" or "$" in newBoard
+   - `initialBoardIsPlaying` — getGameStatus(initialBoard, "white") == "playing"
+   - `whiteWinsWhenBlackHasNoPieces` — encoded board with only white Raichu → "white_wins"
+   - `blackWinsWhenWhiteHasNoPieces` — encoded board with only black Raichu → "black_wins"
+   - `findBestMoveReturnsValidMove` — findBestMove returns non-nil Move (requires JS bundle)
+   - `findBestMoveIsLegal` — returned move's from position is a piece of the current player
+
+2. **GameStoreTests** — `@MainActor` tests for `GameStore`
+   - Initialization: board 8×8, white to move, playing status, empty history
+   - Selection: selectOwnPiece sets selectedPiece; selectOpponent clears; selectEmpty clears
+   - Move execution: changes currentPlayer, appends moveHistory, saves lastMove, appends boardHistory
+   - Captured pieces: capturedByWhite/capturedByBlack track correct piece chars
+   - Draw detection: quiet move increments halfMovesSinceProgress; capture/promotion resets to 0
+   - 50-move rule: setting halfMovesSinceProgress=99 then quiet move → status=="draw", drawReason set
+   - Restart: resets all state to initial values
+   - newGame: updates gameMode, difficulty, playerColor
+  
+3. **EngineTypeTests** — `String` extension helpers and `Player` enum
+   - isWhitePiece: "w", "W", "@" → true; "b", ".", etc. → false
+   - isBlackPiece: "b", "B", "$" → true; "w", ".", etc. → false
+   - pieceColor: correct .white/.black/.nil mapping
+   - playerOpposite: symmetric
+   - gameMoveAsMove: converts from_row/from_col/piece/captured correctly
+
+Board fixtures to define at the top of the file:
+```swift
+private let INITIAL_BOARD = "........W.W.W.W..w.w.w.w................b.b.b.b..B.B.B.B........"
+private let WHITE_WINS_BOARD = "................................@..............................."
+private let BLACK_WINS_BOARD = ".....................................$..........................."
+private let PRE_PROMOTION_BOARD = "..............................................................w....."
+private let PICHU_CAPTURE_BOARD = "................w...............b................................"
+private let PIKACHU_QUIET_BOARD = "........W......................................................."
+```
+
+For GameStore tests that need a Move, construct synthetic Move objects directly (do not rely on engine output) so tests pass even without JS bundle.
+
+Full specification: `ios app/08_TESTING.md` sections 4 and 5.
+```
+
+### Prompt 7.2 — UI Tests
+
+```
+Write a complete UI test suite in `RaichuUITests/RaichuUITests.swift`.
+
+Framework: XCUITest (XCTest, `final class RaichuUITests: XCTestCase`).
+
+Set up: `continueAfterFailure = false`. Launch app in `setUpWithError`. Nil out app in `tearDownWithError`.
+
+Tests to implement:
+
+1. `testAppLaunchesWithoutCrash` — `app.state == .runningForeground`
+2. `testHomeViewTitleIsVisible` — `app.staticTexts["Raichu"].waitForExistence(timeout: 3)`
+3. `testHomeViewPlayVsAIButtonExists` — `app.buttons["Play vs AI"]` exists
+4. `testNavigateToPlayView` — tap "Play vs AI", verify board or nav element appears within 5s
+5. `testPlayViewHasBoardGrid` — navigate to PlayView, verify `app.otherElements["BoardView"]` exists
+6. `testPlayViewHasNewGameButton` — "New Game" or settings gear button visible on PlayView
+7. `testTappingPieceOnBoardDoesNotCrash` — tap board centre, app still running foreground
+8. `testNavigateToProfileTab` — tap Profile tab, verify AuthView or ProfileView visible
+9. `testLaunchPerformanceMeasure` — `measure(metrics: [XCTApplicationLaunchMetric()])` cold launch
+
+For cells with accessibility identifiers "cell-R-C" (row R, col C), check their count == 64 when identifiers are set. Fall back gracefully if they're not set yet.
+
+Important:
+- All test methods must be `@MainActor`
+- Use `waitForExistence(timeout:)` — never hard `sleep()`
+- Prefer `XCTAssert(condition, message)` over bare `XCTAssert(condition)` so failures are readable
+
+Full specification: `ios app/08_TESTING.md` section 7.
+```
+
+### Prompt 7.3 — Xcode Setup Verification
+
+```
+After completing all phases and tests, do a final verification pass:
+
+1. Confirm `raichu-engine.js` is present at `Raichu/Engine/raichu-engine.js`
+   - If missing: run `pnpm build:ios` from the monorepo root
+2. Confirm `raichu-engine.js` is in Xcode's "Copy Bundle Resources" phase
+3. Confirm `supabase-swift` package is added and resolves (no red "module not found" errors)
+4. Run Cmd+U — all unit tests must pass with the real JS bundle loaded
+5. Run UI tests — all 9 tests must pass in simulator
+6. Check test report: zero failures, zero skipped, zero crashes
+
+If any engine bridge tests fail with "stub engine":
+- The JS bundle is not being loaded — check Copy Bundle Resources and target membership
+- Tests that rely on real move generation will fail until bundle is present
+
+See `ios app/08_TESTING.md` section 8 for the full pre-commit checklist.
 ```
 
 ---
