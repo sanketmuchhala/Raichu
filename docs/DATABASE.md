@@ -160,7 +160,7 @@ Transient table for ranked matchmaking. Rows are deleted when a match is found.
 
 **RLS:** None. This table is accessed exclusively by the API via the service role key. No client-side access.
 
-**Processed by:** `matchmaking-worker.ts` in the API, running a loop every 3 seconds.
+**Processed by:** `matchmaking-worker.ts` in the API, running a loop every 5 seconds.
 
 ---
 
@@ -201,6 +201,8 @@ Run in order:
 | `002_elo_tracking.sql` | Adds ELO delta columns and leaderboard index |
 | `003_fix_profile_trigger.sql` | Fixes edge case in auto-profile creation on signup |
 | `004_enable_realtime.sql` | Sets REPLICA IDENTITY FULL, adds tables to supabase_realtime publication |
+| `005_analytics.sql` | Creates `analytics_events` plus 5 dashboard views |
+| `006_analytics_expansion.sql` | Replaces `ip_address` with `ip_hash`, adds `app`, adds play-style and dashboard views, adds `prune_analytics_events()` |
 
 ---
 
@@ -225,3 +227,48 @@ actual_score = 1.0 for win, 0.0 for loss
 Minimum ELO floor: 100 (cannot drop below this).
 
 Both players' ELO is updated atomically after the game result is written.
+
+
+---
+
+## Analytics
+
+`analytics_events` (migration `005`) is the single event table. Events are
+written server-side only — the browser posts to `/api/track` in `apps/web`,
+which inserts with the service-role key, and `apps/api` emits its own events
+through `src/lib/analytics.ts`. RLS is deny-all, so no client can read it.
+
+Migration `006` adds:
+
+- **`ip_hash`** replacing `ip_address`. Raw IPs are personal data and the app
+  has no consent mechanism; the salted hash (`ANALYTICS_IP_SALT`) still supports
+  unique-visitor counting, and country/region/city are unaffected.
+- **`app`** (`web` | `api` | `ios`) distinguishing browser events from
+  server-authoritative ones. `analytics_dau` and `analytics_devices` are
+  restricted to `app = 'web'` so server events cannot inflate session counts.
+- **Play-style views** derived from the existing `moves` table — aggression,
+  advancement bias, piece preference and think-time percentiles need no new
+  collection for online games. Offline and bot games never reach `moves`, so
+  they arrive as a single `game_summary` event per game instead.
+  `analytics_player_profile` merges both sources.
+
+These describe *how someone plays* — aggressive or cautious, fast or deliberate.
+They are not a personality measure and should not be labelled as one in the UI.
+
+### Verifying the connection
+
+```bash
+pnpm check:supabase
+```
+
+Checks env vars in both apps, table and view existence, Realtime publication,
+RLS enforcement, and whether migration `006` has been applied. Exits non-zero on
+failure, so it can gate a deploy.
+
+### Retention
+
+`analytics_events` grows fastest of any table. Run periodically:
+
+```sql
+SELECT prune_analytics_events();   -- default: keep 180 days
+```

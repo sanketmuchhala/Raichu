@@ -12,6 +12,7 @@ import {
 } from '@raichu/game-engine';
 import { findBestMove } from '@raichu/ai-engine';
 import { analytics } from '../lib/analytics';
+import { computeGameSummary } from '../lib/play-style';
 
 interface GameStore {
   // Game state
@@ -21,6 +22,11 @@ interface GameStore {
   moveHistory: Move[];
   boardHistory: Board[];
   lastMove: Move | null;
+
+  // Play-style tracking (offline games never reach the `moves` table, so the
+  // timing data has to be captured here or it is lost)
+  gameStartedAt: number;
+  moveTimestamps: number[];
 
   // Draw detection
   positionCounts: Record<string, number>;  // "boardEncoded:player" → occurrences
@@ -54,6 +60,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   moveHistory: [],
   boardHistory: [createInitialBoard()],
   lastMove: null,
+  gameStartedAt: Date.now(),
+  moveTimestamps: [],
   positionCounts: { [`${encodeBoard(createInitialBoard())}:white`]: 1 },
   halfMovesSinceProgress: 0,
   drawReason: null,
@@ -90,8 +98,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
   makeMove: (move: Move) => {
     const {
       board, currentPlayer, moveHistory, boardHistory, gameMode, playerColor,
-      positionCounts, halfMovesSinceProgress,
+      positionCounts, halfMovesSinceProgress, gameStartedAt, moveTimestamps,
     } = get();
+
+    const movedAt = Date.now();
+    const newMoveTimestamps = [...moveTimestamps, movedAt];
 
     const newBoard    = applyMove(board, move);
     const nextPlayer: Player = currentPlayer === 'white' ? 'black' : 'white';
@@ -128,6 +139,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       currentPlayer: nextPlayer,
       status: finalStatus,
       moveHistory: [...moveHistory, move],
+      moveTimestamps: newMoveTimestamps,
       boardHistory: [...boardHistory, newBoard],
       lastMove: move,
       positionCounts: newPositionCounts,
@@ -138,11 +150,29 @@ export const useGameStore = create<GameStore>((set, get) => ({
     });
 
     if (finalStatus !== 'playing') {
+      const newMoveHistory = [...moveHistory, move];
+
       analytics.gameEnded({
-        mode:      gameMode,
-        status:    finalStatus,
-        moveCount: moveHistory.length + 1,
+        mode:        gameMode,
+        status:      finalStatus,
+        moveCount:   newMoveHistory.length,
+        duration_ms: movedAt - gameStartedAt,
       });
+
+      // One summary per game rather than an event per move: same analytical
+      // value at roughly 1/40th the row count.
+      analytics.gameSummary(
+        computeGameSummary({
+          moveHistory: newMoveHistory,
+          moveTimestamps: newMoveTimestamps,
+          startedAt: gameStartedAt,
+          endedAt: movedAt,
+          playerColor,
+          mode: gameMode,
+          difficulty: get().difficulty,
+          status: finalStatus,
+        }),
+      );
     }
 
     if (gameMode === 'bot' && finalStatus === 'playing' && nextPlayer !== playerColor) {
@@ -166,6 +196,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       currentPlayer: 'white',
       status: 'playing',
       moveHistory: [],
+      gameStartedAt: Date.now(),
+      moveTimestamps: [],
       boardHistory: [initial],
       lastMove: null,
       positionCounts: { [`${encodeBoard(initial)}:white`]: 1 },

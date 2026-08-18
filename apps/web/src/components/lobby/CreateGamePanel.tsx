@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useUIStore } from '../../store/ui-store';
 import { THEMES } from '../../lib/themes';
 import { gamesApi } from '../../lib/api';
+import { analytics } from '../../lib/analytics';
+import { useAuthStore } from '../../store/auth-store';
 
 export function CreateGamePanel() {
   const theme = useUIStore((s) => THEMES[s.theme]);
@@ -24,6 +26,10 @@ export function CreateGamePanel() {
     setError('');
     try {
       const game = (await gamesApi.create({ gameType, playAs })) as { id: string };
+      analytics.gameCreated(
+        { gameType, playAs },
+        useAuthStore.getState().user?.id ?? null,
+      );
       router.push(`/game/${game.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create game');

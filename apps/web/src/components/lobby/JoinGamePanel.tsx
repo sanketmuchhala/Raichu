@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useUIStore } from '../../store/ui-store';
 import { THEMES } from '../../lib/themes';
 import { gamesApi } from '../../lib/api';
+import { analytics } from '../../lib/analytics';
+import { useAuthStore } from '../../store/auth-store';
 
 export function JoinGamePanel() {
   const theme = useUIStore((s) => THEMES[s.theme]);
@@ -17,11 +19,17 @@ export function JoinGamePanel() {
     if (!code.trim()) return;
     setJoining(true);
     setError('');
+    const trimmed = code.trim();
+    const userId = useAuthStore.getState().user?.id ?? null;
+    analytics.joinAttempted({ code: trimmed }, userId);
+
     try {
-      const game = (await gamesApi.joinByCode(code.trim())) as { id: string };
+      const game = (await gamesApi.joinByCode(trimmed)) as { id: string };
       router.push(`/game/${game.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to join game');
+      const reason = err instanceof Error ? err.message : 'Failed to join game';
+      analytics.joinFailed({ code: trimmed, reason }, userId);
+      setError(reason);
     } finally {
       setJoining(false);
     }
