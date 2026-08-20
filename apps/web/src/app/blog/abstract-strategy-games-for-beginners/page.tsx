@@ -6,7 +6,7 @@ import { SeoFooter } from '../../../components/seo/SeoFooter';
 import { Navbar } from '../../../components/nav/Navbar';
 
 export const metadata: Metadata = pageMetadata({
-  title:       'Abstract Strategy Games for Beginners | Getting Started Guide',
+  title:       'Abstract Strategy Games for Beginners: Start Here',
   description: 'What abstract strategy games are, why they are worth playing, and which ones to start with. A practical guide for complete beginners.',
   path:        '/blog/abstract-strategy-games-for-beginners',
   type:        'article',
@@ -19,6 +19,10 @@ const schema = {
   description:'A getting-started guide for players new to abstract strategy games.',
   author:    { '@type': 'Organization', name: 'Raichu Game' },
   publisher: { '@type': 'Organization', name: 'Raichu Game', url: SITE_URL },
+  datePublished: '2026-05-12',
+  dateModified:  '2026-08-20',
+  image:         `${SITE_URL}/opengraph-image`,
+  mainEntityOfPage: `${SITE_URL}/blog/abstract-strategy-games-for-beginners`,
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [

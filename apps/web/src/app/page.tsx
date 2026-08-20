@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useUIStore } from '../store/ui-store';
 import { THEMES } from '../lib/themes';
+import { SITE_URL } from '../lib/seo';
 import { Navbar } from '../components/nav/Navbar';
 
 const CDN = 'https://images.chesscomfiles.com/chess-themes/pieces/neo/150';
@@ -18,7 +19,7 @@ const GAME_SCHEMA = {
   applicationCategory:  'Game',
   playMode:             ['SinglePlayer', 'MultiPlayer'],
   operatingSystem:      'Any',
-  url:                  'https://raichu.live',
+  url:                  SITE_URL,
   offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
 };
 

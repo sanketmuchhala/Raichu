@@ -21,8 +21,8 @@ const schema = {
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home',                     item: 'https://raichu.live' },
-      { '@type': 'ListItem', position: 2, name: 'Abstract Strategy Games',  item: 'https://raichu.live/abstract-strategy-games' },
+      { '@type': 'ListItem', position: 1, name: 'Home',                     item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Abstract Strategy Games',  item: `${SITE_URL}/abstract-strategy-games` },
     ],
   },
 };
@@ -124,7 +124,7 @@ export default function AbstractStrategyGamesPage() {
 
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
           <Link href="/play"             style={{ display: 'inline-block', padding: '0.75rem 1.75rem', backgroundColor: 'var(--c-green)', color: '#fff', borderRadius: 8, fontWeight: 700, textDecoration: 'none' }}>Play Raichu</Link>
-          <Link href="/chess-like-games" style={{ display: 'inline-block', padding: '0.75rem 1.75rem', backgroundColor: 'var(--c-bg-1)', color: 'var(--c-text)', border: '1px solid var(--c-border)', borderRadius: 8, fontWeight: 600, textDecoration: 'none' }}>Chess-Like Games</Link>
+          <Link href="/blog/games-like-chess" style={{ display: 'inline-block', padding: '0.75rem 1.75rem', backgroundColor: 'var(--c-bg-1)', color: 'var(--c-text)', border: '1px solid var(--c-border)', borderRadius: 8, fontWeight: 600, textDecoration: 'none' }}>Chess-Like Games</Link>
         </div>
       </article>
 
