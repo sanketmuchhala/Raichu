@@ -6,7 +6,7 @@ import { SeoFooter } from '../../../components/seo/SeoFooter';
 import { Navbar } from '../../../components/nav/Navbar';
 
 export const metadata: Metadata = pageMetadata({
-  title:       'What Competitive Chess Players Play Next | Chess Alternatives',
+  title:       'What Competitive Chess Players Play Next',
   description: 'When chess players want a new challenge: Chess960, Shogi, Go, and Raichu. Games that reset the learning curve and offer depth that rivals standard chess.',
   path:        '/blog/chess-for-competitive-players',
   type:        'article',
@@ -19,6 +19,10 @@ const schema = {
   description:'Games chess players move to when they want a new challenge.',
   author:    { '@type': 'Organization', name: 'Raichu Game' },
   publisher: { '@type': 'Organization', name: 'Raichu Game', url: SITE_URL },
+  datePublished: '2026-05-12',
+  dateModified:  '2026-08-20',
+  image:         `${SITE_URL}/opengraph-image`,
+  mainEntityOfPage: `${SITE_URL}/blog/chess-for-competitive-players`,
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [

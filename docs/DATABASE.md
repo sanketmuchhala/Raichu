@@ -204,6 +204,7 @@ Run in order:
 | `005_analytics.sql` | Creates `analytics_events` plus 5 dashboard views |
 | `006_analytics_expansion.sql` | Adds `ip_hash` and `app`, adds play-style and dashboard views, adds `prune_analytics_events()` |
 | `007_drop_ip_address.sql` | Drops `ip_address`. Run only after the code writing `ip_hash` is deployed |
+| `008_secure_analytics_views.sql` | Sets `security_invoker` and revokes client grants on every view |
 
 ---
 
@@ -278,3 +279,31 @@ failure, so it can gate a deploy.
 ```sql
 SELECT prune_analytics_events();   -- default: keep 180 days
 ```
+
+
+### Views and RLS — read before adding a view
+
+RLS is enabled on all five tables, but **a view does not inherit it**. In
+PostgreSQL a view executes with the privileges of its owner (`postgres`, which
+bypasses RLS), and Supabase grants SELECT on public-schema objects to `anon` and
+`authenticated` by default. The anon key ships in the browser bundle.
+
+Every analytics view was therefore world-readable until `008` — including
+`analytics_move_facts` (every move of every game) and `analytics_play_style`
+(per-player profiling keyed to username).
+
+Any new view in the `public` schema must do both:
+
+```sql
+ALTER VIEW public.my_view SET (security_invoker = on);
+REVOKE ALL ON public.my_view FROM anon, authenticated;
+```
+
+A newly created view defaults back to definer mode and picks up the default
+grants, so this is not a one-time fix. `pnpm check:supabase` fails if any view
+is readable with the anon key — add new views to the list in
+`apps/api/scripts/check-supabase.ts`.
+
+Table grants are deliberately left in place: on a table it is RLS, not the
+grant, that filters rows, and revoking SELECT would break the leaderboard, game
+loading and move history.

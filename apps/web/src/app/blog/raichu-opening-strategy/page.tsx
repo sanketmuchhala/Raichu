@@ -28,7 +28,7 @@ import { Navbar } from '../../../components/nav/Navbar';
 
 export const metadata: Metadata = pageMetadata({
   title:       'Raichu Opening Strategy: First Move Principles',
-  description: 'How to start strong in Raichu. Five opening principles: advance Pichus, develop Pikachus forward, protect your Raichu, contest the center, create promotion threats.',
+  description: 'How to start strong in Raichu. Five opening principles: advance Pichus, develop Pikachus, protect your Raichu, and create promotion threats.',
   path:        '/blog/raichu-opening-strategy',
   type:        'article',
 });
@@ -40,6 +40,10 @@ const schema = {
   description:'Five opening principles for Raichu that apply in every game.',
   author:    { '@type': 'Organization', name: 'Raichu Game' },
   publisher: { '@type': 'Organization', name: 'Raichu Game', url: SITE_URL },
+  datePublished: '2026-05-12',
+  dateModified:  '2026-08-20',
+  image:         `${SITE_URL}/opengraph-image`,
+  mainEntityOfPage: `${SITE_URL}/blog/raichu-opening-strategy`,
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [

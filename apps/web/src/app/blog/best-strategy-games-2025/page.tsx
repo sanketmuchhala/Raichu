@@ -6,8 +6,8 @@ import { SeoFooter } from '../../../components/seo/SeoFooter';
 import { Navbar } from '../../../components/nav/Navbar';
 
 export const metadata: Metadata = pageMetadata({
-  title:       'Best Strategy Games 2025 | Top Abstract Strategy Games to Play Now',
-  description: 'The best strategy games to play in 2025: Raichu, Chess, Go, Hive, Onitama, and more. Zero luck, deep tactics, playable in a browser or with a physical set.',
+  title:       'Best Strategy Games 2026 | Top Abstract Games to Play',
+  description: 'The best strategy games to play in 2026: Raichu, Chess, Go, Hive, Onitama, and more. Zero luck, deep tactics, playable in a browser or with a physical set.',
   path:        '/blog/best-strategy-games-2025',
   type:        'article',
 });
@@ -15,16 +15,20 @@ export const metadata: Metadata = pageMetadata({
 const schema = {
   '@context': 'https://schema.org',
   '@type':    'Article',
-  headline:   'Best Strategy Games 2025',
-  description:'The top abstract strategy games to play in 2025, ranked and explained.',
+  headline:   'Best Strategy Games 2026',
+  description:'The top abstract strategy games to play in 2026, ranked and explained.',
   author:    { '@type': 'Organization', name: 'Raichu Game' },
   publisher: { '@type': 'Organization', name: 'Raichu Game', url: SITE_URL },
+  datePublished: '2026-05-12',
+  dateModified:  '2026-08-20',
+  image:         `${SITE_URL}/opengraph-image`,
+  mainEntityOfPage: `${SITE_URL}/blog/best-strategy-games-2025`,
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home',  item: SITE_URL },
       { '@type': 'ListItem', position: 2, name: 'Blog',  item: `${SITE_URL}/blog` },
-      { '@type': 'ListItem', position: 3, name: 'Best Strategy Games 2025', item: `${SITE_URL}/blog/best-strategy-games-2025` },
+      { '@type': 'ListItem', position: 3, name: 'Best Strategy Games 2026', item: `${SITE_URL}/blog/best-strategy-games-2025` },
     ],
   },
 };
@@ -49,12 +53,12 @@ export default function Article() {
       <nav aria-label="breadcrumb" style={{ maxWidth: 720, margin: '1rem auto 0', padding: '0 1.5rem', fontSize: '0.8125rem', color: 'var(--c-muted)' }}>
         <Link href="/"    style={{ color: 'var(--c-muted)', textDecoration: 'none' }}>Home</Link>{' / '}
         <Link href="/blog" style={{ color: 'var(--c-muted)', textDecoration: 'none' }}>Blog</Link>{' / '}
-        <span>Best Strategy Games 2025</span>
+        <span>Best Strategy Games 2026</span>
       </nav>
 
       <article style={{ maxWidth: 720, margin: '0 auto', padding: '2rem 1.5rem 4rem' }}>
         <h1 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, lineHeight: 1.2, marginBottom: '0.75rem' }}>
-          Best Strategy Games to Play in 2025
+          Best Strategy Games to Play in 2026
         </h1>
         <p style={{ color: 'var(--c-muted)', fontSize: '1.0625rem', lineHeight: 1.7, marginBottom: '2.5rem' }}>
           The best strategy games are the ones that have lasted decades and will last decades more. This list focuses on abstract strategy: zero luck, two players, pure skill. These games do not need updates, expansions, or battle passes. They are already complete.
@@ -79,7 +83,7 @@ export default function Article() {
         </section>
 
         <section style={{ marginBottom: '2.5rem' }}>
-          <h2 style={h2Style}>What Has Changed in 2025</h2>
+          <h2 style={h2Style}>What Has Changed in 2026</h2>
           <p style={{ color: 'var(--c-muted)', lineHeight: 1.7, marginBottom: '1rem' }}>
             Not much. The best abstract strategy games are stable by design. Chess and Go are unchanged. What has changed is the quality of online platforms. Browser-based play is now smooth enough that there is no meaningful difference between playing online and playing in person.
           </p>
