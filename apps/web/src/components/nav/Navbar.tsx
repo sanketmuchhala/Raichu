@@ -105,13 +105,19 @@ export function Navbar({ backHref, backLabel }: NavbarProps) {
 
         {/* ── Right: UserMenu + hamburger ── */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
-          {pathname !== '/play' && <PlayCta placement="navbar" size="sm" />}
+          {/* Hidden below md: at 320px the bar overflowed, and StickyPlayCta
+              plus the mobile menu already offer the same action. */}
+          {pathname !== '/play' && (
+            <span className="hidden md:inline-flex">
+              <PlayCta placement="navbar" size="sm" />
+            </span>
+          )}
           <UserMenu />
           <button
             className="md:hidden"
             onClick={() => setOpen(!open)}
             aria-label="Toggle navigation"
-            style={{ padding: '0.375rem', borderRadius: 6, background: 'none', border: 'none', cursor: 'pointer', color: theme.textSecondary, lineHeight: 0 }}
+            style={{ width: 44, height: 44, display: 'grid', placeItems: 'center', borderRadius: 6, background: 'none', border: 'none', cursor: 'pointer', color: theme.textSecondary, lineHeight: 0 }}
           >
             {open ? (
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -140,7 +146,9 @@ export function Navbar({ backHref, backLabel }: NavbarProps) {
                 href={href}
                 onClick={() => setOpen(false)}
                 style={{
-                  display:        'block',
+                  display:        'flex',
+                  alignItems:     'center',
+                  minHeight:      44,
                   padding:        '0.625rem 0.75rem',
                   borderRadius:   6,
                   fontSize:       '0.9375rem',

@@ -65,8 +65,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
   positionCounts: { [`${encodeBoard(createInitialBoard())}:white`]: 1 },
   halfMovesSinceProgress: 0,
   drawReason: null,
-  gameMode: 'pvp',
-  difficulty: 'medium',
+  // Default to a bot game: the home page's primary CTA says "Play vs AI" and
+  // links here, so pvp meant a first-time visitor silently played themselves.
+  // Easy (400ms search) rather than medium (800ms) because every bot reply
+  // blocks the main thread, and a slow first move reads as the page being broken.
+  // playerColor must stay 'white' — the initial state has no equivalent of
+  // newGame's bot-first kick-off, so a black default would never move.
+  gameMode: 'bot',
+  difficulty: 'easy',
   playerColor: 'white',
   selectedPiece: null,
   legalMoves: [],
