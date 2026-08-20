@@ -6,8 +6,8 @@ import { SeoFooter } from '../../../components/seo/SeoFooter';
 import { Navbar } from '../../../components/nav/Navbar';
 
 export const metadata: Metadata = pageMetadata({
-  title:       'Raichu for Chess Players: Why You Should Try It | Raichu Game Blog',
-  description: 'Chess players will recognize piece hierarchy, promotion tension, and positional depth. Here is what feels familiar in Raichu, and what is refreshingly different.',
+  title:       'Raichu for Chess Players: Why You Should Try It',
+  description: 'Chess players will recognize piece hierarchy, promotion tension and positional depth. What feels familiar in Raichu, and what is different.',
   path:        '/blog/raichu-for-chess-players',
   type:        'article',
 });
@@ -19,6 +19,10 @@ const schema = {
   description:'A guide for chess players explaining how Raichu applies familiar chess instincts in a new context, and what makes it a rewarding game in its own right.',
   author:    { '@type': 'Organization', name: 'Raichu Game' },
   publisher: { '@type': 'Organization', name: 'Raichu Game', url: SITE_URL },
+  datePublished: '2026-05-12',
+  dateModified:  '2026-08-20',
+  image:         `${SITE_URL}/opengraph-image`,
+  mainEntityOfPage: `${SITE_URL}/blog/raichu-for-chess-players`,
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [

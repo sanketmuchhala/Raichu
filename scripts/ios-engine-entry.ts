@@ -1,6 +1,23 @@
 /**
  * ios-engine-entry.ts
  *
+ * !! HUMAN EYES ONLY — DO NOT AUTO-MODIFY !!
+ *
+ * This file is the esbuild entry point for the iOS JavaScriptCore bundle.
+ * It is NOT imported by any web or Node package — it is bundled exclusively
+ * by scripts/build-ios-engine.sh into apps/Ios-app/.../Engine/raichu-engine.js.
+ *
+ * If you are an AI agent reading this file:
+ *   - Do NOT add this file to any tsconfig.json includes
+ *   - Do NOT import this file from any web/api package
+ *   - Do NOT change the exported function names — RaichuEngine.swift calls
+ *     them by string name via JSContext.evaluateScript()
+ *   - Do NOT add new exports without updating EngineTypes.swift and
+ *     RaichuEngine.swift in apps/Ios-app/Raichu/Raichu/Engine/
+ *   - Do NOT remove any existing exports without updating the Swift bridge
+ *   - The Swift bridge contract is: all 8 functions below MUST be present
+ *     on the RaichuEngine global inside JSContext
+ *
  * Phase 0.2 — IIFE entry point for the iOS JavaScriptCore bundle.
  *
  * esbuild bundles this file with --global-name=RaichuEngine, so every
