@@ -21,8 +21,8 @@ const schema = {
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home',                     item: 'https://raichu.live' },
-      { '@type': 'ListItem', position: 2, name: 'Abstract Strategy Games',  item: 'https://raichu.live/abstract-strategy-games' },
+      { '@type': 'ListItem', position: 1, name: 'Home',                     item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Abstract Strategy Games',  item: `${SITE_URL}/abstract-strategy-games` },
     ],
   },
 };
