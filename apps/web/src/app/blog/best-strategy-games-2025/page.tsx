@@ -19,6 +19,10 @@ const schema = {
   description:'The top abstract strategy games to play in 2026, ranked and explained.',
   author:    { '@type': 'Organization', name: 'Raichu Game' },
   publisher: { '@type': 'Organization', name: 'Raichu Game', url: SITE_URL },
+  datePublished: '2026-05-12',
+  dateModified:  '2026-08-20',
+  image:         `${SITE_URL}/opengraph-image`,
+  mainEntityOfPage: `${SITE_URL}/blog/best-strategy-games-2025`,
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [

@@ -7,9 +7,9 @@ import { useUIStore } from '../../store/ui-store';
 import { THEMES } from '../../lib/themes';
 import { UserMenu } from '../auth/UserMenu';
 import { useAuthStore } from '../../store/auth-store';
+import { PlayCta } from '../cta/PlayCta';
 
 const BASE_LINKS = [
-  { href: '/play',        label: 'Play'        },
   { href: '/lobby',       label: 'Online'      },
   { href: '/rules',       label: 'Rules'       },
   { href: '/how-to-play', label: 'How to Play' },
@@ -105,6 +105,7 @@ export function Navbar({ backHref, backLabel }: NavbarProps) {
 
         {/* ── Right: UserMenu + hamburger ── */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+          {pathname !== '/play' && <PlayCta placement="navbar" size="sm" />}
           <UserMenu />
           <button
             className="md:hidden"

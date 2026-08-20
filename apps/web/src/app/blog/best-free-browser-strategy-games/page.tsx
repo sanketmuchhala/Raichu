@@ -19,6 +19,10 @@ const schema = {
   description:'A curated list of the best free abstract strategy games playable in a web browser, with no download or installation required.',
   author:    { '@type': 'Organization', name: 'Raichu Game' },
   publisher: { '@type': 'Organization', name: 'Raichu Game', url: SITE_URL },
+  datePublished: '2026-05-12',
+  dateModified:  '2026-08-20',
+  image:         `${SITE_URL}/opengraph-image`,
+  mainEntityOfPage: `${SITE_URL}/blog/best-free-browser-strategy-games`,
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [

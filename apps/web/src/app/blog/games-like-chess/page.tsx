@@ -19,6 +19,10 @@ const schema = {
   description:'A ranked list of the best strategy games like chess for players who want something new without giving up tactical depth.',
   author:    { '@type': 'Organization', name: 'Raichu Game' },
   publisher: { '@type': 'Organization', name: 'Raichu Game', url: SITE_URL },
+  datePublished: '2026-05-12',
+  dateModified:  '2026-05-12',
+  image:         `${SITE_URL}/opengraph-image`,
+  mainEntityOfPage: `${SITE_URL}/blog/games-like-chess`,
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [

@@ -19,6 +19,10 @@ const schema = {
   description:'Games that fix chess\'s memorization problem by making every opening position fresh.',
   author:    { '@type': 'Organization', name: 'Raichu Game' },
   publisher: { '@type': 'Organization', name: 'Raichu Game', url: SITE_URL },
+  datePublished: '2026-05-12',
+  dateModified:  '2026-08-20',
+  image:         `${SITE_URL}/opengraph-image`,
+  mainEntityOfPage: `${SITE_URL}/blog/chess-without-memorization`,
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [
