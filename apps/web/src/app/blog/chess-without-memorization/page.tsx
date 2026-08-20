@@ -6,7 +6,7 @@ import { SeoFooter } from '../../../components/seo/SeoFooter';
 import { Navbar } from '../../../components/nav/Navbar';
 
 export const metadata: Metadata = pageMetadata({
-  title:       'Chess Without Opening Memorization | Strategy Games That Skip Theory',
+  title:       'Chess Without Opening Memorization | Skip the Theory',
   description: 'Tired of memorizing chess openings? These strategy games eliminate theory entirely: Chess960, Onitama, and Raichu all force you to think from move one.',
   path:        '/blog/chess-without-memorization',
   type:        'article',

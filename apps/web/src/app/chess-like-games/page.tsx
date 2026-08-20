@@ -6,7 +6,7 @@ import { SeoFooter } from '../../components/seo/SeoFooter';
 import { Navbar } from '../../components/nav/Navbar';
 
 export const metadata: Metadata = pageMetadata({
-  title:       'Best Chess-Like Games to Play Online | Chess-Inspired Strategy Games',
+  title:       'Best Chess-Like Games to Play Online Free',
   description: 'Discover the best chess-like games: Chess, Shogi, Go, Hex, Hive, Onitama, Arimaa, and Raichu. Each offers tactical depth and strategic thinking without luck.',
   path:        '/chess-like-games',
   type:        'article',

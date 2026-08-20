@@ -6,7 +6,7 @@ import { SeoFooter } from '../../../components/seo/SeoFooter';
 import { Navbar } from '../../../components/nav/Navbar';
 
 export const metadata: Metadata = pageMetadata({
-  title:       'Online Board Games With No Download | Browser Games That Work Instantly',
+  title:       'Online Board Games With No Download | Play Instantly',
   description: 'Board games that run in any browser with no download, no install, and no account required. Raichu, Lichess, Board Game Arena, and more.',
   path:        '/blog/online-board-games-no-download',
   type:        'article',

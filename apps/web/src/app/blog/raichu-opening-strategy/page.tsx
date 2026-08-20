@@ -28,7 +28,7 @@ import { Navbar } from '../../../components/nav/Navbar';
 
 export const metadata: Metadata = pageMetadata({
   title:       'Raichu Opening Strategy: First Move Principles',
-  description: 'How to start strong in Raichu. Five opening principles: advance Pichus, develop Pikachus forward, protect your Raichu, contest the center, create promotion threats.',
+  description: 'How to start strong in Raichu. Five opening principles: advance Pichus, develop Pikachus, protect your Raichu, and create promotion threats.',
   path:        '/blog/raichu-opening-strategy',
   type:        'article',
 });

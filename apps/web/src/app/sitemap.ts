@@ -44,9 +44,12 @@ const PAGES: { path: string; priority: number; changeFrequency: MetadataRoute.Si
   { path: '/blog/best-free-browser-strategy-games',                priority: 0.6,  changeFrequency: 'monthly' },
   { path: '/blog/best-strategy-games-2025',                        priority: 0.6,  changeFrequency: 'yearly'  },
   { path: '/blog/how-to-improve-at-board-games',                   priority: 0.6,  changeFrequency: 'monthly' },
-  // App pages
-  { path: '/leaderboard',                                          priority: 0.5,  changeFrequency: 'daily'   },
-  { path: '/lobby',                                                priority: 0.5,  changeFrequency: 'weekly'  },
+  // App pages are deliberately absent.
+  //   /lobby       is Disallow-ed in robots.ts, so listing it here contradicted that.
+  //   /leaderboard renders empty to crawlers: the profiles RLS policy is
+  //                TO authenticated, so a signed-out visitor (and Googlebot)
+  //                sees "No players yet". Indexing an empty page is worse than
+  //                not indexing it. Revisit if profiles ever become public.
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

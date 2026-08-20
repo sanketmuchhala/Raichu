@@ -4,7 +4,7 @@ import { pageMetadata, SITE_URL } from '../../lib/seo';
 import { SchemaScript } from '../../components/seo/SchemaScript';
 
 export const metadata: Metadata = pageMetadata({
-  title:       'Play Raichu Online | Free Chess-Style Strategy Game in Your Browser',
+  title:       'Play Raichu Online | Free Chess-Style Strategy Game',
   description: 'Play Raichu free in your browser, a chess-inspired abstract strategy game. Choose vs AI or challenge a friend online. No download required.',
   path:        '/play',
 });
@@ -34,6 +34,11 @@ export default function PlayLayout({ children }: { children: React.ReactNode }) 
       {children}
       {/* SEO: brief description below the game interface */}
       <section style={{ backgroundColor: 'var(--c-bg-1)', borderTop: '1px solid var(--c-border)', padding: '1.25rem 2rem', textAlign: 'center' }}>
+        {/* The game board carries no heading of its own, so /play had no h1 at
+            all. A real, visible one belongs here rather than hidden text. */}
+        <h1 style={{ color: 'var(--c-text)', fontSize: '1rem', fontWeight: 600, margin: '0 0 0.5rem' }}>
+          Play Raichu Online — Free Chess-Inspired Strategy Game
+        </h1>
         <p style={{ color: 'var(--c-muted)', fontSize: '0.8125rem', maxWidth: 640, margin: '0 auto', lineHeight: 1.65 }}>
           Raichu is a free chess-inspired abstract strategy game. No download, no account required.
           Two players, three piece types, zero luck.{' '}

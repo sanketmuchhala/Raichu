@@ -6,7 +6,7 @@ import { SeoFooter } from '../../../components/seo/SeoFooter';
 import { Navbar } from '../../../components/nav/Navbar';
 
 export const metadata: Metadata = pageMetadata({
-  title:       'Why Play Abstract Strategy Games | The Case for Zero-Luck Games',
+  title:       'Why Play Abstract Strategy Games | Zero-Luck Games',
   description: 'Why abstract strategy games like Chess, Go, and Raichu are worth your time: clean feedback, no luck, skill that compounds, and games that never go stale.',
   path:        '/blog/why-play-strategy-games',
   type:        'article',

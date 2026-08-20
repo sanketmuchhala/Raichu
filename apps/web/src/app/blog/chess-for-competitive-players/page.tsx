@@ -6,7 +6,7 @@ import { SeoFooter } from '../../../components/seo/SeoFooter';
 import { Navbar } from '../../../components/nav/Navbar';
 
 export const metadata: Metadata = pageMetadata({
-  title:       'What Competitive Chess Players Play Next | Chess Alternatives',
+  title:       'What Competitive Chess Players Play Next',
   description: 'When chess players want a new challenge: Chess960, Shogi, Go, and Raichu. Games that reset the learning curve and offer depth that rivals standard chess.',
   path:        '/blog/chess-for-competitive-players',
   type:        'article',
