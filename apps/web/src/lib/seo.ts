@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 
-export const SITE_URL  = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://raichu.live').replace(/\/$/, '');
+// Must match the domain the site actually resolves at. The apex redirects to
+// www, so using the apex here made every canonical, og:url and sitemap entry
+// point at a redirect instead of the live URL.
+export const SITE_URL  = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.raichu.live').replace(/\/$/, '');
 export const SITE_NAME = 'Raichu Game';
 
 export function pageMetadata({

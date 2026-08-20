@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useUIStore } from '../../store/ui-store';
 import { THEMES } from '../../lib/themes';
+import { analytics } from '../../lib/analytics';
+import { useAuthStore } from '../../store/auth-store';
 
 interface InviteCodeDisplayProps {
   code: string;
@@ -15,6 +17,7 @@ export function InviteCodeDisplay({ code }: InviteCodeDisplayProps) {
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(code);
+      analytics.inviteCopied({ gameId: code }, useAuthStore.getState().user?.id ?? null);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {

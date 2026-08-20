@@ -34,9 +34,22 @@
 		A8A053382FB3B60200BEF013 /* RaichuUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RaichuUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		A8FBB2FC2FD8941A004A1F4A /* Exceptions for "Raichu" folder in "Raichu" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = A8A053202FB3B5FF00BEF013 /* Raichu */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A8A053232FB3B60000BEF013 /* Raichu */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				A8FBB2FC2FD8941A004A1F4A /* Exceptions for "Raichu" folder in "Raichu" target */,
+			);
 			path = Raichu;
 			sourceTree = "<group>";
 		};
@@ -421,6 +434,7 @@
 				DEVELOPMENT_TEAM = 83G5VWTNT3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Raichu/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -453,6 +467,7 @@
 				DEVELOPMENT_TEAM = 83G5VWTNT3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Raichu/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
