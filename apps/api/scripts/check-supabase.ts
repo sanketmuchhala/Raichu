@@ -175,31 +175,70 @@ async function checkRealtime() {
     return;
   }
 
-  // Subscribe exactly the way use-game-subscription.ts does, so this tests the
-  // real path rather than a catalog table the browser never touches.
-  const status = await new Promise<string>((resolveStatus) => {
-    const timer = setTimeout(() => resolveStatus('TIMED_OUT'), 15000);
+  // Subscribing successfully proves only that the websocket connects. It does
+  // NOT prove that Postgres changes are actually delivered — those are separate
+  // systems, and change delivery can be broken while the socket is perfectly
+  // healthy. So this creates a throwaway game row, subscribes, updates it, and
+  // waits for the event, then cleans up.
+  const probeId = crypto.randomUUID();
+  const { error: seedErr } = await admin.from('games').insert({
+    id: probeId,
+    status: 'waiting',
+    board_state: '.'.repeat(64),
+    current_player: 'white',
+    game_type: 'friendly',
+    move_count: 0,
+  });
+
+  if (seedErr) {
+    record('realtime delivery', 'fail', `could not seed probe row: ${seedErr.message}`);
+    return;
+  }
+
+  try {
+    let delivered = false;
     const channel = anon
-      .channel('healthcheck')
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'games' }, () => {})
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'moves' }, () => {})
-      .subscribe((s: string) => {
+      .channel(`healthcheck:${probeId}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'games', filter: `id=eq.${probeId}` },
+        () => { delivered = true; },
+      );
+
+    const status = await new Promise<string>((resolveStatus) => {
+      const timer = setTimeout(() => resolveStatus('TIMED_OUT'), 20000);
+      channel.subscribe((s: string) => {
         if (s === 'SUBSCRIBED' || s === 'CHANNEL_ERROR' || s === 'TIMED_OUT') {
           clearTimeout(timer);
-          anon.removeChannel(channel);
           resolveStatus(s);
         }
       });
-  });
+    });
 
-  if (status === 'SUBSCRIBED') {
-    record('realtime games/moves subscription', 'pass');
-  } else {
-    record(
-      'realtime games/moves subscription',
-      'fail',
-      `status ${status} — check ALTER PUBLICATION supabase_realtime (migration 004)`,
-    );
+    if (status !== 'SUBSCRIBED') {
+      record('realtime subscription', 'fail', `status ${status}`);
+      return;
+    }
+    record('realtime subscription (websocket)', 'pass');
+
+    // Give the server a moment to register the subscription before writing.
+    await new Promise((r) => setTimeout(r, 3000));
+    await admin.from('games').update({ updated_at: new Date().toISOString() }).eq('id', probeId);
+    await new Promise((r) => setTimeout(r, 8000));
+
+    if (delivered) {
+      record('realtime delivers postgres changes', 'pass');
+    } else {
+      record(
+        'realtime delivers postgres changes',
+        'fail',
+        'websocket connected but no change event arrived — multiplayer will fall back to 3s polling',
+      );
+    }
+
+    await anon.removeChannel(channel);
+  } finally {
+    await admin.from('games').delete().eq('id', probeId);
   }
 }
 
