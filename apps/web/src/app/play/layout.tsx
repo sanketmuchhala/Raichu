@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { pageMetadata } from '../../lib/seo';
+import { pageMetadata, SITE_URL } from '../../lib/seo';
 import { SchemaScript } from '../../components/seo/SchemaScript';
 
 export const metadata: Metadata = pageMetadata({
@@ -20,7 +20,7 @@ export default function PlayLayout({ children }: { children: React.ReactNode }) 
     applicationCategory:  'Game',
     playMode:             ['SinglePlayer', 'MultiPlayer'],
     operatingSystem:      'Any',
-    url:                  'https://raichu.live/play',
+    url:                  `${SITE_URL}/play`,
     offers: {
       '@type': 'Offer',
       price:   '0',

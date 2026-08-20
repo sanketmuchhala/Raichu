@@ -19,7 +19,7 @@ const nextConfig = {
       { source: '/sign-up',      destination: '/auth',   permanent: true },
       { source: '/leaderboards', destination: '/leaderboard', permanent: true },
       { source: '/rule',         destination: '/rules',  permanent: true },
-      { source: '/faq',          destination: '/faq',    permanent: false },
+      { source: '/faqs',         destination: '/faq',    permanent: true },
     ];
   },
 
