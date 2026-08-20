@@ -10,7 +10,6 @@ const PAGES: { path: string; priority: number; changeFrequency: MetadataRoute.Si
   { path: '/strategy',                                             priority: 0.8,  changeFrequency: 'monthly' },
   { path: '/faq',                                                  priority: 0.7,  changeFrequency: 'monthly' },
   // Comparison / info pages
-  { path: '/chess-like-games',                                     priority: 0.7,  changeFrequency: 'monthly' },
   { path: '/abstract-strategy-games',                              priority: 0.7,  changeFrequency: 'monthly' },
   { path: '/chess-variants',                                       priority: 0.7,  changeFrequency: 'monthly' },
   { path: '/raichu-vs-chess',                                      priority: 0.7,  changeFrequency: 'monthly' },
