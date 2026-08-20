@@ -7,7 +7,7 @@ import { Navbar } from '../../components/nav/Navbar';
 
 export const metadata: Metadata = pageMetadata({
   title:       'Raichu vs Chess | Similarities, Differences, and Strategy',
-  description: 'How does Raichu compare to chess? Both use a piece hierarchy and tactical positional play. Raichu has simpler rules, a different win condition, and faster games.',
+  description: 'How does Raichu compare to chess? Both use a piece hierarchy and tactical play. Raichu has simpler rules, a different win condition, faster games.',
   path:        '/raichu-vs-chess',
   type:        'article',
 });

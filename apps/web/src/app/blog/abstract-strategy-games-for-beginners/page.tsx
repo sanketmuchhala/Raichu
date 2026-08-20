@@ -6,7 +6,7 @@ import { SeoFooter } from '../../../components/seo/SeoFooter';
 import { Navbar } from '../../../components/nav/Navbar';
 
 export const metadata: Metadata = pageMetadata({
-  title:       'Abstract Strategy Games for Beginners | Getting Started Guide',
+  title:       'Abstract Strategy Games for Beginners: Start Here',
   description: 'What abstract strategy games are, why they are worth playing, and which ones to start with. A practical guide for complete beginners.',
   path:        '/blog/abstract-strategy-games-for-beginners',
   type:        'article',
