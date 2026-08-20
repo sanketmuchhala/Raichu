@@ -5,6 +5,7 @@ import './globals.css';
 import { AuthProvider } from '../components/auth/AuthProvider';
 import { AnalyticsProvider } from '../components/analytics/AnalyticsProvider';
 import { StickyPlayCta } from '../components/cta/StickyPlayCta';
+import { ThemeVars } from '../components/theme/ThemeVars';
 import { SITE_URL, SITE_NAME } from '../lib/seo';
 
 const figtree = Figtree({
@@ -44,8 +45,9 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  // maximumScale/userScalable deliberately omitted. Blocking pinch-zoom fails
+  // WCAG 2.1 SC 1.4.4, and Android Chrome honours it — so users could not
+  // magnify the board at all.
 };
 
 const WEBSITE_SCHEMA = {
@@ -70,6 +72,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBSITE_SCHEMA) }}
         />
         <AuthProvider>
+          <ThemeVars />
           <AnalyticsProvider />
           {children}
           <StickyPlayCta />

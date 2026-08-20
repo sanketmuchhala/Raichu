@@ -150,7 +150,7 @@ export function Board() {
     <svg
       ref={boardRef}
       viewBox={`0 0 ${TOTAL_WIDTH} ${TOTAL_HEIGHT}`}
-      className="w-full h-full max-w-[min(85vw,85vh)] max-h-[min(85vw,85vh)] select-none touch-none"
+      className="w-full h-full select-none touch-none"
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerLeave={handlePointerUp}
