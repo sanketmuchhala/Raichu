@@ -228,6 +228,39 @@ async function checkRls() {
   }
 }
 
+async function checkViewLeaks() {
+  console.log('\nView exposure (the anon key is public — no view may be readable with it)');
+  if (!anon) {
+    record('anon view access', 'fail', 'no anon key to test with');
+    return;
+  }
+
+  // Postgres views run as their OWNER by default, which bypasses RLS on the
+  // underlying tables. Migration 008 set security_invoker and revoked the
+  // client grants; this guards against a new view reintroducing the leak,
+  // since a freshly created view defaults back to definer mode.
+  const views = [
+    'analytics_dau', 'analytics_top_pages', 'analytics_devices', 'analytics_geo',
+    'analytics_game_funnel', 'analytics_event_counts', 'analytics_play_style',
+    'analytics_player_profile', 'analytics_player_outcomes', 'analytics_move_facts',
+    'analytics_errors', 'analytics_web_vitals', 'analytics_engagement',
+    'analytics_conversion', 'analytics_game_mix',
+  ];
+
+  let leaked = 0;
+  for (const view of views) {
+    const { data, error } = await anon.from(view).select('*').limit(1);
+    if (!error && data && data.length > 0) {
+      record(`anon cannot read ${view}`, 'fail', 'READABLE WITH THE PUBLIC ANON KEY');
+      leaked++;
+    }
+  }
+
+  if (leaked === 0) {
+    record(`no view readable by anon (${views.length} checked)`, 'pass');
+  }
+}
+
 async function checkAnalyticsIngestion() {
   console.log('\nAnalytics ingestion');
   if (!webEnv.SUPABASE_SERVICE_ROLE_KEY) {
@@ -259,6 +292,7 @@ async function main() {
   await checkMigration006();
   await checkRealtime();
   await checkRls();
+  await checkViewLeaks();
   await checkAnalyticsIngestion();
 
   const failed = results.filter((r) => r.status === 'fail');

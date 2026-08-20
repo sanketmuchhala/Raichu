@@ -161,6 +161,12 @@ finished game instead, since they never touch the database.
 
 Visitor IPs are stored as a salted hash (`ANALYTICS_IP_SALT`), never raw.
 
+**Views do NOT inherit RLS.** A Postgres view runs as its owner and bypasses RLS
+on the underlying tables, and Supabase grants SELECT to `anon` by default — the
+anon key is public. Every new view must set `security_invoker = on` AND revoke
+`anon`/`authenticated`; see migration `008` and `docs/DATABASE.md`.
+`pnpm check:supabase` fails if any view is readable with the anon key.
+
 ---
 
 ## Code style
