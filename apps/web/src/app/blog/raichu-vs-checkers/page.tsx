@@ -19,6 +19,10 @@ const schema = {
   description:'A direct comparison of Raichu and Checkers: rules, depth, game length, and strategic character.',
   author:    { '@type': 'Organization', name: 'Raichu Game' },
   publisher: { '@type': 'Organization', name: 'Raichu Game', url: SITE_URL },
+  datePublished: '2026-05-12',
+  dateModified:  '2026-08-20',
+  image:         `${SITE_URL}/opengraph-image`,
+  mainEntityOfPage: `${SITE_URL}/blog/raichu-vs-checkers`,
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [

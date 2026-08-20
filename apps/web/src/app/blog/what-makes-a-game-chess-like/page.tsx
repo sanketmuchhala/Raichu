@@ -19,6 +19,10 @@ const schema = {
   description:    'Defining the properties that make abstract strategy games feel like chess, with examples including Shogi, Go, Hex, Onitama, and Raichu.',
   author: { '@type': 'Organization', name: 'Raichu Game' },
   publisher: { '@type': 'Organization', name: 'Raichu Game', url: SITE_URL },
+  datePublished: '2026-05-12',
+  dateModified:  '2026-05-12',
+  image:         `${SITE_URL}/opengraph-image`,
+  mainEntityOfPage: `${SITE_URL}/blog/what-makes-a-game-chess-like`,
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [

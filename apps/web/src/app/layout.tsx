@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
 import { AuthProvider } from '../components/auth/AuthProvider';
 import { AnalyticsProvider } from '../components/analytics/AnalyticsProvider';
+import { StickyPlayCta } from '../components/cta/StickyPlayCta';
 import { SITE_URL, SITE_NAME } from '../lib/seo';
 
 const figtree = Figtree({
@@ -71,6 +72,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AuthProvider>
           <AnalyticsProvider />
           {children}
+          <StickyPlayCta />
         </AuthProvider>
         <Analytics />
       </body>

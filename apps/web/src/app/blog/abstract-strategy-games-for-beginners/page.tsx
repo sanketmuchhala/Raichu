@@ -19,6 +19,10 @@ const schema = {
   description:'A getting-started guide for players new to abstract strategy games.',
   author:    { '@type': 'Organization', name: 'Raichu Game' },
   publisher: { '@type': 'Organization', name: 'Raichu Game', url: SITE_URL },
+  datePublished: '2026-05-12',
+  dateModified:  '2026-08-20',
+  image:         `${SITE_URL}/opengraph-image`,
+  mainEntityOfPage: `${SITE_URL}/blog/abstract-strategy-games-for-beginners`,
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [

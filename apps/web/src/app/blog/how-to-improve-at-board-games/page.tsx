@@ -19,6 +19,10 @@ const schema = {
   description:'Seven practical tips for getting better at abstract strategy games.',
   author:    { '@type': 'Organization', name: 'Raichu Game' },
   publisher: { '@type': 'Organization', name: 'Raichu Game', url: SITE_URL },
+  datePublished: '2026-05-12',
+  dateModified:  '2026-08-20',
+  image:         `${SITE_URL}/opengraph-image`,
+  mainEntityOfPage: `${SITE_URL}/blog/how-to-improve-at-board-games`,
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [

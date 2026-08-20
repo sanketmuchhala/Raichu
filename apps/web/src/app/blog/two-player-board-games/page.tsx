@@ -19,6 +19,10 @@ const schema = {
   description:'A ranked list of the best two player board games, from pure strategy to light card games.',
   author:    { '@type': 'Organization', name: 'Raichu Game' },
   publisher: { '@type': 'Organization', name: 'Raichu Game', url: SITE_URL },
+  datePublished: '2026-05-12',
+  dateModified:  '2026-05-12',
+  image:         `${SITE_URL}/opengraph-image`,
+  mainEntityOfPage: `${SITE_URL}/blog/two-player-board-games`,
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [
