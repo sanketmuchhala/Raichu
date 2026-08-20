@@ -76,6 +76,10 @@ const schema = {
   description:'Complete movement and capture rules for every piece in the Raichu board game.',
   author:    { '@type': 'Organization', name: 'Raichu Game' },
   publisher: { '@type': 'Organization', name: 'Raichu Game', url: SITE_URL },
+  datePublished: '2026-05-12',
+  dateModified:  '2026-05-12',
+  image:         `${SITE_URL}/opengraph-image`,
+  mainEntityOfPage: `${SITE_URL}/blog/raichu-piece-guide`,
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [

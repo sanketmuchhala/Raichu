@@ -40,9 +40,7 @@ struct OnlineGameView: View {
         }
         .navigationBarHidden(true)
         .task {
-            guard let token = authStore.accessToken,
-                  let userId = authStore.userId else { return }
-            await onlineGameStore.loadGame(gameId, accessToken: token, userId: userId)
+            await onlineGameStore.loadGame(gameId)
             onlineGameStore.subscribeRealtime(gameId: gameId)
         }
         .onDisappear {
@@ -217,6 +215,17 @@ struct OnlineGameView: View {
                     .foregroundColor(gameOverColor)
 
                 HStack(spacing: 12) {
+                    Button(action: {
+                        // Enter replay from the beginning
+                        uiStore.enterReplay(step: 0)
+                    }) {
+                        Text("Replay")
+                            .font(.headline)
+                            .foregroundColor(theme.textPrimary)
+                            .padding()
+                            .background(theme.btnSecondaryBg)
+                            .cornerRadius(12)
+                    }
                     Button(action: { dismiss() }) {
                         Text("Back to Lobby")
                             .font(.headline)

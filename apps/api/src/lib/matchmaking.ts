@@ -1,5 +1,6 @@
 import { supabaseAdmin } from './supabase';
 import { encodeBoard, createInitialBoard } from '@raichu/game-engine';
+import { trackServerEvent } from './analytics';
 
 /** Add a player to the matchmaking queue */
 export async function joinQueue(playerId: string, eloRating: number) {
@@ -126,6 +127,21 @@ export async function processQueue(): Promise<number> {
           matched.add(player1.player_id);
           matched.add(player2.player_id);
           matchesMade++;
+
+          // Real queue latency and the ELO gap actually accepted — neither is
+          // observable from the browser.
+          trackServerEvent('server_match_made', {
+            gameId: game.id,
+            eloDiff: Math.abs(player1.elo_rating - player2.elo_rating),
+            eloRange,
+            whiteWaitSeconds: Math.round(
+              (Date.now() - new Date(whitePlayer.queued_at).getTime()) / 1000,
+            ),
+            blackWaitSeconds: Math.round(
+              (Date.now() - new Date(blackPlayer.queued_at).getTime()) / 1000,
+            ),
+            queueDepth: queue.length,
+          });
 
           console.log(
             `Matchmaking: paired ${whitePlayer.player_id.slice(0, 8)}(W) vs ${blackPlayer.player_id.slice(0, 8)}(B) → game ${game.id.slice(0, 8)}`,

@@ -4,6 +4,7 @@
 
 import SwiftUI
 import Combine
+import Supabase
 
 @MainActor
 final class OnlineGameStore: ObservableObject {
@@ -28,18 +29,37 @@ final class OnlineGameStore: ObservableObject {
     // Polling fallback task
     private var pollTask: Task<Void, Never>? = nil
 
+    // Realtime channel
+    private var realtimeChannel: RealtimeChannelV2? = nil
+
+    // MARK: - Auth helpers (live — read from supabase SDK directly)
+
+    private func currentAccessToken() async -> String? {
+        try? await supabase.auth.session.accessToken
+    }
+
+    private func currentUserId() async -> String? {
+        try? await supabase.auth.session.user.id.uuidString
+    }
+
     // MARK: - Load Game
 
-    func loadGame(_ id: String, accessToken: String, userId: String) async {
+    func loadGame(_ id: String) async {
         loading = true
         error = nil
         defer { loading = false }
 
+        guard let token = await currentAccessToken(),
+              let userId = await currentUserId() else {
+            error = "Not signed in."
+            return
+        }
+
         do {
-            let gameDetail = try await gamesAPI.get(id: id, accessToken: accessToken)
+            let gameDetail = try await gamesAPI.get(id: id, accessToken: token)
             applyGameDetail(gameDetail, userId: userId)
 
-            let gameMoves = try await gamesAPI.getMoves(id: id, accessToken: accessToken)
+            let gameMoves = try await gamesAPI.getMoves(id: id, accessToken: token)
             moves = gameMoves
         } catch {
             self.error = error.localizedDescription
@@ -93,8 +113,9 @@ final class OnlineGameStore: ObservableObject {
     // MARK: - Submit Move
 
     func submitMove(_ move: Move) async {
-        guard let gameId = game?.id,
-              let token = currentAccessToken() else { return }
+        guard let gameId = game?.id else { return }
+        guard let token = await currentAccessToken(),
+              let userId = await currentUserId() else { return }
         isThinking = true
         error = nil
         defer { isThinking = false }
@@ -102,7 +123,6 @@ final class OnlineGameStore: ObservableObject {
 
         do {
             let updated = try await gamesAPI.submitMove(move, gameId: gameId, accessToken: token)
-            let userId = currentUserId() ?? ""
             applyGameDetail(updated, userId: userId)
         } catch {
             self.error = error.localizedDescription
@@ -113,7 +133,7 @@ final class OnlineGameStore: ObservableObject {
 
     func resign() async {
         guard let gameId = game?.id,
-              let token = currentAccessToken() else { return }
+              let token = await currentAccessToken() else { return }
 
         do {
             _ = try await gamesAPI.resign(gameId: gameId, accessToken: token)
@@ -123,21 +143,56 @@ final class OnlineGameStore: ObservableObject {
         }
     }
 
-    // MARK: - Realtime (stub — wire up when Supabase SDK is added)
+    // MARK: - Realtime
 
     func subscribeRealtime(gameId: String) {
-        // TODO: wire supabase realtime channel
-        // supabase.realtime.channel("game-\(gameId)")
-        //   .on(.postgres, table: "games", filter: "id=eq.\(gameId)") { handleGameUpdate }
-        //   .on(.postgres, table: "moves",  filter: "game_id=eq.\(gameId)") { handleNewMove }
-        //   .subscribe()
+        // Cancel any existing channel first
+        let oldChannel = realtimeChannel
+        realtimeChannel = nil
+        if let ch = oldChannel {
+            Task { await supabase.realtimeV2.removeChannel(ch) }
+        }
+
+        let channel = supabase.realtimeV2.channel("game-\(gameId)")
+
+        // games UPDATE — board_state / status / current_player changes
+        _ = channel.onPostgresChange(
+            UpdateAction.self,
+            schema: "public",
+            table: "games",
+            filter: "id=eq.\(gameId)"
+        ) { [weak self] _ in
+            guard let self else { return }
+            Task { await self.refreshGameDetail(gameId: gameId) }
+        }
+
+        // moves INSERT — new move records
+        _ = channel.onPostgresChange(
+            InsertAction.self,
+            schema: "public",
+            table: "moves",
+            filter: "game_id=eq.\(gameId)"
+        ) { [weak self] _ in
+            guard let self else { return }
+            Task { await self.refreshGameDetail(gameId: gameId) }
+        }
+
+        realtimeChannel = channel
+
+        Task { try? await channel.subscribeWithError() }
+
+        // Also run polling fallback in case Realtime drops
         startPollingFallback(gameId: gameId)
     }
 
     func unsubscribe() {
         pollTask?.cancel()
         pollTask = nil
-        // TODO: supabase.realtime.removeChannel(realtimeChannel)
+        let ch = realtimeChannel
+        realtimeChannel = nil
+        if let ch {
+            Task { await supabase.realtimeV2.removeChannel(ch) }
+        }
     }
 
     // MARK: - Polling Fallback (3s)
@@ -148,28 +203,28 @@ final class OnlineGameStore: ObservableObject {
             while !Task.isCancelled {
                 try? await Task.sleep(nanoseconds: 3_000_000_000)
                 guard !Task.isCancelled else { break }
-                await self?.pollGame(gameId: gameId)
+                await self?.refreshGameDetail(gameId: gameId)
                 if let s = self?.status, s != "playing" && s != "waiting" { break }
             }
         }
     }
 
-    private func pollGame(gameId: String) async {
-        guard let token = currentAccessToken() else { return }
+    private func refreshGameDetail(gameId: String) async {
+        guard let token = await currentAccessToken(),
+              let userId = await currentUserId() else { return }
         do {
             let g = try await gamesAPI.get(id: gameId, accessToken: token)
-            let userId = currentUserId() ?? ""
-            if g.board_state != game?.board_state || g.status != game?.status {
-                applyGameDetail(g, userId: userId)
-            }
-        } catch { /* silent poll failure */ }
+            applyGameDetail(g, userId: userId)
+        } catch { /* silent */ }
     }
 
-    // MARK: - Realtime Handlers
+    // MARK: - Realtime Handlers (called directly when needed)
 
     func handleGameUpdate(_ g: OnlineGameDetail) {
-        let userId = currentUserId() ?? ""
-        applyGameDetail(g, userId: userId)
+        Task {
+            let userId = await currentUserId() ?? ""
+            applyGameDetail(g, userId: userId)
+        }
     }
 
     func handleNewMove(_ gameMove: GameMove) {
@@ -217,17 +272,6 @@ final class OnlineGameStore: ObservableObject {
         halfMovesSinceProgress = 0
         drawReason = nil
         clearSelection()
-    }
-
-    // MARK: - Helpers (will come from AuthStore via environment)
-
-    private func currentAccessToken() -> String? {
-        // Accessed by passing token in when calling actions
-        nil
-    }
-
-    private func currentUserId() -> String? {
-        nil
     }
 
     var capturedByWhite: [String] {

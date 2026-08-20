@@ -11,6 +11,7 @@ import { supabaseAdmin } from './supabase';
 import { generateInviteCode } from './invite-code';
 import { updatePlayerStats } from './player-stats';
 import { calculateElo } from './elo';
+import { trackServerEvent } from './analytics';
 
 type GameType = 'friendly' | 'ranked' | 'bot';
 
@@ -52,6 +53,13 @@ export async function createGame(opts: CreateGameOpts) {
     .single();
 
   if (error) throw new Error(`Failed to create game: ${error.message}`);
+
+  trackServerEvent(
+    'server_game_created',
+    { gameId: data.id, gameType, difficulty: gameData.difficulty, playAs: chosenColor },
+    playerId,
+  );
+
   return data;
 }
 
@@ -257,6 +265,21 @@ export async function makeMove(
     .single();
 
   if (updateErr) throw new Error(`Failed to update game: ${updateErr.message}`);
+
+  if (newStatus !== 'playing') {
+    trackServerEvent('server_game_finished', {
+      gameId,
+      gameType: game.game_type,
+      status: newStatus,
+      reason: 'checkmate',
+      moveCount: newMoveNumber,
+      winnerId: gameUpdate.winner_id ?? null,
+      winnerEloDelta: gameUpdate.winner_elo_delta ?? null,
+      loserEloDelta: gameUpdate.loser_elo_delta ?? null,
+      durationMs: Date.now() - new Date(game.created_at).getTime(),
+    });
+  }
+
   return updatedGame;
 }
 
@@ -298,6 +321,21 @@ export async function resignGame(gameId: string, playerId: string) {
     .single();
 
   if (error) throw new Error(`Failed to resign: ${error.message}`);
+
+  trackServerEvent(
+    'server_game_finished',
+    {
+      gameId,
+      gameType: game.game_type,
+      status: update.status,
+      reason: 'resign',
+      moveCount: game.move_count,
+      winnerId: winnerId ?? null,
+      durationMs: Date.now() - new Date(game.created_at).getTime(),
+    },
+    playerId,
+  );
+
   return data;
 }
 
