@@ -21,8 +21,8 @@ const schema = {
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home',     item: 'https://raichu.live' },
-      { '@type': 'ListItem', position: 2, name: 'Strategy', item: 'https://raichu.live/strategy' },
+      { '@type': 'ListItem', position: 1, name: 'Home',     item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Strategy', item: `${SITE_URL}/strategy` },
     ],
   },
 };
@@ -33,7 +33,7 @@ const paraStyle = { color: 'var(--c-muted)', lineHeight: 1.75, marginBottom: '1r
 
 export default function StrategyPage() {
   return (
-    <main style={{ backgroundColor: 'var(--c-bg)', color: 'var(--c-text)', minHeight: '100vh' }}>
+    <main style={{ backgroundColor: 'var(--c-bg)', color: 'var(--c-text)', minHeight: '100dvh' }}>
       <SchemaScript schema={schema} />
       <Navbar />
 

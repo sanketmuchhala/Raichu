@@ -151,7 +151,7 @@ export default function OnlineGamePage() {
     return (
       <div className="min-h-screen" style={{ backgroundColor: theme.bgPrimary }}>
         <Navbar backHref="/lobby" backLabel="Lobby" />
-        <main className="flex items-center justify-center" style={{ minHeight: 'calc(100vh - 57px)' }}>
+        <main className="flex items-center justify-center" style={{ minHeight: 'calc(100dvh - 57px)' }}>
           <p style={{ color: theme.textSecondary }}>Loading game...</p>
         </main>
       </div>
@@ -162,7 +162,7 @@ export default function OnlineGamePage() {
     return (
       <div className="min-h-screen" style={{ backgroundColor: theme.bgPrimary }}>
         <Navbar backHref="/lobby" backLabel="Lobby" />
-        <main className="flex flex-col items-center justify-center gap-4" style={{ minHeight: 'calc(100vh - 57px)' }}>
+        <main className="flex flex-col items-center justify-center gap-4" style={{ minHeight: 'calc(100dvh - 57px)' }}>
           <p style={{ color: '#ef4444' }}>{error}</p>
           <Link href="/lobby" className="text-sm hover:underline" style={{ color: theme.accent }}>
             Back to Lobby

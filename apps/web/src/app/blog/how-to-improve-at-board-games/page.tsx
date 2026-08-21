@@ -7,7 +7,7 @@ import { Navbar } from '../../../components/nav/Navbar';
 
 export const metadata: Metadata = pageMetadata({
   title:       'How to Improve at Strategy Board Games | 7 Practical Tips',
-  description: 'Concrete advice for getting better at abstract strategy games like Chess, Go, and Raichu. Slow down, study losses, understand piece value, and think in patterns.',
+  description: 'Concrete advice for getting better at abstract strategy games like Chess, Go and Raichu. Study your losses, learn piece value, think in patterns.',
   path:        '/blog/how-to-improve-at-board-games',
   type:        'article',
 });
@@ -19,6 +19,10 @@ const schema = {
   description:'Seven practical tips for getting better at abstract strategy games.',
   author:    { '@type': 'Organization', name: 'Raichu Game' },
   publisher: { '@type': 'Organization', name: 'Raichu Game', url: SITE_URL },
+  datePublished: '2026-05-12',
+  dateModified:  '2026-08-20',
+  image:         `${SITE_URL}/opengraph-image`,
+  mainEntityOfPage: `${SITE_URL}/blog/how-to-improve-at-board-games`,
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [
@@ -71,7 +75,7 @@ const TIPS = [
 
 export default function Article() {
   return (
-    <main style={{ backgroundColor: 'var(--c-bg)', color: 'var(--c-text)', minHeight: '100vh' }}>
+    <main style={{ backgroundColor: 'var(--c-bg)', color: 'var(--c-text)', minHeight: '100dvh' }}>
       <SchemaScript schema={schema} />
       <Navbar />
 
