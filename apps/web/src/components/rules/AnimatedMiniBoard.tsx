@@ -44,7 +44,7 @@ export function AnimatedMiniBoard({
 }: Props) {
   const theme = useUIStore((s) => THEMES[s.theme]);
   const [phase, setPhase] = useState<Phase>('idle');
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     function runCycle() {

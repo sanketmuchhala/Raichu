@@ -75,7 +75,7 @@ const breadcrumbSchema = {
 
 export default function FaqPage() {
   return (
-    <main style={{ backgroundColor: 'var(--c-bg)', color: 'var(--c-text)', minHeight: '100vh' }}>
+    <main style={{ backgroundColor: 'var(--c-bg)', color: 'var(--c-text)', minHeight: '100dvh' }}>
       <SchemaScript schema={faqSchema} />
       <SchemaScript schema={breadcrumbSchema} />
       <Navbar />

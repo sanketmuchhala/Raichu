@@ -4,6 +4,7 @@
 
 import SwiftUI
 import Combine
+import Supabase
 
 @MainActor
 final class MatchmakingStore: ObservableObject {
@@ -16,16 +17,27 @@ final class MatchmakingStore: ObservableObject {
 
     private var idleRetries: Int = 0
     private var pollTask: Task<Void, Never>? = nil
-    private var accessToken: String? = nil
 
-    func joinQueue(accessToken: String) async {
-        self.accessToken = accessToken
+    // MARK: - Auth helper
+
+    private func accessToken() async -> String? {
+        try? await supabase.auth.session.accessToken
+    }
+
+    // MARK: - Actions
+
+    func joinQueue() async {
         loading = true
         error = nil
         defer { loading = false }
 
+        guard let token = await accessToken() else {
+            error = "Not signed in."
+            return
+        }
+
         do {
-            _ = try await matchmakingAPI.joinQueue(accessToken: accessToken)
+            _ = try await matchmakingAPI.joinQueue(accessToken: token)
             status = "queued"
             idleRetries = 0
             startPolling()
@@ -37,11 +49,12 @@ final class MatchmakingStore: ObservableObject {
     func leaveQueue() async {
         pollTask?.cancel()
         pollTask = nil
-        guard let token = accessToken else { return }
 
-        do {
-            _ = try await matchmakingAPI.leaveQueue(accessToken: token)
-        } catch { /* ignore leave errors */ }
+        if let token = await accessToken() {
+            do {
+                _ = try await matchmakingAPI.leaveQueue(accessToken: token)
+            } catch { /* ignore leave errors */ }
+        }
 
         reset()
     }
@@ -59,7 +72,7 @@ final class MatchmakingStore: ObservableObject {
     }
 
     func pollStatus() async {
-        guard let token = accessToken else { return }
+        guard let token = await accessToken() else { return }
 
         do {
             let response = try await matchmakingAPI.status(accessToken: token)
@@ -98,6 +111,5 @@ final class MatchmakingStore: ObservableObject {
         matchedGameId = nil
         error = nil
         idleRetries = 0
-        accessToken = nil
     }
 }

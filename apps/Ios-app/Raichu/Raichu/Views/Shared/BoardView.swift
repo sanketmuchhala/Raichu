@@ -7,6 +7,11 @@ import SwiftUI
 private let COL_LABELS = ["a","b","c","d","e","f","g","h"]
 private let MARGIN: CGFloat = 20
 
+// Easing for piece slide (matches web app Framer Motion config)
+private let slideAnimation = Animation.timingCurve(0.25, 0.46, 0.45, 0.94, duration: 0.26)
+// Easing for drag lift (80ms scale-up)
+private let dragLiftAnimation = Animation.easeOut(duration: 0.08)
+
 struct BoardView: View {
     let board: [[String]]
     let selectedPiece: Position?
@@ -15,13 +20,17 @@ struct BoardView: View {
     let flipped: Bool
     let canInteract: Bool
     var onTap: (Position) -> Void
-    var onDrop: ((Position, Position) -> Void)?
+    var onDrop: (Position, Position) -> Void
 
     @Environment(\.theme) var theme
+
+    // Drag state
     @State private var draggedPiece: Position? = nil
-    @State private var dragOffset: CGSize = .zero
-    @State private var animatingMoveFrom: Position? = nil
-    @State private var animatingMoveTo: Position? = nil
+    @State private var dragLocation: CGPoint = .zero   // absolute in board coords
+    @State private var isDragging: Bool = false
+
+    // Snap-back state (tracks pieces that need to animate back to origin)
+    @State private var snapBackPiece: Position? = nil
 
     var body: some View {
         GeometryReader { geo in
@@ -29,24 +38,42 @@ struct BoardView: View {
             let squareSize = boardWidth / 8
 
             ZStack(alignment: .topLeading) {
-                // Board background
+                // Board squares + overlays
                 boardGrid(squareSize: squareSize, boardWidth: boardWidth)
                 // Coordinate labels
                 coordinateLabels(squareSize: squareSize, boardWidth: boardWidth)
-                // Pieces layer
+                // Stationary pieces (exclude the one being dragged)
                 piecesLayer(squareSize: squareSize, boardWidth: boardWidth)
+                // Dragged piece follows finger at zIndex 100
+                if isDragging, let pos = draggedPiece {
+                    let piece = board[pos.row][pos.col]
+                    PieceImage(piece: piece, size: squareSize * 0.88)
+                        // 80ms easeOut scale-up on drag lift (spec 6.2)
+                        .scaleEffect(1.08)
+                        .animation(dragLiftAnimation, value: isDragging)
+                        .opacity(0.85)
+                        .position(dragLocation)
+                        .zIndex(100)
+                        .allowsHitTesting(false)
+                }
             }
             .frame(width: boardWidth + MARGIN, height: boardWidth + MARGIN)
+            .contentShape(Rectangle())
+            // Tap to select / move
+            .gesture(tapGesture(squareSize: squareSize))
         }
         .aspectRatio(1, contentMode: .fit)
+        .animation(.spring(response: 0.4, dampingFraction: 0.85), value: flipped)
     }
 
-    // MARK: - Board Grid
+    // MARK: - Board Grid (Canvas)
 
     private func boardGrid(squareSize: CGFloat, boardWidth: CGFloat) -> some View {
         Canvas { ctx, _ in
             for row in 0..<8 {
                 for col in 0..<8 {
+                    // flipped=true: black at bottom (board rotated 180°)
+                    // flipped=false: white at bottom (default white perspective)
                     let displayRow = flipped ? row : 7 - row
                     let displayCol = flipped ? col : 7 - col
                     let isLight = (displayRow + displayCol) % 2 == 0
@@ -62,17 +89,17 @@ struct BoardView: View {
 
                     let pos = Position(row: displayRow, col: displayCol)
 
-                    // Last move highlight
+                    // Last move highlight (0.2 opacity)
                     if let lm = lastMove, (lm.from == pos || lm.to == pos) {
                         ctx.fill(Path(rect), with: .color(theme.lastMove))
                     }
 
-                    // Selection highlight
+                    // Selection highlight (0.4 opacity yellow)
                     if selectedPiece == pos {
                         ctx.fill(Path(rect), with: .color(theme.selected))
                     }
 
-                    // Legal move indicator
+                    // Legal move indicators
                     if legalMoves.contains(where: { $0.to == pos }) {
                         let isCapture = legalMoves.first(where: { $0.to == pos })?.captured != nil
                         if isCapture {
@@ -82,7 +109,7 @@ struct BoardView: View {
                             let ring = Path(ellipseIn: rect.insetBy(dx: inset, dy: inset))
                             ctx.stroke(ring, with: .color(theme.captureIndicator), lineWidth: strokeWidth)
                         } else {
-                            // Small circle for quiet moves
+                            // Small dot for quiet moves (0.2 opacity)
                             let circleSize = squareSize * 0.3
                             let circleRect = CGRect(
                                 x: rect.midX - circleSize / 2,
@@ -97,8 +124,6 @@ struct BoardView: View {
             }
         }
         .frame(width: boardWidth + MARGIN, height: boardWidth + MARGIN)
-        .contentShape(Rectangle())
-        .gesture(tapGesture(squareSize: squareSize))
     }
 
     // MARK: - Pieces Layer
@@ -117,9 +142,12 @@ struct BoardView: View {
 
                     PieceImage(piece: piece, size: squareSize * 0.88)
                         .position(x: x, y: y)
-                        .opacity(draggedPiece == pos ? 0.5 : 1.0)
-                        .animation(.easeOut(duration: 0.26), value: pos)
+                        // Hide original while dragging; captured pieces fade out 180ms easeOut (spec 6.2)
+                        .opacity(draggedPiece == pos && isDragging ? 0 : 1)
+                        .animation(.easeOut(duration: 0.18), value: piece)
+                        .animation(slideAnimation, value: pos)
                         .gesture(dragGesture(for: pos, squareSize: squareSize, boardWidth: boardWidth))
+                        .zIndex(draggedPiece == pos ? 1 : 0)
                 }
             }
         }
@@ -129,7 +157,9 @@ struct BoardView: View {
 
     private func coordinateLabels(squareSize: CGFloat, boardWidth: CGFloat) -> some View {
         ZStack {
-            // Column labels (bottom)
+            // Column labels (bottom edge)
+            // flipped=false (white perspective): col 0 on left = 'a'
+            // flipped=true (black perspective): col 0 on left = 'h'
             ForEach(0..<8, id: \.self) { col in
                 let label = flipped ? COL_LABELS[col] : COL_LABELS[7 - col]
                 Text(label)
@@ -140,7 +170,9 @@ struct BoardView: View {
                         y: MARGIN + boardWidth + 10
                     )
             }
-            // Row labels (left)
+            // Row labels (left edge)
+            // flipped=false (white): screen row 0 = rank 8, screen row 7 = rank 1
+            // flipped=true (black): screen row 0 = rank 1, screen row 7 = rank 8
             ForEach(0..<8, id: \.self) { row in
                 let label = flipped ? "\(row + 1)" : "\(8 - row)"
                 Text(label)
@@ -156,7 +188,7 @@ struct BoardView: View {
     private func tapGesture(squareSize: CGFloat) -> some Gesture {
         SpatialTapGesture()
             .onEnded { value in
-                guard canInteract else { return }
+                guard canInteract, !isDragging else { return }
                 let col = Int((value.location.x - MARGIN) / squareSize)
                 let row = Int((value.location.y - MARGIN) / squareSize)
                 guard col >= 0, col < 8, row >= 0, row < 8 else { return }
@@ -172,32 +204,57 @@ struct BoardView: View {
         DragGesture(minimumDistance: 5)
             .onChanged { value in
                 guard canInteract else { return }
-                if draggedPiece == nil {
+                if !isDragging {
+                    // Lift the piece
                     draggedPiece = pos
+                    isDragging = true
                     HapticManager.shared.piecePickup()
-                    onTap(pos)
+                    onTap(pos)  // select the piece so legal moves show
                 }
-                dragOffset = value.translation
+                dragLocation = value.location
             }
             .onEnded { value in
-                guard let dragged = draggedPiece else { return }
-                let endX = value.location.x
-                let endY = value.location.y
-                let col = Int((endX - MARGIN) / squareSize)
-                let row = Int((endY - MARGIN) / squareSize)
+                guard isDragging, let dragged = draggedPiece else { return }
 
-                if col >= 0, col < 8, row >= 0, row < 8 {
+                let col = Int((value.location.x - MARGIN) / squareSize)
+                let row = Int((value.location.y - MARGIN) / squareSize)
+
+                let validDrop = col >= 0 && col < 8 && row >= 0 && row < 8
+                if validDrop {
                     let displayRow = flipped ? row : 7 - row
                     let displayCol = flipped ? col : 7 - col
                     let target = Position(row: displayRow, col: displayCol)
                     if target != dragged {
-                        onDrop?(dragged, target)
+                        onDrop(dragged, target)
                     }
                 } else {
+                    // Out-of-bounds drop — snap back with warning haptic
                     HapticManager.shared.invalidDrop()
                 }
-                draggedPiece = nil
-                dragOffset = .zero
+
+                // Reset drag state — pieces animate back via slideAnimation
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                    isDragging = false
+                    draggedPiece = nil
+                    dragLocation = .zero
+                }
             }
     }
+}
+
+#Preview {
+    let board = RaichuEngine.shared.createInitialBoard()
+    BoardView(
+        board: board,
+        selectedPiece: nil,
+        legalMoves: [],
+        lastMove: nil,
+        flipped: false,
+        canInteract: true,
+        onTap: { _ in },
+        onDrop: { _, _ in }
+    )
+    .padding()
+    .background(Color(hex: "1a1a1a"))
+    .environment(\.theme, ThemeConfig.classic)
 }

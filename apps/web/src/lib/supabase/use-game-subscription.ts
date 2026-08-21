@@ -6,6 +6,7 @@ import { getSupabaseBrowserClient } from './client';
 import { useOnlineGameStore } from '../../store/online-game-store';
 import { gamesApi } from '../api';
 import type { OnlineGameDetail } from '@raichu/shared-types';
+import { analytics } from '../analytics';
 
 const POLL_INTERVAL = 3000;
 
@@ -40,6 +41,9 @@ export function useGameSubscription(gameId: string | null) {
       )
       .subscribe((status: string) => {
         realtimeConnected.current = status === 'SUBSCRIBED';
+        // Realtime health is a direct measure of whether multiplayer feels live.
+        // Nothing recorded it before, so a degraded channel was invisible.
+        analytics.realtimeStatus({ gameId, status });
       });
 
     return () => {
@@ -64,13 +68,17 @@ export function useGameSubscription(gameId: string | null) {
       try {
         const game = (await gamesApi.get(gameId)) as OnlineGameDetail;
         const storeGame = useOnlineGameStore.getState().game;
-        // Only update if board state actually changed
-        if (storeGame && game.board_state !== storeGame.board_state) {
+        const boardChanged = !!storeGame && game.board_state !== storeGame.board_state;
+        const statusChanged = !!storeGame && game.status !== storeGame.status;
+
+        if (boardChanged || statusChanged) {
           handleGameUpdate(game);
-        }
-        // Also update if status changed (e.g. game ended)
-        if (storeGame && game.status !== storeGame.status) {
-          handleGameUpdate(game);
+
+          // The websocket missed a change the poll had to recover. This is the
+          // signal that Realtime is degraded rather than merely idle.
+          if (!realtimeConnected.current) {
+            analytics.realtimeStatus({ gameId, status: 'POLL_RECOVERED', viaPolling: true });
+          }
         }
       } catch {
         // Silently fail polls
