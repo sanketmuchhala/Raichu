@@ -22,7 +22,7 @@
     "esbuild": "^0.28.2",
     "express": "^4.22.2",
     "typescript": "^5.7.0",
-    "zod": "^3.23.0"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "supabase": "^2.114.0",
