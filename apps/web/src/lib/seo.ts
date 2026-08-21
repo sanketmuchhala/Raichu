@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 
-// Must match the domain the site actually resolves at. The apex redirects to
-// www, so using the apex here made every canonical, og:url and sitemap entry
-// point at a redirect instead of the live URL.
-export const SITE_URL  = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.raichu.live').replace(/\/$/, '');
+// The bare apex is the canonical domain. Search Console shows ~97% of all
+// impressions (479 of 491) and every click landing on raichu.live URLs rather
+// than www, so consolidating onto the apex keeps that accumulated history
+// instead of asking Google to migrate it. www redirects here permanently.
+export const SITE_URL  = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://raichu.live').replace(/\/$/, '');
 export const SITE_NAME = 'Raichu Game';
 
 export function pageMetadata({

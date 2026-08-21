@@ -5,7 +5,7 @@ import { SchemaScript } from '../../components/seo/SchemaScript';
 
 export const metadata: Metadata = pageMetadata({
   title:       'Play Raichu Online | Free Chess-Style Strategy Game',
-  description: 'Play Raichu free in your browser, a chess-inspired abstract strategy game. Choose vs AI or challenge a friend online. No download required.',
+  description: 'Play Raichu free in your browser, a chess-inspired abstract strategy game. Start instantly against the AI, or pass and play with a friend. No download required.',
   path:        '/play',
 });
 

@@ -33,7 +33,7 @@ const paraStyle = { color: 'var(--c-muted)', lineHeight: 1.75, marginBottom: '1r
 
 export default function StrategyPage() {
   return (
-    <main style={{ backgroundColor: 'var(--c-bg)', color: 'var(--c-text)', minHeight: '100vh' }}>
+    <main style={{ backgroundColor: 'var(--c-bg)', color: 'var(--c-text)', minHeight: '100dvh' }}>
       <SchemaScript schema={schema} />
       <Navbar />
 
