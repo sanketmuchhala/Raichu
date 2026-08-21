@@ -19,6 +19,10 @@ const schema = {
   description:'A curated list of the best free abstract strategy games playable in a web browser, with no download or installation required.',
   author:    { '@type': 'Organization', name: 'Raichu Game' },
   publisher: { '@type': 'Organization', name: 'Raichu Game', url: SITE_URL },
+  datePublished: '2026-05-12',
+  dateModified:  '2026-08-20',
+  image:         `${SITE_URL}/opengraph-image`,
+  mainEntityOfPage: `${SITE_URL}/blog/best-free-browser-strategy-games`,
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [
@@ -32,7 +36,7 @@ const schema = {
 const GAMES = [
   {
     name:     'Raichu Game',
-    url:      'https://raichu.live/play',
+    url:      `${SITE_URL}/play`,
     internal: '/play',
     type:     'Chess-inspired abstract strategy',
     free:     'Yes. No account needed for AI play',
@@ -73,7 +77,7 @@ const h2Style = { fontSize: '1.375rem', fontWeight: 700, marginBottom: '1.25rem'
 
 export default function Article() {
   return (
-    <main style={{ backgroundColor: 'var(--c-bg)', color: 'var(--c-text)', minHeight: '100vh' }}>
+    <main style={{ backgroundColor: 'var(--c-bg)', color: 'var(--c-text)', minHeight: '100dvh' }}>
       <SchemaScript schema={schema} />
       <Navbar />
 

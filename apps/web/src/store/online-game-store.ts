@@ -5,6 +5,8 @@ import type { Board, Move, Player, GameStatus } from '@raichu/shared-types';
 import type { OnlineGameDetail, GameMove } from '@raichu/shared-types';
 import { decodeBoard, generateMovesForPiece, encodeBoard, createInitialBoard } from '@raichu/game-engine';
 import { gamesApi } from '../lib/api';
+import { analytics } from '../lib/analytics';
+import { useAuthStore } from './auth-store';
 
 interface OnlineGameStore {
   // Game data
@@ -37,6 +39,68 @@ interface OnlineGameStore {
 }
 
 const EMPTY_BOARD: Board = Array.from({ length: 8 }, () => Array(8).fill('.'));
+
+// ─── Analytics helpers ─────────────────────────────────────────────────────
+// Online games previously emitted no events at all. Each game reports start and
+// end exactly once; per-move events are deliberately omitted because the `moves`
+// table already records every online move (see migration 006).
+
+const startedTracked = new Set<string>();
+const endedTracked = new Set<string>();
+
+const TERMINAL_STATUSES = ['white_wins', 'black_wins', 'abandoned'];
+
+/**
+ * Work out which side the signed-in user is playing. The store's `myColor` is
+ * set by the game page after load, so it is not reliably populated at the
+ * moment these events fire.
+ */
+function resolveMyColor(game: OnlineGameDetail): 'white' | 'black' | null {
+  const userId = useAuthStore.getState().user?.id;
+  if (!userId) return null;
+  if (game.white_player_id === userId) return 'white';
+  if (game.black_player_id === userId) return 'black';
+  return null;
+}
+
+function trackGameStarted(game: OnlineGameDetail) {
+  if (game.status !== 'playing' || startedTracked.has(game.id)) return;
+  startedTracked.add(game.id);
+
+  analytics.onlineGameStarted(
+    {
+      gameId: game.id,
+      gameType: game.game_type,
+      myColor: resolveMyColor(game) ?? 'spectator',
+    },
+    useAuthStore.getState().user?.id ?? null,
+  );
+}
+
+function trackGameEnded(game: OnlineGameDetail) {
+  if (!TERMINAL_STATUSES.includes(game.status) || endedTracked.has(game.id)) return;
+  endedTracked.add(game.id);
+
+  const userId = useAuthStore.getState().user?.id ?? null;
+  const myColor = resolveMyColor(game);
+  const won = !!userId && game.winner_id === userId;
+
+  analytics.onlineGameEnded(
+    {
+      gameId: game.id,
+      gameType: game.game_type,
+      status: game.status,
+      myColor: myColor ?? 'spectator',
+      won,
+      moveCount: game.move_count,
+      durationMs: game.created_at
+        ? Date.now() - new Date(game.created_at).getTime()
+        : undefined,
+      eloDelta: won ? game.winner_elo_delta : game.loser_elo_delta,
+    },
+    userId,
+  );
+}
 
 export const useOnlineGameStore = create<OnlineGameStore>((set, get) => ({
   game: null,
@@ -92,6 +156,9 @@ export const useOnlineGameStore = create<OnlineGameStore>((set, get) => ({
         lastMove,
         loading: false,
       });
+
+      trackGameStarted(game);
+      trackGameEnded(game);
     } catch (err) {
       set({ error: err instanceof Error ? err.message : 'Failed to load game', loading: false });
     }
@@ -137,7 +204,14 @@ export const useOnlineGameStore = create<OnlineGameStore>((set, get) => ({
       await gamesApi.move(game.id, move);
       // The game state will be updated via Realtime subscription
     } catch (err) {
-      set({ error: err instanceof Error ? err.message : 'Failed to submit move' });
+      const reason = err instanceof Error ? err.message : 'Failed to submit move';
+      // apiFetch already recorded the transport-level failure; this records the
+      // game-rule rejection ("Invalid move", "Not your turn") separately.
+      analytics.invalidMove(
+        { mode: 'online', reason },
+        useAuthStore.getState().user?.id ?? null,
+      );
+      set({ error: reason });
     } finally {
       set({ isThinking: false });
     }
@@ -150,6 +224,11 @@ export const useOnlineGameStore = create<OnlineGameStore>((set, get) => ({
   resign: async () => {
     const { game } = get();
     if (!game) return;
+
+    analytics.onlineResigned(
+      { gameId: game.id, moveCount: game.move_count },
+      useAuthStore.getState().user?.id ?? null,
+    );
 
     try {
       await gamesApi.resign(game.id);
@@ -166,14 +245,28 @@ export const useOnlineGameStore = create<OnlineGameStore>((set, get) => ({
     else if (updatedGame.status === 'black_wins') status = 'black_wins';
     else if (updatedGame.status === 'abandoned') status = 'white_wins';
 
+    // Realtime delivers the raw `games` row, which carries no joined profiles.
+    // Assigning it wholesale would blank white_player/black_player, which the
+    // game page renders, so merge and keep the profiles already loaded.
+    const previous = get().game;
+    const merged: OnlineGameDetail = {
+      ...previous,
+      ...updatedGame,
+      white_player: updatedGame.white_player ?? previous?.white_player ?? null,
+      black_player: updatedGame.black_player ?? previous?.black_player ?? null,
+    };
+
     set({
-      game: updatedGame,
+      game: merged,
       board,
       currentPlayer: updatedGame.current_player as Player,
       status,
       selectedPiece: null,
       legalMoves: [],
     });
+
+    trackGameStarted(merged);
+    trackGameEnded(merged);
   },
 
   handleNewMove: (move: GameMove) => {

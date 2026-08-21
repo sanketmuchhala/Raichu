@@ -3,10 +3,12 @@
 // App preferences: theme, orientation, sound, haptics, notifications.
 
 import SwiftUI
+import UserNotifications
 
 struct SettingsView: View {
     @EnvironmentObject var uiStore: UIStore
     @Environment(\.theme) var theme
+    @State private var notificationStatus: UNAuthorizationStatus = .notDetermined
 
     var body: some View {
         ZStack {
@@ -63,11 +65,24 @@ struct SettingsView: View {
                 // Notifications
                 Section {
                     Button(action: {
-                        requestNotificationPermission()
+                        NotificationManager.shared.requestPermission()
+                        // Re-check status after a short delay for UI update
+                        Task {
+                            try? await Task.sleep(nanoseconds: 500_000_000)
+                            await checkNotificationStatus()
+                        }
                     }) {
-                        Label("Enable Push Notifications", systemImage: "bell.badge.fill")
-                            .foregroundColor(theme.accent)
+                        HStack {
+                            Label(notificationButtonLabel, systemImage: "bell.badge.fill")
+                                .foregroundColor(notificationStatus == .authorized ? theme.textSecondary : theme.accent)
+                            Spacer()
+                            if notificationStatus == .authorized {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(theme.accent)
+                            }
+                        }
                     }
+                    .disabled(notificationStatus == .authorized)
                 }
                 .listRowBackground(theme.bgPanel)
 
@@ -95,14 +110,31 @@ struct SettingsView: View {
         .navigationTitle("Settings")
         .toolbarBackground(theme.bgPanel, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
+        .task { await checkNotificationStatus() }
     }
 
     private var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
     }
 
-    private func requestNotificationPermission() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { _, _ in }
+    private var notificationButtonLabel: String {
+        switch notificationStatus {
+        case .authorized:    return "Push Notifications Enabled"
+        case .denied:        return "Notifications Denied — Open Settings"
+        default:             return "Enable Push Notifications"
+        }
+    }
+
+    private func checkNotificationStatus() async {
+        let settings = await UNUserNotificationCenter.current().notificationSettings()
+        notificationStatus = settings.authorizationStatus
+    }
+}
+
+extension SettingsView {
+    // Trigger status check on appear
+    func onAppearModifier() -> some View {
+        self.task { await checkNotificationStatus() }
     }
 }
 

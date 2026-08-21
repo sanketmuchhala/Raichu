@@ -19,6 +19,10 @@ const schema = {
   description:'Strategy games playable for two players instantly, without creating an account.',
   author:    { '@type': 'Organization', name: 'Raichu Game' },
   publisher: { '@type': 'Organization', name: 'Raichu Game', url: SITE_URL },
+  datePublished: '2026-05-12',
+  dateModified:  '2026-05-12',
+  image:         `${SITE_URL}/opengraph-image`,
+  mainEntityOfPage: `${SITE_URL}/blog/two-player-games-no-account`,
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [
@@ -61,7 +65,7 @@ const OPTIONS = [
 
 export default function Article() {
   return (
-    <main style={{ backgroundColor: 'var(--c-bg)', color: 'var(--c-text)', minHeight: '100vh' }}>
+    <main style={{ backgroundColor: 'var(--c-bg)', color: 'var(--c-text)', minHeight: '100dvh' }}>
       <SchemaScript schema={schema} />
       <Navbar />
 

@@ -14,7 +14,7 @@ struct CapturedPiecesRow: View {
     }
 
     private func pieceOrder(_ p: String) -> Int {
-        switch p.lowercased() {
+        switch p {
         case "w", "b": return 0   // Pichu first
         case "W", "B": return 1   // Pikachu
         case "@", "$": return 2   // Raichu last

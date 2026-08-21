@@ -19,6 +19,10 @@ const schema = {
   description:'An analysis of how luck affects board games, why zero-luck abstract strategy games appeal to competitive players, and how Raichu fits the no-luck model.',
   author:    { '@type': 'Organization', name: 'Raichu Game' },
   publisher: { '@type': 'Organization', name: 'Raichu Game', url: SITE_URL },
+  datePublished: '2026-05-12',
+  dateModified:  '2026-05-12',
+  image:         `${SITE_URL}/opengraph-image`,
+  mainEntityOfPage: `${SITE_URL}/blog/role-of-luck-in-board-games`,
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [
@@ -34,7 +38,7 @@ const pStyle  = { color: 'var(--c-muted)', lineHeight: 1.75, marginBottom: '1rem
 
 export default function Article() {
   return (
-    <main style={{ backgroundColor: 'var(--c-bg)', color: 'var(--c-text)', minHeight: '100vh' }}>
+    <main style={{ backgroundColor: 'var(--c-bg)', color: 'var(--c-text)', minHeight: '100dvh' }}>
       <SchemaScript schema={schema} />
       <Navbar />
 
