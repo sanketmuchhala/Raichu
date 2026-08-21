@@ -1,4 +1,5 @@
 import { getSupabaseBrowserClient } from './supabase/client';
+import { analytics } from './analytics';
 
 /** Get current JWT from Supabase session */
 async function getToken(): Promise<string | null> {
@@ -22,11 +23,25 @@ export async function apiFetch<T = unknown>(
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const res = await fetch(path, { ...options, headers });
+  // Every API call in the app funnels through here, so this one try/catch is
+  // the complete error surface — no per-call-site instrumentation needed.
+  let res: Response;
+  try {
+    res = await fetch(path, { ...options, headers });
+  } catch (err) {
+    // Network failure: the API is unreachable, so the request never got a status.
+    analytics.apiError({
+      path,
+      reason: err instanceof Error ? err.message : 'network error',
+    });
+    throw err;
+  }
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error(body.error || `Request failed: ${res.status}`);
+    const reason = body.error || `Request failed: ${res.status}`;
+    analytics.apiError({ path, status: res.status, reason });
+    throw new Error(reason);
   }
 
   return res.json();
