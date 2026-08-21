@@ -21,7 +21,7 @@
     "dotenv": "^17.4.2",
     "esbuild": "^0.28.2",
     "express": "^4.22.2",
-    "typescript": "^5.7.0",
+    "typescript": "^6.0.3",
     "zod": "^4.4.3"
   },
   "devDependencies": {
