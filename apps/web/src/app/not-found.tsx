@@ -12,7 +12,7 @@ const SUGGESTIONS = [
 
 export default function NotFound() {
   return (
-    <div style={{ backgroundColor: '#1a1a1a', minHeight: '100vh', color: '#f0ece8' }}>
+    <div style={{ backgroundColor: '#1a1a1a', minHeight: '100dvh', color: '#f0ece8' }}>
       <Navbar />
       <main
         style={{
