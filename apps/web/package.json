@@ -13,24 +13,24 @@
     "@raichu/ai-engine": "workspace:*",
     "@raichu/game-engine": "workspace:*",
     "@raichu/shared-types": "workspace:*",
-    "@supabase/ssr": "^0.9.0",
-    "@supabase/supabase-js": "^2.99.3",
+    "@supabase/ssr": "^0.12.4",
+    "@supabase/supabase-js": "^2.112.3",
     "@vercel/analytics": "^2.0.1",
     "framer-motion": "^11.11.0",
-    "next": "^15.5.16",
+    "next": "^15.5.23",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
-    "zustand": "^5.0.0"
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.0",
-    "autoprefixer": "^10.4.0",
-    "jsdom": "^25.0.0",
-    "postcss": "^8.5.10",
+    "autoprefixer": "^10.5.4",
+    "jsdom": "^29.1.1",
+    "postcss": "^8.5.26",
     "tailwindcss": "^3.4.0",
-    "typescript": "^5.7.0",
-    "vitest": "^3.2.4"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.6"
   }
 }

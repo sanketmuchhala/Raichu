@@ -15,9 +15,10 @@ export function NewGameDialog() {
   const newGame = useGameStore((s) => s.newGame);
   const router = useRouter();
 
-  const [mode, setMode] = useState<GameMode>('pvp');
-  const [difficulty, setDifficulty] = useState<Difficulty>('medium');
-  const [playerColor, setPlayerColor] = useState<Player>('white');
+  // Seed from the store so the dialog reflects the game actually on the board.
+  const [mode, setMode] = useState<GameMode>(useGameStore.getState().gameMode);
+  const [difficulty, setDifficulty] = useState<Difficulty>(useGameStore.getState().difficulty);
+  const [playerColor, setPlayerColor] = useState<Player>(useGameStore.getState().playerColor);
 
   if (!show) return null;
 
