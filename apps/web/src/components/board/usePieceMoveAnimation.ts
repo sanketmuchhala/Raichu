@@ -36,7 +36,7 @@ export function usePieceMoveAnimation(
   toDisplayCol: (c: number) => number,
 ) {
   const [animState, setAnimState] = useState<AnimState | null>(null);
-  const timerRef  = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef  = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const skipRef   = useRef(false);
   const moveIdRef = useRef(0);
 

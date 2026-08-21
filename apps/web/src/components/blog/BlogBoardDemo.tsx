@@ -87,7 +87,7 @@ export function BlogBoardDemo({
     captureRow?: number; captureCol?: number;
   } | null>(null);
   const [boardDisplay, setBoardDisplay] = useState(() => decode(initialBoard));
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const advance = useCallback(() => {
     if (states.current.length < 2) return;
