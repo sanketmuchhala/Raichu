@@ -29,7 +29,7 @@ export function UserMenu() {
     return (
       <Link
         href="/auth"
-        className="px-4 py-2 rounded-lg text-sm font-semibold transition-opacity hover:opacity-90"
+        className="px-4 py-2 min-h-[44px] inline-flex items-center rounded-lg text-sm font-semibold transition-opacity hover:opacity-90"
         style={{ backgroundColor: theme.accent, color: '#fff' }}
       >
         Sign In

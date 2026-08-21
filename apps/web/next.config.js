@@ -19,7 +19,12 @@ const nextConfig = {
       { source: '/sign-up',      destination: '/auth',   permanent: true },
       { source: '/leaderboards', destination: '/leaderboard', permanent: true },
       { source: '/rule',         destination: '/rules',  permanent: true },
-      { source: '/faq',          destination: '/faq',    permanent: false },
+      { source: '/faqs',         destination: '/faq',    permanent: true },
+      // Consolidated: /chess-like-games and /blog/games-like-chess were
+      // near-duplicates competing for the same query. Google had already
+      // chosen the blog page (256 impressions vs almost none), so the
+      // top-level page redirects into it rather than the other way round.
+      { source: '/chess-like-games', destination: '/blog/games-like-chess', permanent: true },
     ];
   },
 
