@@ -71,6 +71,12 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         await get().fetchProfile();
         analytics.signup(data.session.user.id);
       }
+    } catch (err) {
+      analytics.authError({
+        action: 'signup',
+        reason: err instanceof Error ? err.message : 'unknown',
+      });
+      throw err;
     } finally {
       set({ loading: false });
     }
@@ -88,6 +94,12 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         await get().fetchProfile();
         analytics.login(data.user.id);
       }
+    } catch (err) {
+      analytics.authError({
+        action: 'login',
+        reason: err instanceof Error ? err.message : 'unknown',
+      });
+      throw err;
     } finally {
       set({ loading: false });
     }
@@ -108,6 +120,12 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         },
       });
       if (error) throw error;
+    } catch (err) {
+      analytics.authError({
+        action: 'google_oauth',
+        reason: err instanceof Error ? err.message : 'unknown',
+      });
+      throw err;
     } finally {
       set({ loading: false });
     }

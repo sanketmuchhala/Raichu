@@ -134,12 +134,38 @@ Do NOT run the Next.js dev server for tasks that only touch `packages/`.
 ## Supabase
 
 - **Project:** `jfqofulsmcjqudwnxekb.supabase.co`
-- **Key tables:** `profiles`, `games`, `moves`, `matchmaking_queue`
+- **Key tables:** `profiles`, `games`, `moves`, `matchmaking_queue`, `analytics_events`
 - **Auth:** Email/password + Google OAuth. JWT auto-managed by supabase-swift on iOS.
 - **Realtime:** `games` UPDATE + `moves` INSERT channels for multiplayer sync
 - **ELO:** Start 1200, K=32/24/16 (by games played), floor 100
 
 The anon key in `SupabaseClient.swift` is a placeholder. Do NOT commit real keys.
+
+**Health check:** `pnpm check:supabase` verifies env vars, tables, views, Realtime
+and RLS against the live project, and reports whether migration `006` is applied.
+Run it before assuming a Supabase problem is a code problem.
+
+### Analytics
+
+All product analytics land in `analytics_events`. Two writers:
+
+- `apps/web/src/app/api/track/route.ts` — browser events, posted by
+  `apps/web/src/lib/analytics.ts` (extend the `analytics.*` facade there; do NOT
+  add a second tracking system).
+- `apps/api/src/lib/analytics.ts` — server-authoritative events, tagged `app='api'`.
+
+Online games do NOT emit per-move events: the `moves` table already records
+every online move, and play-style metrics are derived from it in SQL
+(migration `006`). Offline and bot games emit one `game_summary` event per
+finished game instead, since they never touch the database.
+
+Visitor IPs are stored as a salted hash (`ANALYTICS_IP_SALT`), never raw.
+
+**Views do NOT inherit RLS.** A Postgres view runs as its owner and bypasses RLS
+on the underlying tables, and Supabase grants SELECT to `anon` by default — the
+anon key is public. Every new view must set `security_invoker = on` AND revoke
+`anon`/`authenticated`; see migration `008` and `docs/DATABASE.md`.
+`pnpm check:supabase` fails if any view is readable with the anon key.
 
 ---
 

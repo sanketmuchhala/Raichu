@@ -6,7 +6,7 @@ import { SeoFooter } from '../../../components/seo/SeoFooter';
 import { Navbar } from '../../../components/nav/Navbar';
 
 export const metadata: Metadata = pageMetadata({
-  title:       'Raichu vs Checkers: Two Promotion-Based Strategy Games Compared',
+  title:       'Raichu vs Checkers: Strategy Games Compared',
   description: 'Raichu and Checkers both center on promotion. How they compare: movement rules, capture systems, game length, depth, and which to play first.',
   path:        '/blog/raichu-vs-checkers',
   type:        'article',
@@ -15,10 +15,14 @@ export const metadata: Metadata = pageMetadata({
 const schema = {
   '@context': 'https://schema.org',
   '@type':    'Article',
-  headline:   'Raichu vs Checkers: Two Promotion-Based Strategy Games Compared',
+  headline:   'Raichu vs Checkers: Strategy Games Compared',
   description:'A direct comparison of Raichu and Checkers: rules, depth, game length, and strategic character.',
   author:    { '@type': 'Organization', name: 'Raichu Game' },
   publisher: { '@type': 'Organization', name: 'Raichu Game', url: SITE_URL },
+  datePublished: '2026-05-12',
+  dateModified:  '2026-08-20',
+  image:         `${SITE_URL}/opengraph-image`,
+  mainEntityOfPage: `${SITE_URL}/blog/raichu-vs-checkers`,
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [
@@ -44,7 +48,7 @@ const COMPARISON = [
 
 export default function Article() {
   return (
-    <main style={{ backgroundColor: 'var(--c-bg)', color: 'var(--c-text)', minHeight: '100vh' }}>
+    <main style={{ backgroundColor: 'var(--c-bg)', color: 'var(--c-text)', minHeight: '100dvh' }}>
       <SchemaScript schema={schema} />
       <Navbar />
 
