@@ -108,14 +108,39 @@ struct HistoryView: View {
     }
 
     private func loadGames() async {
+        // Show cached games immediately while fetching (spec 6.3)
+        if games.isEmpty { games = loadCachedGames() }
+
         guard let token = authStore.accessToken else { return }
         loading = true
         defer { loading = false }
         do {
-            games = try await gamesAPI.myGames(accessToken: token)
+            let fetched = try await gamesAPI.myGames(accessToken: token)
                 .filter { $0.status != "playing" && $0.status != "waiting" }
                 .sorted { $0.created_at > $1.created_at }
-        } catch {}
+            games = fetched
+            // Cache up to last 20 completed games (spec 6.3)
+            cacheGames(Array(fetched.prefix(20)))
+        } catch {
+            // Network error — continue showing cached data
+        }
+    }
+
+    // MARK: - Cache helpers
+
+    private static let cacheKey = "cachedGameHistory"
+
+    private func loadCachedGames() -> [OnlineGameDetail] {
+        guard let data = UserDefaults.standard.data(forKey: Self.cacheKey),
+              let cached = try? JSONDecoder().decode([OnlineGameDetail].self, from: data)
+        else { return [] }
+        return cached
+    }
+
+    private func cacheGames(_ list: [OnlineGameDetail]) {
+        if let data = try? JSONEncoder().encode(list) {
+            UserDefaults.standard.set(data, forKey: Self.cacheKey)
+        }
     }
 }
 
@@ -179,6 +204,11 @@ struct HistoryGameRow: View {
                     Text("\(game.move_count) moves")
                         .font(.caption)
                         .foregroundColor(theme.textSecondary)
+                    Text("·")
+                        .foregroundColor(theme.textSecondary)
+                    Text(formattedDate(game.created_at))
+                        .font(.caption)
+                        .foregroundColor(theme.textSecondary)
                 }
 
                 Text(abandoned ? "Abandoned" : (won ? "Won" : "Lost"))
@@ -195,6 +225,20 @@ struct HistoryGameRow: View {
         }
         .background(theme.bgPanel)
         .cornerRadius(10)
+    }
+
+    private func formattedDate(_ iso: String) -> String {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let date: Date?
+        if let d = formatter.date(from: iso) {
+            date = d
+        } else {
+            formatter.formatOptions = [.withInternetDateTime]
+            date = formatter.date(from: iso)
+        }
+        guard let d = date else { return "" }
+        return RelativeDateTimeFormatter().localizedString(for: d, relativeTo: Date())
     }
 }
 

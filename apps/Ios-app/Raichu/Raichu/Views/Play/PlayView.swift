@@ -131,6 +131,8 @@ struct PlayView: View {
                 }
             }
         )
+        // Replay step: 100ms easeInOut fade on board transition (spec 6.2)
+        .animation(.easeInOut(duration: 0.1), value: uiStore.replayStep)
         .padding(8)
     }
 
@@ -319,9 +321,16 @@ struct PlayView: View {
         .transition(.opacity)
         .animation(.easeOut(duration: 0.3), value: gameStore.status)
         .onAppear {
+            // Distinguish win vs loss based on player color (spec 6.2)
             if gameStore.status == "white_wins" || gameStore.status == "black_wins" {
-                // Trigger haptic — determine if current human player won
-                HapticManager.shared.gameWon()
+                let playerWon = gameStore.status == "white_wins"
+                    ? gameStore.playerColor == "white"
+                    : gameStore.playerColor == "black"
+                if gameStore.gameMode == "pvp" || playerWon {
+                    HapticManager.shared.gameWon()
+                } else {
+                    HapticManager.shared.gameLost()
+                }
             }
         }
     }

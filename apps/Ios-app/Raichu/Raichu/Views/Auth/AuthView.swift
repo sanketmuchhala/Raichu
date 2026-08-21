@@ -150,8 +150,13 @@ struct AuthView: View {
     }
 
     private var isFormValid: Bool {
-        !email.isEmpty && password.count >= 6 &&
-        (tab == 0 || (username.count >= 3 && username.count <= 20))
+        guard !email.isEmpty, password.count >= 6 else { return false }
+        if tab == 1 {
+            // Username: 3–20 chars, alphanumeric + underscores only
+            let validUsername = NSPredicate(format: "SELF MATCHES %@", "^[a-zA-Z0-9_]{3,20}$")
+            return validUsername.evaluate(with: username)
+        }
+        return true
     }
 
     private func handleAction() {

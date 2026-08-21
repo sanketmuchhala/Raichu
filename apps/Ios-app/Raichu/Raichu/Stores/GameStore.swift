@@ -26,9 +26,9 @@ final class GameStore: ObservableObject {
     @Published var drawReason: String? = nil
 
     // Config
-    var gameMode: String = "pvp"        // pvp | bot
-    var difficulty: String = "medium"   // easy | medium | hard
-    var playerColor: String = "white"   // which color the human plays (bot mode)
+    @Published var gameMode: String = "pvp"        // pvp | bot
+    @Published var difficulty: String = "medium"   // easy | medium | hard
+    @Published var playerColor: String = "white"   // which color the human plays (bot mode)
 
     init() {
         board = RaichuEngine.shared.createInitialBoard()
@@ -131,6 +131,8 @@ final class GameStore: ObservableObject {
 
         if let move = botMove {
             makeMove(move)
+        } else if let randomMove = RaichuEngine.shared.generateAllMoves(board: board, player: currentPlayer).randomElement() {
+            makeMove(randomMove)
         }
     }
 

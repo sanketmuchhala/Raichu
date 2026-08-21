@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { pageMetadata } from '../../lib/seo';
+import { pageMetadata, SITE_URL } from '../../lib/seo';
 import { SchemaScript } from '../../components/seo/SchemaScript';
 
 export const metadata: Metadata = pageMetadata({
@@ -18,8 +18,8 @@ export default function RulesLayout({ children }: { children: React.ReactNode })
     breadcrumb: {
       '@type': 'BreadcrumbList',
       itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Home',  item: 'https://raichu.live' },
-        { '@type': 'ListItem', position: 2, name: 'Rules', item: 'https://raichu.live/rules' },
+        { '@type': 'ListItem', position: 1, name: 'Home',  item: SITE_URL },
+        { '@type': 'ListItem', position: 2, name: 'Rules', item: `${SITE_URL}/rules` },
       ],
     },
   };

@@ -3,6 +3,7 @@
 // Top 50 players by ELO rating with gold/silver/bronze for top 3.
 
 import SwiftUI
+import Supabase
 
 struct LeaderboardView: View {
     @EnvironmentObject var authStore: AuthStore
@@ -58,14 +59,20 @@ struct LeaderboardView: View {
     }
 
     private func loadLeaderboard() async {
-        // TODO: Supabase direct query when SDK is added
-        // let profiles: [Profile] = try await supabase
-        //   .from("profiles").select()
-        //   .order("elo_rating", ascending: false).limit(50).execute().value
-        // players = profiles
-
-        // Placeholder: use API approach
-        loading = false
+        loading = true
+        defer { loading = false }
+        do {
+            let profiles: [Profile] = try await supabase
+                .from("profiles")
+                .select()
+                .order("elo_rating", ascending: false)
+                .limit(50)
+                .execute()
+                .value
+            players = profiles
+        } catch {
+            // Network unavailable or not authenticated — leave list empty
+        }
     }
 }
 

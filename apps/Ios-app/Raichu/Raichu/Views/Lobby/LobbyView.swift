@@ -98,9 +98,8 @@ struct LobbyView: View {
                 .cornerRadius(12)
             } else {
                 Button(action: {
-                    guard let token = authStore.accessToken else { return }
                     HapticManager.shared.buttonTap()
-                    Task { await matchmakingStore.joinQueue(accessToken: token) }
+                    Task { await matchmakingStore.joinQueue() }
                 }) {
                     HStack {
                         Image(systemName: "magnifyingglass")
