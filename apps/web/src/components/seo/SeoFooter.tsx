@@ -32,7 +32,7 @@ export function SeoFooter() {
           <div>
             <p style={{ fontWeight: 700, fontSize: '0.8125rem', color: 'var(--c-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.625rem' }}>Explore</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
-              <Link href="/chess-like-games"        style={linkStyle}>Chess-Like Games</Link>
+              <Link href="/blog/games-like-chess"        style={linkStyle}>Chess-Like Games</Link>
               <Link href="/abstract-strategy-games" style={linkStyle}>Abstract Strategy Games</Link>
               <Link href="/chess-variants"          style={linkStyle}>Chess Variants</Link>
               <Link href="/raichu-vs-chess"         style={linkStyle}>Raichu vs Chess</Link>

@@ -10,6 +10,7 @@ import { CreateGamePanel } from '../../components/lobby/CreateGamePanel';
 import { JoinGamePanel } from '../../components/lobby/JoinGamePanel';
 import { MatchmakingPanel } from '../../components/lobby/MatchmakingPanel';
 import { ActiveGamesList } from '../../components/lobby/ActiveGamesList';
+import { analytics } from '../../lib/analytics';
 
 export default function LobbyPage() {
   const theme = useUIStore((s) => THEMES[s.theme]);
@@ -23,6 +24,10 @@ export default function LobbyPage() {
       router.push('/auth');
     }
   }, [initialized, user, router]);
+
+  useEffect(() => {
+    if (initialized && user) analytics.lobbyViewed(user.id);
+  }, [initialized, user]);
 
   if (!initialized) {
     return (

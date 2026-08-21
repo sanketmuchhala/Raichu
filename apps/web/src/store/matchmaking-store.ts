@@ -3,6 +3,7 @@
 import { create } from 'zustand';
 import { apiFetch } from '../lib/api';
 import { analytics } from '../lib/analytics';
+import { useAuthStore } from './auth-store';
 
 type MatchmakingStatus = 'idle' | 'queued' | 'matched';
 
@@ -45,6 +46,10 @@ export const useMatchmakingStore = create<MatchmakingStore>((set, get) => ({
         matchedGameId: null,
         _idleRetries: 0,
       });
+      analytics.matchmakingQueued(
+        { eloRating: useAuthStore.getState().profile?.elo_rating },
+        useAuthStore.getState().user?.id ?? null,
+      );
     } catch (err) {
       set({ loading: false, error: err instanceof Error ? err.message : 'Failed to join queue' });
     }
@@ -52,7 +57,14 @@ export const useMatchmakingStore = create<MatchmakingStore>((set, get) => ({
 
   leaveQueue: async () => {
     try {
+      // Read the wait before it is cleared — abandonment time is the number that
+      // says whether the queue is too slow.
+      const abandonedAfter = get().waitSeconds;
       await apiFetch('/api/v1/matchmaking/queue', { method: 'DELETE' });
+      analytics.matchmakingCancelled(
+        { waitSeconds: abandonedAfter },
+        useAuthStore.getState().user?.id ?? null,
+      );
       set({ status: 'idle', waitSeconds: 0, queueCount: 0, matchedGameId: null, _idleRetries: 0 });
     } catch (err) {
       set({ error: err instanceof Error ? err.message : 'Failed to leave queue' });
@@ -70,7 +82,14 @@ export const useMatchmakingStore = create<MatchmakingStore>((set, get) => ({
       };
 
       if (data.status === 'matched' && data.gameId) {
-        analytics.matchFound({ gameType: 'ranked' });
+        analytics.matchFound(
+          {
+            gameType: 'ranked',
+            eloRating: useAuthStore.getState().profile?.elo_rating,
+            waitSeconds: get().waitSeconds,
+          },
+          useAuthStore.getState().user?.id ?? null,
+        );
         set({ status: 'matched', matchedGameId: data.gameId, _idleRetries: 0 });
       } else if (data.status === 'queued') {
         set({

@@ -15,6 +15,7 @@ import { THEMES } from '../../lib/themes';
 import { BLACK_PIECES, WHITE_PIECES } from '@raichu/shared-types';
 import type { PieceChar } from '@raichu/shared-types';
 import { BOT_NAME, DIFFICULTY_LABEL } from '../../lib/constants';
+import { analytics } from '../../lib/analytics';
 
 export default function PlayPage() {
   const theme = useUIStore((s) => THEMES[s.theme]);
@@ -35,6 +36,30 @@ export default function PlayPage() {
   const boardContainerRef = useRef<HTMLDivElement>(null);
   const [boardHeight, setBoardHeight] = useState<number>(0);
   const [resultDismissed, setResultDismissed] = useState(false);
+
+  // /play defaults to a bot game. ?mode=pvp switches to pass-and-play so the
+  // home page's Local PvP card lands somewhere that matches its label.
+  //
+  // Read from window rather than useSearchParams: that hook opts the route out
+  // of static prerendering, and /play is a priority-0.9 SEO page that should
+  // stay static. This effect is client-only, so window is always available.
+  const startedRef = useRef(false);
+
+  useEffect(() => {
+    if (startedRef.current) return;
+    startedRef.current = true;
+
+    const { gameMode, difficulty, playerColor } = useGameStore.getState();
+
+    if (new URLSearchParams(window.location.search).get('mode') === 'pvp') {
+      newGame({ mode: 'pvp', difficulty, playerColor });
+      return;
+    }
+
+    // The default game comes from the store's initial state, which never runs
+    // newGame — so without this the opening game emits no analytics at all.
+    analytics.gameStarted({ mode: gameMode, difficulty, playerColor });
+  }, [newGame]);
 
   // Reset dismissed flag whenever a new game starts
   useEffect(() => {
@@ -103,8 +128,8 @@ export default function PlayPage() {
     <>
       <Navbar />
       <main
-        className="flex flex-col items-center px-2 pt-4 pb-4 lg:p-8"
-        style={{ backgroundColor: theme.bgPrimary, minHeight: 'calc(100vh - 52px)' }}
+        className="flex flex-col items-center px-0 pt-3 pb-4 sm:px-2 lg:p-8"
+        style={{ backgroundColor: theme.bgPrimary, minHeight: 'calc(100dvh - 52px)' }}
       >
         <div className="w-full" style={{ maxWidth: 1100 }}>
           <div className="flex flex-col lg:flex-row gap-0 lg:gap-6">
@@ -114,7 +139,7 @@ export default function PlayPage() {
                 <CapturedPieces pieces={topCaptured} size={20} />
               </div>
 
-              <div ref={boardContainerRef} className="w-full" style={{ aspectRatio: '1 / 1' }}>
+              <div ref={boardContainerRef} className="w-full" style={{ aspectRatio: '532 / 552' }}>
                 <div
                   className="w-full h-full overflow-hidden"
                   style={{ borderRadius: 12, boxShadow: `0 8px 32px ${theme.shadow}, 0 2px 8px ${theme.shadow}` }}
