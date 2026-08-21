@@ -7,7 +7,7 @@ import { Navbar } from '../../components/nav/Navbar';
 
 export const metadata: Metadata = pageMetadata({
   title:       'Raichu vs Chess | Similarities, Differences, and Strategy',
-  description: 'How does Raichu compare to chess? Both use a piece hierarchy and tactical positional play. Raichu has simpler rules, a different win condition, and faster games.',
+  description: 'How does Raichu compare to chess? Both use a piece hierarchy and tactical play. Raichu has simpler rules, a different win condition, faster games.',
   path:        '/raichu-vs-chess',
   type:        'article',
 });
@@ -21,8 +21,8 @@ const schema = {
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home',           item: 'https://raichu.live' },
-      { '@type': 'ListItem', position: 2, name: 'Raichu vs Chess', item: 'https://raichu.live/raichu-vs-chess' },
+      { '@type': 'ListItem', position: 1, name: 'Home',           item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Raichu vs Chess', item: `${SITE_URL}/raichu-vs-chess` },
     ],
   },
 };
@@ -31,7 +31,7 @@ const h2Style = { fontSize: '1.375rem', fontWeight: 700, marginBottom: '1.25rem'
 
 export default function RaichuVsChessPage() {
   return (
-    <main style={{ backgroundColor: 'var(--c-bg)', color: 'var(--c-text)', minHeight: '100vh' }}>
+    <main style={{ backgroundColor: 'var(--c-bg)', color: 'var(--c-text)', minHeight: '100dvh' }}>
       <SchemaScript schema={schema} />
       <Navbar />
 
@@ -130,7 +130,7 @@ export default function RaichuVsChessPage() {
 
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
           <Link href="/play"             style={{ display: 'inline-block', padding: '0.75rem 1.75rem', backgroundColor: 'var(--c-green)', color: '#fff', borderRadius: 8, fontWeight: 700, textDecoration: 'none' }}>Play Raichu Free</Link>
-          <Link href="/chess-like-games" style={{ display: 'inline-block', padding: '0.75rem 1.75rem', backgroundColor: 'var(--c-bg-1)', color: 'var(--c-text)', border: '1px solid var(--c-border)', borderRadius: 8, fontWeight: 600, textDecoration: 'none' }}>More Chess-Like Games</Link>
+          <Link href="/blog/games-like-chess" style={{ display: 'inline-block', padding: '0.75rem 1.75rem', backgroundColor: 'var(--c-bg-1)', color: 'var(--c-text)', border: '1px solid var(--c-border)', borderRadius: 8, fontWeight: 600, textDecoration: 'none' }}>More Chess-Like Games</Link>
           <Link href="/rules"            style={{ display: 'inline-block', padding: '0.75rem 1.75rem', backgroundColor: 'var(--c-bg-1)', color: 'var(--c-text)', border: '1px solid var(--c-border)', borderRadius: 8, fontWeight: 600, textDecoration: 'none' }}>Raichu Rules</Link>
         </div>
       </article>
