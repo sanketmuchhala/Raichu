@@ -6,7 +6,7 @@ import { SeoFooter } from '../../../components/seo/SeoFooter';
 import { Navbar } from '../../../components/nav/Navbar';
 
 export const metadata: Metadata = pageMetadata({
-  title:       'Why Play Abstract Strategy Games | The Case for Zero-Luck Games',
+  title:       'Why Play Abstract Strategy Games | Zero-Luck Games',
   description: 'Why abstract strategy games like Chess, Go, and Raichu are worth your time: clean feedback, no luck, skill that compounds, and games that never go stale.',
   path:        '/blog/why-play-strategy-games',
   type:        'article',
@@ -19,6 +19,10 @@ const schema = {
   description:'The case for playing zero-luck strategy games over luck-based games.',
   author:    { '@type': 'Organization', name: 'Raichu Game' },
   publisher: { '@type': 'Organization', name: 'Raichu Game', url: SITE_URL },
+  datePublished: '2026-05-12',
+  dateModified:  '2026-08-20',
+  image:         `${SITE_URL}/opengraph-image`,
+  mainEntityOfPage: `${SITE_URL}/blog/why-play-strategy-games`,
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [
@@ -33,7 +37,7 @@ const h2Style = { fontSize: '1.375rem', fontWeight: 700, marginBottom: '1.25rem'
 
 export default function Article() {
   return (
-    <main style={{ backgroundColor: 'var(--c-bg)', color: 'var(--c-text)', minHeight: '100vh' }}>
+    <main style={{ backgroundColor: 'var(--c-bg)', color: 'var(--c-text)', minHeight: '100dvh' }}>
       <SchemaScript schema={schema} />
       <Navbar />
 

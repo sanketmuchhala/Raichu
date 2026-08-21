@@ -6,7 +6,7 @@ import { SeoFooter } from '../../../components/seo/SeoFooter';
 import { Navbar } from '../../../components/nav/Navbar';
 
 export const metadata: Metadata = pageMetadata({
-  title:       'Chess Without Opening Memorization | Strategy Games That Skip Theory',
+  title:       'Chess Without Opening Memorization | Skip the Theory',
   description: 'Tired of memorizing chess openings? These strategy games eliminate theory entirely: Chess960, Onitama, and Raichu all force you to think from move one.',
   path:        '/blog/chess-without-memorization',
   type:        'article',
@@ -19,6 +19,10 @@ const schema = {
   description:'Games that fix chess\'s memorization problem by making every opening position fresh.',
   author:    { '@type': 'Organization', name: 'Raichu Game' },
   publisher: { '@type': 'Organization', name: 'Raichu Game', url: SITE_URL },
+  datePublished: '2026-05-12',
+  dateModified:  '2026-08-20',
+  image:         `${SITE_URL}/opengraph-image`,
+  mainEntityOfPage: `${SITE_URL}/blog/chess-without-memorization`,
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [
@@ -33,7 +37,7 @@ const h2Style = { fontSize: '1.375rem', fontWeight: 700, marginBottom: '1.25rem'
 
 export default function Article() {
   return (
-    <main style={{ backgroundColor: 'var(--c-bg)', color: 'var(--c-text)', minHeight: '100vh' }}>
+    <main style={{ backgroundColor: 'var(--c-bg)', color: 'var(--c-text)', minHeight: '100dvh' }}>
       <SchemaScript schema={schema} />
       <Navbar />
 

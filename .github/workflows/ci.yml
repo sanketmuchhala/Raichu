@@ -41,7 +41,7 @@ jobs:
     steps:
       # ── 1. Checkout the repository ──────────────────────────
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       # ── 2. Set up pnpm (matches packageManager in root package.json) ──
       - name: Install pnpm
@@ -51,9 +51,9 @@ jobs:
 
       # ── 3. Set up Node.js with pnpm dependency cache ───────
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
 
       # ── 4. Install dependencies (frozen lockfile for reproducibility) ──

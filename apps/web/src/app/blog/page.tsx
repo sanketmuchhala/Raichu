@@ -6,7 +6,7 @@ import { SeoFooter } from '../../components/seo/SeoFooter';
 import { Navbar } from '../../components/nav/Navbar';
 
 export const metadata: Metadata = pageMetadata({
-  title:       'Raichu Game Blog | Strategy Guides and Abstract Board Game Articles',
+  title:       'Raichu Blog | Strategy Guides & Board Game Articles',
   description: 'Articles on Raichu strategy, abstract board games, chess-like games, and game design. Guides for beginners and experienced players.',
   path:        '/blog',
 });
@@ -168,7 +168,7 @@ const ARTICLES = [
 
 export default function BlogPage() {
   return (
-    <main style={{ backgroundColor: 'var(--c-bg)', color: 'var(--c-text)', minHeight: '100vh' }}>
+    <main style={{ backgroundColor: 'var(--c-bg)', color: 'var(--c-text)', minHeight: '100dvh' }}>
       <SchemaScript schema={schema} />
       <Navbar />
 

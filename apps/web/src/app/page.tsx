@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useUIStore } from '../store/ui-store';
 import { THEMES } from '../lib/themes';
+import { SITE_URL } from '../lib/seo';
 import { Navbar } from '../components/nav/Navbar';
 
 const CDN = 'https://images.chesscomfiles.com/chess-themes/pieces/neo/150';
@@ -18,7 +19,7 @@ const GAME_SCHEMA = {
   applicationCategory:  'Game',
   playMode:             ['SinglePlayer', 'MultiPlayer'],
   operatingSystem:      'Any',
-  url:                  'https://raichu.live',
+  url:                  SITE_URL,
   offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
 };
 
@@ -35,26 +36,37 @@ export default function Home() {
 
       {/* ── Hero ─────────────────────────────────────── */}
       <section className="lp-hero">
+        {/* Sizes are fluid: at 375px the fixed 52/64/80 widths totalled 452px
+            inside a 311px box, so the outer pieces were clipped in half. */}
         <div
           className="r1"
-          style={{ display: 'flex', alignItems: 'flex-end', gap: '0.75rem', marginBottom: '2.5rem' }}
+          style={{
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'center',
+            gap: 'clamp(0.25rem, 2vw, 0.75rem)',
+            marginBottom: '2.5rem',
+            width: '100%',
+          }}
         >
           {[
-            { code: 'bp', size: 52 },
-            { code: 'br', size: 64 },
-            { code: 'bq', size: 80 },
-            { code: 'wq', size: 80 },
-            { code: 'wr', size: 64 },
-            { code: 'wp', size: 52 },
+            { code: 'bp', size: 'clamp(30px, 9vw, 52px)' },
+            { code: 'br', size: 'clamp(37px, 11vw, 64px)' },
+            { code: 'bq', size: 'clamp(46px, 14vw, 80px)' },
+            { code: 'wq', size: 'clamp(46px, 14vw, 80px)' },
+            { code: 'wr', size: 'clamp(37px, 11vw, 64px)' },
+            { code: 'wp', size: 'clamp(30px, 9vw, 52px)' },
           ].map(({ code, size }) => (
             <img
               key={code}
               src={P(code)}
-              width={size}
-              height={size}
               alt=""
               draggable={false}
-              style={{ filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.5))' }}
+              style={{
+                width: size,
+                height: size,
+                filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.5))',
+              }}
             />
           ))}
         </div>
@@ -94,7 +106,15 @@ export default function Home() {
           <Link href="/lobby" className="lp-btn lp-btn-ghost"   style={{ color: theme.textPrimary, border: `1px solid ${theme.border}` }}>Play Online</Link>
         </div>
 
-        <nav className="r5" style={{ display: 'flex', gap: '1.75rem' }}>
+        <nav
+          className="r5"
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            gap: 'clamp(0.75rem, 4vw, 1.75rem)',
+          }}
+        >
           {[
             { href: '/rules',       label: 'How to Play'  },
             { href: '/puzzles',     label: 'Puzzles'      },
@@ -115,16 +135,20 @@ export default function Home() {
             maxWidth: 900,
             margin: '0 auto',
             display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
+            // 4 hard columns left ~62px of usable width per cell at 375px.
+            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
           }}
         >
           {STATS.map(({ value, label }, i) => (
             <div
               key={label}
               style={{
-                padding: '2rem 1rem',
+                padding: 'clamp(1.25rem, 4vw, 2rem) 1rem',
                 textAlign: 'center',
-                borderRight: i < STATS.length - 1 ? `1px solid ${theme.border}` : undefined,
+                // Outline rather than borderRight: the grid wraps on narrow
+                // screens, which left a border dangling at the row end.
+                outline: `1px solid ${theme.border}`,
+                outlineOffset: -1,
               }}
             >
               <div
@@ -189,7 +213,7 @@ export default function Home() {
       </section>
 
       {/* ── Capture Hierarchy ────────────────────────── */}
-      <section style={{ borderTop: `1px solid ${theme.border}`, maxWidth: 900, margin: '0 auto', width: '100%', padding: '3rem 2rem' }}>
+      <section style={{ borderTop: `1px solid ${theme.border}`, maxWidth: 900, margin: '0 auto', width: '100%', padding: 'clamp(2rem, 6vw, 3rem) clamp(1rem, 4vw, 2rem)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.5rem' }}>
           <h2 style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: theme.textSecondary }}>
             Capture Hierarchy
@@ -205,10 +229,13 @@ export default function Home() {
               key={name}
               style={{
                 display: 'grid',
-                gridTemplateColumns: '1fr auto 1fr',
+                // The middle column is whiteSpace:nowrap, so it could not shrink;
+                // three columns plus 48px of gaps did not fit a 375px screen.
+                // Stack to one column below 640px.
+                gridTemplateColumns: 'var(--hierarchy-cols, 1fr)',
                 alignItems: 'center',
-                padding: '1.125rem 1.5rem',
-                gap: '1.5rem',
+                padding: 'clamp(0.875rem, 3vw, 1.125rem) clamp(0.875rem, 3vw, 1.5rem)',
+                gap: 'clamp(0.625rem, 2vw, 1.5rem)',
                 backgroundColor: i % 2 === 0 ? theme.bgPanel : theme.bgPrimary,
                 borderTop: i > 0 ? `1px solid ${theme.border}` : undefined,
               }}
@@ -247,7 +274,7 @@ export default function Home() {
       </section>
 
       {/* ── What is Raichu ───────────────────────────── */}
-      <section style={{ borderTop: `1px solid ${theme.border}`, maxWidth: 900, margin: '0 auto', width: '100%', padding: '3rem 2rem' }}>
+      <section style={{ borderTop: `1px solid ${theme.border}`, maxWidth: 900, margin: '0 auto', width: '100%', padding: 'clamp(2rem, 6vw, 3rem) clamp(1rem, 4vw, 2rem)' }}>
         <div style={{ display: 'grid', gap: '2rem', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
           <div>
             <h2 style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: theme.textSecondary, marginBottom: '0.75rem' }}>
@@ -288,7 +315,7 @@ export default function Home() {
       </section>
 
       {/* ── Game Modes ───────────────────────────────── */}
-      <section style={{ borderTop: `1px solid ${theme.border}`, maxWidth: 900, margin: '0 auto', width: '100%', padding: '3rem 2rem' }}>
+      <section style={{ borderTop: `1px solid ${theme.border}`, maxWidth: 900, margin: '0 auto', width: '100%', padding: 'clamp(2rem, 6vw, 3rem) clamp(1rem, 4vw, 2rem)' }}>
         <h2 style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: theme.textSecondary, marginBottom: '1.5rem', textAlign: 'center' }}>
           How you want to play
         </h2>
@@ -340,7 +367,7 @@ export default function Home() {
       </section>
 
       {/* ── How to play — 3 steps ────────────────────── */}
-      <section style={{ borderTop: `1px solid ${theme.border}`, maxWidth: 900, margin: '0 auto', width: '100%', padding: '3rem 2rem' }}>
+      <section style={{ borderTop: `1px solid ${theme.border}`, maxWidth: 900, margin: '0 auto', width: '100%', padding: 'clamp(2rem, 6vw, 3rem) clamp(1rem, 4vw, 2rem)' }}>
         <h2 style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: theme.textSecondary, marginBottom: '2rem', textAlign: 'center' }}>
           Up and running in minutes
         </h2>
@@ -396,7 +423,7 @@ export default function Home() {
       </section>
 
       {/* ── Learning resources ───────────────────────── */}
-      <section style={{ borderTop: `1px solid ${theme.border}`, maxWidth: 900, margin: '0 auto', width: '100%', padding: '3rem 2rem' }}>
+      <section style={{ borderTop: `1px solid ${theme.border}`, maxWidth: 900, margin: '0 auto', width: '100%', padding: 'clamp(2rem, 6vw, 3rem) clamp(1rem, 4vw, 2rem)' }}>
         <h2 style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: theme.textSecondary, marginBottom: '1.5rem', textAlign: 'center' }}>
           Go deeper
         </h2>
@@ -575,7 +602,7 @@ const MODES = [
     title:   'Local PvP',
     badge:   'Two players',
     desc:    'Pass and play on the same device. No accounts, no setup — just open the board and go.',
-    href:    '/play',
+    href:    '/play?mode=pvp',
     cta:     'Play Now',
     primary: false,
   },
