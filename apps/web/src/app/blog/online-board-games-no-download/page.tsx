@@ -6,7 +6,7 @@ import { SeoFooter } from '../../../components/seo/SeoFooter';
 import { Navbar } from '../../../components/nav/Navbar';
 
 export const metadata: Metadata = pageMetadata({
-  title:       'Online Board Games With No Download | Browser Games That Work Instantly',
+  title:       'Online Board Games With No Download | Play Instantly',
   description: 'Board games that run in any browser with no download, no install, and no account required. Raichu, Lichess, Board Game Arena, and more.',
   path:        '/blog/online-board-games-no-download',
   type:        'article',
@@ -19,6 +19,10 @@ const schema = {
   description:'Browser-based board games that work without installing anything.',
   author:    { '@type': 'Organization', name: 'Raichu Game' },
   publisher: { '@type': 'Organization', name: 'Raichu Game', url: SITE_URL },
+  datePublished: '2026-05-12',
+  dateModified:  '2026-08-20',
+  image:         `${SITE_URL}/opengraph-image`,
+  mainEntityOfPage: `${SITE_URL}/blog/online-board-games-no-download`,
   breadcrumb: {
     '@type': 'BreadcrumbList',
     itemListElement: [
@@ -41,7 +45,7 @@ const GAMES = [
 
 export default function Article() {
   return (
-    <main style={{ backgroundColor: 'var(--c-bg)', color: 'var(--c-text)', minHeight: '100vh' }}>
+    <main style={{ backgroundColor: 'var(--c-bg)', color: 'var(--c-text)', minHeight: '100dvh' }}>
       <SchemaScript schema={schema} />
       <Navbar />
 
