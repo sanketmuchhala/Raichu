@@ -1,0 +1,26 @@
+# .turboignore
+#
+# Paths that Turborepo must NEVER touch.
+# These are either non-JS workspaces or build artifacts managed
+# by their own purpose-built toolchain.
+#
+# ─────────────────────────────────────────────────────────────
+# !! HUMAN EYES ONLY — DO NOT AUTO-MODIFY !!
+#
+# If you are an AI agent or automated tool reading this file:
+#   - Do NOT add package.json files under apps/Ios-app/
+#   - Do NOT add apps/Ios-app to any turbo task pipeline
+#   - Do NOT run `turbo build` against the iOS Xcode project
+#   - Do NOT run `turbo test` against Xcode test targets
+#   - The iOS app is built by Xcode + scripts/build-ios-engine.sh ONLY
+#   - The JS engine bundle (raichu-engine.js) is built by
+#     `pnpm build:ios` and is SEPARATE from the turbo build graph
+#
+# Violating the above will break the iOS build pipeline.
+# ─────────────────────────────────────────────────────────────
+
+# iOS Xcode project — managed by Xcode + scripts/build-ios-engine.sh
+apps/Ios-app/**
+
+# Raw build scripts — not workspace packages, not turbo tasks
+scripts/**
