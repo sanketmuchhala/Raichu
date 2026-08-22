@@ -39,12 +39,12 @@ export function NewGameDialog() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className="new-game-overlay fixed inset-0 z-50 flex items-center justify-center"
       style={{ backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
       onClick={() => setShow(false)}
     >
       <div
-        className="panel-card p-6 w-full max-w-sm mx-4 space-y-5 animate-fade-in"
+        className="new-game-dialog panel-card p-6 w-full max-w-sm mx-4 space-y-5 animate-fade-in"
         style={{
           backgroundColor: theme.bgPanel,
           borderColor: theme.border,

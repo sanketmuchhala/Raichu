@@ -33,7 +33,7 @@ export default function PlayLayout({ children }: { children: React.ReactNode }) 
       <SchemaScript schema={schema} />
       {children}
       {/* SEO: brief description below the game interface */}
-      <section style={{ backgroundColor: 'var(--c-bg-1)', borderTop: '1px solid var(--c-border)', padding: '1.25rem 2rem', textAlign: 'center' }}>
+      <section className="play-seo-footer" style={{ backgroundColor: 'var(--c-bg-1)', borderTop: '1px solid var(--c-border)', padding: '1.25rem 2rem', textAlign: 'center' }}>
         {/* The game board carries no heading of its own, so /play had no h1 at
             all. A real, visible one belongs here rather than hidden text. */}
         <h1 style={{ color: 'var(--c-text)', fontSize: '1rem', fontWeight: 600, margin: '0 0 0.5rem' }}>

@@ -36,7 +36,7 @@ export const THEMES: Record<ThemeName, Theme> = {
     bgSecondary: '#111111',
     bgPanel: '#242424',
     textPrimary: '#f0ece8',
-    textSecondary: '#7a7a7a',
+    textSecondary: '#9a9a9a',
     accent: '#769656',
     accentHover: '#638048',
     border: '#333333',
