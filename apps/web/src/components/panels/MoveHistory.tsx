@@ -59,7 +59,7 @@ export function MoveHistory() {
 
   return (
     <div
-      className="panel-card mobile-compact flex flex-col lg:flex-1 lg:min-h-0"
+      className="game-moves panel-card mobile-compact flex flex-col lg:flex-1 lg:min-h-0"
       style={{
         backgroundColor: theme.bgPanel,
         borderColor: theme.border,
@@ -77,7 +77,10 @@ export function MoveHistory() {
           style={{ background: 'none', border: 'none', padding: 0 }}
         >
           <span className="text-sm font-semibold" style={{ color: theme.textPrimary }}>
-            Move History
+            Moves
+          </span>
+          <span className="text-xs lg:hidden" style={{ color: theme.textSecondary }}>
+            {total}
           </span>
           <svg
             className="lg:hidden"
@@ -95,7 +98,7 @@ export function MoveHistory() {
         </button>
 
         {/* Replay controls */}
-        <div className="flex items-center gap-1">
+        {total > 0 && <div className="flex items-center gap-1">
           {replayMode && (
             <button
               className="text-xs px-2 py-0.5 rounded-md font-medium mr-1"
@@ -149,7 +152,7 @@ export function MoveHistory() {
           >
             ⏭
           </button>
-        </div>
+        </div>}
       </div>
 
       {/* Move list */}

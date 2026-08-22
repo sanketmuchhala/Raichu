@@ -39,7 +39,7 @@ export default function Home() {
         {/* Sizes are fluid: at 375px the fixed 52/64/80 widths totalled 452px
             inside a 311px box, so the outer pieces were clipped in half. */}
         <div
-          className="r1"
+          className="r1 lp-hero-pieces"
           style={{
             display: 'flex',
             alignItems: 'flex-end',
@@ -71,8 +71,12 @@ export default function Home() {
           ))}
         </div>
 
+        <p className="r2 lp-hero-eyebrow" style={{ color: theme.accent }}>
+          Fast games. Pure strategy.
+        </p>
+
         <h1
-          className="r2"
+          className="r2 lp-hero-title"
           style={{
             fontSize: 'clamp(3rem, 10vw, 5.5rem)',
             fontWeight: 800,
@@ -82,10 +86,11 @@ export default function Home() {
           }}
         >
           Raichu
+          <span className="lp-hero-hook">Think ahead. Take the board.</span>
         </h1>
 
         <p
-          className="r3"
+          className="r3 lp-hero-copy"
           style={{
             fontSize: '1rem',
             color: theme.textSecondary,
@@ -94,20 +99,56 @@ export default function Home() {
             lineHeight: 1.6,
           }}
         >
-          A strategy board game with three piece types.
-          Capture every opponent piece to win.
+          Learn three pieces, build a plan, and capture the opposition. No luck,
+          no download, and no account required.
         </p>
 
         <div
-          className="r4"
+          className="r4 lp-mode-launcher"
           style={{ display: 'flex', gap: '0.625rem', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '1.5rem' }}
         >
-          <Link href="/play"  className="lp-btn lp-btn-primary" style={{ backgroundColor: theme.accent }}>Play vs AI</Link>
-          <Link href="/lobby" className="lp-btn lp-btn-ghost"   style={{ color: theme.textPrimary, border: `1px solid ${theme.border}` }}>Play Online</Link>
+          <Link href="/play" className="lp-btn lp-btn-primary" style={{ backgroundColor: theme.accent }}>
+            <span className="lp-mode-icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                <rect x="4" y="6" width="14" height="11" rx="3" stroke="currentColor" strokeWidth="1.7" />
+                <path d="M8 6V4m6 2V4M8 11h.01M14 11h.01M8.5 14h5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+              </svg>
+            </span>
+            <span className="lp-mode-copy">
+              <strong>Play vs computer</strong>
+              <small>Start instantly</small>
+            </span>
+            <span className="lp-mode-arrow" aria-hidden="true">→</span>
+          </Link>
+          <Link href="/lobby" className="lp-btn lp-btn-ghost" style={{ color: theme.textPrimary, border: `1px solid ${theme.border}` }}>
+            <span className="lp-mode-icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                <circle cx="8" cy="8" r="3" stroke="currentColor" strokeWidth="1.7" />
+                <circle cx="15.5" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.7" />
+                <path d="M3.5 18c.5-3.1 2.1-4.7 4.8-4.7 2.6 0 4.2 1.6 4.7 4.7M13 14c2.9-.5 4.8.8 5.5 3.4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+              </svg>
+            </span>
+            <span className="lp-mode-copy">
+              <strong>Play online</strong>
+              <small>Challenge real players</small>
+            </span>
+            <span className="lp-mode-arrow" aria-hidden="true">→</span>
+          </Link>
+        </div>
+
+        <div className="r5 lp-mobile-links">
+          <Link href="/how-to-play" style={{ color: theme.textSecondary, borderColor: theme.border }}>
+            <span aria-hidden="true">?</span>
+            Learn in 2 minutes
+          </Link>
+          <Link href="/puzzles" style={{ color: theme.textSecondary, borderColor: theme.border }}>
+            <span aria-hidden="true">♟</span>
+            Solve puzzles
+          </Link>
         </div>
 
         <nav
-          className="r5"
+          className="r5 lp-hero-links"
           style={{
             display: 'flex',
             flexWrap: 'wrap',
@@ -129,8 +170,9 @@ export default function Home() {
       </section>
 
       {/* ── Stats strip ──────────────────────────────── */}
-      <section style={{ borderTop: `1px solid ${theme.border}`, width: '100%' }}>
+      <section className="lp-stats-section" style={{ borderTop: `1px solid ${theme.border}`, width: '100%' }}>
         <div
+          className="lp-stats"
           style={{
             maxWidth: 900,
             margin: '0 auto',
@@ -139,8 +181,9 @@ export default function Home() {
             gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
           }}
         >
-          {STATS.map(({ value, label }, i) => (
+          {STATS.map(({ value, label }) => (
             <div
+              className="lp-stat"
               key={label}
               style={{
                 padding: 'clamp(1.25rem, 4vw, 2rem) 1rem',
@@ -172,8 +215,8 @@ export default function Home() {
       </section>
 
       {/* ── Piece Guide ──────────────────────────────── */}
-      <section style={{ borderTop: `1px solid ${theme.border}`, maxWidth: 900, margin: '0 auto', width: '100%' }}>
-        <div style={{ padding: '3rem 2rem 1.5rem', textAlign: 'center' }}>
+      <section className="lp-piece-section" style={{ borderTop: `1px solid ${theme.border}`, maxWidth: 900, margin: '0 auto', width: '100%' }}>
+        <div className="lp-section-heading" style={{ padding: '3rem 2rem 1.5rem', textAlign: 'center' }}>
           <h2
             style={{
               fontSize: '1rem',
@@ -319,10 +362,11 @@ export default function Home() {
         <h2 style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: theme.textSecondary, marginBottom: '1.5rem', textAlign: 'center' }}>
           How you want to play
         </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1px', border: `1px solid ${theme.border}`, borderRadius: 10, overflow: 'hidden' }}>
+        <div className="lp-mode-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1px', border: `1px solid ${theme.border}`, borderRadius: 10, overflow: 'hidden' }}>
           {MODES.map(({ title, badge, desc, href, cta, primary }, i) => (
             <div
               key={title}
+              className="lp-mode-card"
               style={{
                 backgroundColor: theme.bgPanel,
                 padding: '1.75rem 1.5rem',
@@ -371,10 +415,11 @@ export default function Home() {
         <h2 style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: theme.textSecondary, marginBottom: '2rem', textAlign: 'center' }}>
           Up and running in minutes
         </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0' }}>
+        <div className="lp-steps-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0' }}>
           {STEPS.map(({ n, title, body, pieces }, i) => (
             <div
               key={n}
+              className="lp-step"
               style={{
                 padding: '1.75rem 1.5rem',
                 borderRight: i < STEPS.length - 1 ? `1px solid ${theme.border}` : undefined,
@@ -427,11 +472,12 @@ export default function Home() {
         <h2 style={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: theme.textSecondary, marginBottom: '1.5rem', textAlign: 'center' }}>
           Go deeper
         </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1px', border: `1px solid ${theme.border}`, borderRadius: 10, overflow: 'hidden' }}>
+        <div className="lp-resource-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1px', border: `1px solid ${theme.border}`, borderRadius: 10, overflow: 'hidden' }}>
           {RESOURCES.map(({ label, title, desc, href }, i) => (
             <Link
               key={title}
               href={href}
+              className="lp-resource-card"
               style={{
                 display: 'block',
                 backgroundColor: theme.bgPanel,

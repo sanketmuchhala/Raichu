@@ -9,6 +9,7 @@ import { MoveHistory } from '../../components/panels/MoveHistory';
 import { Controls } from '../../components/panels/Controls';
 import { NewGameDialog } from '../../components/panels/NewGameDialog';
 import { GameResultModal } from '../../components/game/GameResultModal';
+import { PlayerBar } from '../../components/game/PlayerBar';
 import { useUIStore } from '../../store/ui-store';
 import { useGameStore } from '../../store/game-store';
 import { THEMES } from '../../lib/themes';
@@ -27,6 +28,8 @@ export default function PlayPage() {
 
   const moveHistory   = useGameStore((s) => s.moveHistory);
   const status        = useGameStore((s) => s.status);
+  const currentPlayer = useGameStore((s) => s.currentPlayer);
+  const isThinking    = useGameStore((s) => s.isThinking);
   const gameMode      = useGameStore((s) => s.gameMode);
   const difficulty    = useGameStore((s) => s.difficulty);
   const playerColor   = useGameStore((s) => s.playerColor);
@@ -103,6 +106,8 @@ export default function PlayPage() {
 
   const topCaptured    = boardFlipped ? blackCaptured : whiteCaptured;
   const bottomCaptured = boardFlipped ? whiteCaptured : blackCaptured;
+  const topColor = boardFlipped ? 'black' : 'white';
+  const bottomColor = boardFlipped ? 'white' : 'black';
 
   const isOver = status !== 'playing';
 
@@ -113,6 +118,16 @@ export default function PlayPage() {
   const blackName = gameMode === 'bot'
     ? (playerColor === 'black' ? 'You' : `${BOT_NAME} · ${DIFFICULTY_LABEL[difficulty]}`)
     : 'Black';
+
+  const nameForColor = (color: 'white' | 'black') => {
+    if (gameMode === 'pvp') return color === 'white' ? 'White' : 'Black';
+    return color === playerColor ? 'You' : BOT_NAME;
+  };
+
+  const detailForColor = (color: 'white' | 'black') => {
+    if (gameMode === 'pvp') return 'Local player';
+    return color === playerColor ? color[0].toUpperCase() + color.slice(1) : DIFFICULTY_LABEL[difficulty];
+  };
 
   const handleNewGame = () => {
     setResultDismissed(true);
@@ -126,39 +141,65 @@ export default function PlayPage() {
 
   return (
     <>
-      <Navbar />
+      <Navbar gameMode />
       <main
-        className="flex flex-col items-center px-0 pt-3 pb-4 sm:px-2 lg:p-8"
+        className="game-page flex flex-col items-center px-0 pb-4 lg:p-8"
         style={{ backgroundColor: theme.bgPrimary, minHeight: 'calc(100dvh - 52px)' }}
       >
-        <div className="w-full" style={{ maxWidth: 1100 }}>
-          <div className="flex flex-col lg:flex-row gap-0 lg:gap-6">
+        <div className="game-shell w-full" style={{ maxWidth: 1100 }}>
+          <div className="game-layout flex flex-col lg:flex-row lg:gap-6">
             {/* Board column */}
-            <div className="w-full lg:flex-1 mx-auto lg:mx-0 space-y-1" style={{ maxWidth: 700 }}>
-              <div style={{ minHeight: 26 }}>
+            <div className="game-board-column w-full lg:flex-1 mx-auto lg:mx-0" style={{ maxWidth: 700 }}>
+              <div className="lg:hidden">
+                <PlayerBar
+                  username={nameForColor(topColor)}
+                  detail={detailForColor(topColor)}
+                  isCurrentTurn={currentPlayer === topColor && status === 'playing'}
+                  color={topColor}
+                  capturedPieces={topCaptured}
+                  compact
+                  statusLabel={isThinking && topColor !== playerColor ? 'Thinking' : 'Turn'}
+                />
+              </div>
+
+              <div className="hidden lg:block" style={{ minHeight: 26 }}>
                 <CapturedPieces pieces={topCaptured} size={20} />
               </div>
 
-              <div ref={boardContainerRef} className="w-full" style={{ aspectRatio: '532 / 552' }}>
+              <div ref={boardContainerRef} className="game-board w-full" style={{ aspectRatio: '532 / 552' }}>
                 <div
-                  className="w-full h-full overflow-hidden"
+                  className="game-board-frame w-full h-full overflow-hidden"
                   style={{ borderRadius: 12, boxShadow: `0 8px 32px ${theme.shadow}, 0 2px 8px ${theme.shadow}` }}
                 >
                   <Board />
                 </div>
               </div>
 
-              <div style={{ minHeight: 26 }}>
+              <div className="hidden lg:block" style={{ minHeight: 26 }}>
                 <CapturedPieces pieces={bottomCaptured} size={20} />
+              </div>
+
+              <div className="lg:hidden">
+                <PlayerBar
+                  username={nameForColor(bottomColor)}
+                  detail={detailForColor(bottomColor)}
+                  isCurrentTurn={currentPlayer === bottomColor && status === 'playing'}
+                  color={bottomColor}
+                  capturedPieces={bottomCaptured}
+                  compact
+                  statusLabel={isThinking && bottomColor !== playerColor ? 'Thinking' : 'Turn'}
+                />
               </div>
             </div>
 
             {/* Sidebar */}
             <div
-              className="w-full lg:w-80 flex flex-col gap-0 lg:gap-3 sidebar-responsive"
+              className="game-sidebar w-full lg:w-80 flex flex-col lg:gap-3 sidebar-responsive"
               style={{ height: boardHeight > 0 ? boardHeight + 52 : 'auto', minHeight: 400 }}
             >
-              <GameInfo />
+              <div className="hidden lg:block">
+                <GameInfo />
+              </div>
               <Controls />
               <MoveHistory />
             </div>

@@ -7,52 +7,79 @@ import { CapturedPieces } from '../board/CapturedPieces';
 
 interface PlayerBarProps {
   username: string;
-  elo: number;
+  elo?: number;
+  detail?: string;
   isCurrentTurn: boolean;
   color: 'white' | 'black';
   capturedPieces?: PieceChar[];
+  compact?: boolean;
+  statusLabel?: string;
 }
 
-export function PlayerBar({ username, elo, isCurrentTurn, color, capturedPieces = [] }: PlayerBarProps) {
+export function PlayerBar({
+  username,
+  elo,
+  detail,
+  isCurrentTurn,
+  color,
+  capturedPieces = [],
+  compact = false,
+  statusLabel = 'Turn',
+}: PlayerBarProps) {
   const theme = useUIStore((s) => THEMES[s.theme]);
 
   return (
-    <div>
+    <div
+      className={`player-bar${compact ? ' player-bar-compact' : ''}${isCurrentTurn ? ' is-current' : ''}`}
+      style={{
+        backgroundColor: isCurrentTurn ? theme.accent + '15' : theme.bgSecondary,
+        borderColor: isCurrentTurn ? theme.accent : 'transparent',
+        ['--glow-color' as string]: theme.accent + '60',
+      }}
+    >
       <div
-        className={`flex items-center gap-3 px-4 py-2.5 rounded-lg${isCurrentTurn ? ' animate-turn-glow' : ''}`}
+        className="player-avatar"
         style={{
-          backgroundColor: isCurrentTurn ? theme.accent + '15' : theme.bgSecondary,
-          border: `2px solid ${isCurrentTurn ? theme.accent : 'transparent'}`,
-          ['--glow-color' as string]: theme.accent + '60',
+          backgroundColor: color === 'white' ? '#f0f0f0' : '#333',
+          color: color === 'white' ? '#333' : '#f0f0f0',
+          borderColor: color === 'white' ? '#d4d4d4' : '#4a4a4a',
         }}
       >
-        <div
-          className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
-          style={{
-            backgroundColor: color === 'white' ? '#f0f0f0' : '#333',
-            color: color === 'white' ? '#333' : '#f0f0f0',
-          }}
-        >
-          {username[0]?.toUpperCase() || '?'}
-        </div>
-        <div className="flex-1 min-w-0">
-          <span className="text-sm font-medium truncate" style={{ color: theme.textPrimary }}>
+        {username[0]?.toUpperCase() || '?'}
+      </div>
+
+      <div className="player-details">
+        <div className="player-name-row">
+          <span className="player-name" style={{ color: theme.textPrimary }}>
             {username}
           </span>
-          <span className="text-xs ml-2" style={{ color: theme.textSecondary }}>
-            ({elo})
-          </span>
+          {elo !== undefined && (
+            <span className="player-rating" style={{ color: theme.textSecondary }}>
+              {elo}
+            </span>
+          )}
+          {detail && (
+            <span className="player-rating" style={{ color: theme.textSecondary }}>
+              {detail}
+            </span>
+          )}
         </div>
-        {isCurrentTurn && (
-          <span className="text-xs font-medium px-2 py-0.5 rounded-full shrink-0" style={{ backgroundColor: theme.accent, color: '#fff' }}>
-            Turn
-          </span>
+        {(compact || capturedPieces.length > 0) && (
+          <div className="player-captures" aria-label={`${username}'s captured pieces`}>
+            {capturedPieces.length > 0 ? (
+              <CapturedPieces pieces={capturedPieces} size={compact ? 16 : 18} />
+            ) : (
+              <span style={{ color: theme.textSecondary }}>No captures</span>
+            )}
+          </div>
         )}
       </div>
-      {capturedPieces.length > 0 && (
-        <div className="px-1 pt-1">
-          <CapturedPieces pieces={capturedPieces} size={18} />
-        </div>
+
+      {isCurrentTurn && (
+        <span className="player-turn" style={{ backgroundColor: theme.accent, color: '#fff' }}>
+          <span className="player-turn-dot" />
+          {statusLabel}
+        </span>
       )}
     </div>
   );

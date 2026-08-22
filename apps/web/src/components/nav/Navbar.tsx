@@ -25,9 +25,11 @@ interface NavbarProps {
   /** Show a back arrow on the left side (e.g. game pages) */
   backHref?:  string;
   backLabel?: string;
+  /** Use the focused, low-chrome navigation shown above a live board. */
+  gameMode?: boolean;
 }
 
-export function Navbar({ backHref, backLabel }: NavbarProps) {
+export function Navbar({ backHref, backLabel, gameMode = false }: NavbarProps) {
   const theme    = useUIStore((s) => THEMES[s.theme]);
   const pathname = usePathname();
   const user     = useAuthStore((s) => s.user);
@@ -43,16 +45,28 @@ export function Navbar({ backHref, backLabel }: NavbarProps) {
 
   return (
     <header
-      className="sticky top-0 z-40"
+      className={`site-navbar sticky top-0 z-40${gameMode ? ' game-navbar' : ''}`}
       style={{ backgroundColor: theme.bgPanel, borderBottom: `1px solid ${theme.border}` }}
     >
       <div
-        className="max-w-6xl mx-auto px-4"
+        className="navbar-inner max-w-6xl mx-auto px-4"
         style={{ height: 52, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}
       >
 
         {/* ── Left: back arrow (optional) + logo ── */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+          {gameMode && (
+            <Link
+              href="/"
+              className="game-nav-back md:hidden"
+              aria-label="Back to home"
+              style={{ color: theme.textSecondary }}
+            >
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                <path d="M11.5 14L6.5 9L11.5 4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </Link>
+          )}
           {backHref && (
             <Link
               href={backHref}
@@ -112,12 +126,14 @@ export function Navbar({ backHref, backLabel }: NavbarProps) {
               <PlayCta placement="navbar" size="sm" />
             </span>
           )}
-          <UserMenu />
+          <div className={gameMode ? 'hidden md:block' : undefined}>
+            <UserMenu />
+          </div>
           <button
-            className="md:hidden"
+            className="grid md:hidden"
             onClick={() => setOpen(!open)}
             aria-label="Toggle navigation"
-            style={{ width: 44, height: 44, display: 'grid', placeItems: 'center', borderRadius: 6, background: 'none', border: 'none', cursor: 'pointer', color: theme.textSecondary, lineHeight: 0 }}
+            style={{ width: 44, height: 44, placeItems: 'center', borderRadius: 6, background: 'none', border: 'none', cursor: 'pointer', color: theme.textSecondary, lineHeight: 0 }}
           >
             {open ? (
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -162,6 +178,19 @@ export function Navbar({ backHref, backLabel }: NavbarProps) {
               </Link>
             );
           })}
+          {!user && gameMode && (
+            <Link
+              href="/auth"
+              onClick={() => setOpen(false)}
+              className="mobile-nav-signin"
+              style={{ color: theme.textPrimary, borderColor: theme.border }}
+            >
+              Sign in or create an account
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </Link>
+          )}
         </nav>
       )}
     </header>
