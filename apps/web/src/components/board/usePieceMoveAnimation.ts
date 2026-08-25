@@ -6,8 +6,8 @@ import type { Move, PieceChar } from '@raichu/shared-types';
 export const SQUARE_SIZE = 64;
 export const COORD_SIZE = 20;
 
-const ANIM_MS   = 260;   // transition duration
-const CLEAR_MS  = ANIM_MS + 80; // a bit after transition ends, restore static layer
+// Keep the overlay around just long enough for the spring in Board to settle.
+const CLEAR_MS = 440;
 
 export interface AnimState {
   moveId: number;

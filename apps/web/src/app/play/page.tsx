@@ -150,7 +150,7 @@ export default function PlayPage() {
           <div className="game-layout flex flex-col lg:flex-row lg:gap-6">
             {/* Board column */}
             <div className="game-board-column w-full lg:flex-1 mx-auto lg:mx-0" style={{ maxWidth: 700 }}>
-              <div className="lg:hidden">
+              <div className="game-player game-player-top lg:hidden">
                 <PlayerBar
                   username={nameForColor(topColor)}
                   detail={detailForColor(topColor)}
@@ -179,7 +179,7 @@ export default function PlayPage() {
                 <CapturedPieces pieces={bottomCaptured} size={20} />
               </div>
 
-              <div className="lg:hidden">
+              <div className="game-player game-player-bottom lg:hidden">
                 <PlayerBar
                   username={nameForColor(bottomColor)}
                   detail={detailForColor(bottomColor)}

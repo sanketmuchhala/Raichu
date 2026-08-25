@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { useCallback, useEffect, useRef } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { BOARD_SIZE } from '@raichu/shared-types';
 import type { Move, PieceChar } from '@raichu/shared-types';
 import { useGameStore } from '../../store/game-store';
@@ -14,12 +14,12 @@ const BOARD_PX    = SQUARE_SIZE * BOARD_SIZE;
 const TOTAL_WIDTH  = BOARD_PX + COORD_SIZE;
 const TOTAL_HEIGHT = BOARD_PX + COORD_SIZE * 2;
 const COL_LABELS   = 'abcdefgh';
-const ANIM_MS      = 260;
-
-const SLIDE_EASE = [0.25, 0.46, 0.45, 0.94] as const;
 
 export function Board() {
   const boardRef = useRef<SVGSVGElement>(null);
+  const dragFrameRef = useRef<number | null>(null);
+  const pendingDragRef = useRef<{ x: number; y: number } | null>(null);
+  const reduceMotion = useReducedMotion();
   const theme        = useUIStore((s) => THEMES[s.theme]);
   const boardFlipped = useUIStore((s) => s.boardFlipped);
   const isDragging   = useUIStore((s) => s.isDragging);
@@ -54,6 +54,22 @@ export function Board() {
   const toDisplayCol = useCallback((col: number) => boardFlipped ? BOARD_SIZE - 1 - col : col, [boardFlipped]);
 
   const { animState, markDragMove } = usePieceMoveAnimation(lastMove, toDisplayRow, toDisplayCol);
+
+  useEffect(() => () => {
+    if (dragFrameRef.current !== null) cancelAnimationFrame(dragFrameRef.current);
+  }, []);
+
+  const queueDragUpdate = useCallback((x: number, y: number) => {
+    pendingDragRef.current = { x, y };
+    if (dragFrameRef.current !== null) return;
+
+    dragFrameRef.current = requestAnimationFrame(() => {
+      const pending = pendingDragRef.current;
+      if (pending) updateDrag(pending.x, pending.y);
+      pendingDragRef.current = null;
+      dragFrameRef.current = null;
+    });
+  }, [updateDrag]);
 
   const handleSquareClick = useCallback((row: number, col: number) => {
     if (!canInteract) return;
@@ -90,6 +106,8 @@ export function Board() {
     selectPiece(row, col);
 
     if (boardRef.current) {
+      e.preventDefault();
+      boardRef.current.setPointerCapture(e.pointerId);
       const rect = boardRef.current.getBoundingClientRect();
       const scale = rect.width / TOTAL_WIDTH;
       const x = (e.clientX - rect.left) / scale - COORD_SIZE;
@@ -104,10 +122,19 @@ export function Board() {
     const scale = rect.width / TOTAL_WIDTH;
     const x = (e.clientX - rect.left) / scale - COORD_SIZE;
     const y = (e.clientY - rect.top)  / scale - COORD_SIZE;
-    updateDrag(x, y);
-  }, [isDragging, updateDrag]);
+    queueDragUpdate(x, y);
+  }, [isDragging, queueDragUpdate]);
 
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
+    if (dragFrameRef.current !== null) {
+      cancelAnimationFrame(dragFrameRef.current);
+      dragFrameRef.current = null;
+      pendingDragRef.current = null;
+    }
+    if (boardRef.current?.hasPointerCapture(e.pointerId)) {
+      boardRef.current.releasePointerCapture(e.pointerId);
+    }
+
     if (!isDragging || !boardRef.current || !dragPiece) {
       endDrag();
       return;
@@ -153,7 +180,7 @@ export function Board() {
       className="w-full h-full select-none touch-none"
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
-      onPointerLeave={handlePointerUp}
+      onPointerCancel={handlePointerUp}
     >
       {/* Background */}
       <rect width={TOTAL_WIDTH} height={TOTAL_HEIGHT} fill={theme.bgSecondary} rx="4" />
@@ -220,6 +247,7 @@ export function Board() {
 
               {isLastMove && (
                 <rect
+                  className="last-move-square"
                   x={COORD_SIZE + displayCol * SQUARE_SIZE}
                   y={COORD_SIZE + displayRow * SQUARE_SIZE}
                   width={SQUARE_SIZE} height={SQUARE_SIZE}
@@ -230,6 +258,7 @@ export function Board() {
 
               {isSelected && (
                 <rect
+                  className="selected-square"
                   x={COORD_SIZE + displayCol * SQUARE_SIZE}
                   y={COORD_SIZE + displayRow * SQUARE_SIZE}
                   width={SQUARE_SIZE} height={SQUARE_SIZE}
@@ -241,6 +270,7 @@ export function Board() {
               {legalMove && !isSelected && (
                 legalMove.captured ? (
                   <circle
+                    className="capture-ring"
                     cx={COORD_SIZE + displayCol * SQUARE_SIZE + SQUARE_SIZE / 2}
                     cy={COORD_SIZE + displayRow * SQUARE_SIZE + SQUARE_SIZE / 2}
                     r={SQUARE_SIZE / 2 - 4}
@@ -251,6 +281,7 @@ export function Board() {
                   />
                 ) : (
                   <circle
+                    className="legal-move-dot"
                     cx={COORD_SIZE + displayCol * SQUARE_SIZE + SQUARE_SIZE / 2}
                     cy={COORD_SIZE + displayRow * SQUARE_SIZE + SQUARE_SIZE / 2}
                     r={SQUARE_SIZE / 6}
@@ -280,6 +311,7 @@ export function Board() {
           return (
             <g
               key={`piece-${row}-${col}`}
+              className={`board-piece${canInteract ? ' is-interactive' : ''}`}
               transform={`translate(${pieceX}, ${pieceY})`}
               onClick={() => handleSquareClick(row, col)}
               onPointerDown={(e) => handlePointerDown(e, row, col)}
@@ -298,10 +330,11 @@ export function Board() {
            animState.capturedX    !== undefined &&
            animState.capturedY    !== undefined && (
             <motion.g
+              className="captured-piece-exit"
               key={`cap-${animState.moveId}`}
               initial={{ x: animState.capturedX, y: animState.capturedY, opacity: 1 }}
-              animate={{ x: animState.capturedX, y: animState.capturedY, opacity: 0 }}
-              transition={{ duration: 0.18, ease: 'easeOut' }}
+              animate={{ x: animState.capturedX, y: animState.capturedY, opacity: 0, scale: reduceMotion ? 1 : 0.86 }}
+              transition={{ duration: reduceMotion ? 0 : 0.16, ease: 'easeOut' }}
               pointerEvents="none"
             >
               <PieceSVG piece={animState.capturedPiece} size={SQUARE_SIZE - 4} />
@@ -309,10 +342,13 @@ export function Board() {
           )}
 
           <motion.g
+            className="moving-piece"
             key={`mv-${animState.moveId}`}
-            initial={{ x: animState.fromX, y: animState.fromY }}
-            animate={{ x: animState.toX,   y: animState.toY   }}
-            transition={{ duration: ANIM_MS / 1000, ease: SLIDE_EASE }}
+            initial={{ x: animState.fromX, y: animState.fromY, scale: reduceMotion ? 1 : 0.94 }}
+            animate={{ x: animState.toX,   y: animState.toY,   scale: 1 }}
+            transition={reduceMotion
+              ? { duration: 0 }
+              : { type: 'spring', stiffness: 520, damping: 38, mass: 0.72 }}
             pointerEvents="none"
           >
             <PieceSVG piece={animState.landingPiece} size={SQUARE_SIZE - 4} />
@@ -323,6 +359,7 @@ export function Board() {
       {/* Drag overlay */}
       {!replayMode && isDragging && dragPiece && (
         <g
+          className="drag-piece"
           transform={`translate(${dragPiece.x - SQUARE_SIZE / 2 + 2}, ${dragPiece.y - SQUARE_SIZE / 2 + 2})`}
           pointerEvents="none"
           opacity={0.85}

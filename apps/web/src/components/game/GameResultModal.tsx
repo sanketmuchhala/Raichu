@@ -106,12 +106,12 @@ export function GameResultModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center animate-fade-in"
+      className="game-result-overlay fixed inset-0 z-50 flex items-center justify-center"
       style={{ backgroundColor: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(6px)' }}
       onClick={onClose}
     >
       <div
-        className="relative animate-slide-up"
+        className="game-result-dialog relative"
         style={{
           backgroundColor: theme.bgPanel,
           border: `1px solid ${theme.border}`,
@@ -147,13 +147,14 @@ export function GameResultModal({
             <p style={{ fontSize: '0.8125rem', color: theme.textSecondary, marginBottom: 6 }}>
               {resultSubtitle}
             </p>
-            <h2 style={{ fontSize: '2rem', fontWeight: 900, color: resultColor, lineHeight: 1, margin: 0 }}>
+            <h2 className="game-result-title" style={{ fontSize: '2rem', fontWeight: 900, color: resultColor, lineHeight: 1, margin: 0 }}>
               {resultTitle}
             </h2>
           </div>
 
           {/* Player row — chess.com style */}
           <div
+            className="game-result-score"
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               backgroundColor: theme.bgSecondary,
@@ -229,7 +230,7 @@ export function GameResultModal({
           )}
 
           {/* Action buttons */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div className="game-result-actions" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {onReplay && (
               <button
                 onClick={onReplay}

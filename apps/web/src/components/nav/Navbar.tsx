@@ -130,17 +130,17 @@ export function Navbar({ backHref, backLabel, gameMode = false }: NavbarProps) {
             <UserMenu />
           </div>
           <button
-            className="grid md:hidden"
+            className="nav-menu-toggle grid md:hidden"
             onClick={() => setOpen(!open)}
             aria-label="Toggle navigation"
             style={{ width: 44, height: 44, placeItems: 'center', borderRadius: 6, background: 'none', border: 'none', cursor: 'pointer', color: theme.textSecondary, lineHeight: 0 }}
           >
             {open ? (
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <svg className="nav-menu-icon" width="18" height="18" viewBox="0 0 18 18" fill="none">
                 <path d="M14 4L4 14M4 4L14 14" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/>
               </svg>
             ) : (
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <svg className="nav-menu-icon" width="18" height="18" viewBox="0 0 18 18" fill="none">
                 <path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/>
               </svg>
             )}
@@ -151,7 +151,7 @@ export function Navbar({ backHref, backLabel, gameMode = false }: NavbarProps) {
       {/* ── Mobile dropdown ── */}
       {open && (
         <nav
-          className="md:hidden"
+          className="mobile-nav-menu md:hidden"
           style={{ backgroundColor: theme.bgPanel, borderTop: `1px solid ${theme.border}`, padding: '0.375rem 0.75rem 0.75rem' }}
         >
           {NAV_LINKS.map(({ href, label }) => {
