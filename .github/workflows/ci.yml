@@ -68,6 +68,13 @@ jobs:
       # - name: Lint
       #   run: pnpm lint
 
+      # ── 5b. Documentation ───────────────────────────────────
+      # Validates local Markdown links and formatting. Runs before the build
+      # because it is fast and needs no build output, so a broken doc link
+      # fails in seconds rather than after a full turbo build.
+      - name: Check documentation
+        run: pnpm docs:check
+
       # ── 6. Build all packages and apps ──────────────────────
       # Turborepo builds in dependency order:
       #   shared-types -> game-engine -> ai-engine -> api / web
