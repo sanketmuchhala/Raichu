@@ -1,6 +1,7 @@
 'use client';
 
 import type { PieceChar } from '@raichu/shared-types';
+import { preload } from 'react-dom';
 
 interface PieceSVGProps {
   piece: PieceChar;
@@ -23,6 +24,10 @@ export function PieceSVG({ piece, size }: PieceSVGProps) {
   const src = PIECE_IMG[piece];
   if (!src) return null;
 
+  // React deduplicates these hints, so every piece type starts downloading at
+  // most once and is decoded before it needs to move under the pointer.
+  preload(src, { as: 'image' });
+
   return (
     <svg
       width={size}
@@ -30,7 +35,14 @@ export function PieceSVG({ piece, size }: PieceSVGProps) {
       viewBox={`0 0 ${size} ${size}`}
       xmlns="http://www.w3.org/2000/svg"
     >
-      <image href={src} x="0" y="0" width={size} height={size} />
+      <image
+        href={src}
+        x="0"
+        y="0"
+        width={size}
+        height={size}
+        preserveAspectRatio="xMidYMid meet"
+      />
     </svg>
   );
 }

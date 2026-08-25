@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useLayoutEffect, useRef, useCallback } from 'react';
 import type { Move, PieceChar } from '@raichu/shared-types';
 
 export const SQUARE_SIZE = 64;
 export const COORD_SIZE = 20;
 
-// Keep the overlay around just long enough for the spring in Board to settle.
-const CLEAR_MS = 440;
+// Keep the overlay through the longest distance-aware slide without leaving a
+// duplicate layer mounted after the destination is visually settled.
+const CLEAR_MS = 300;
 
 export interface AnimState {
   moveId: number;
@@ -48,7 +49,9 @@ export function usePieceMoveAnimation(
 
   const markDragMove = useCallback(() => { skipRef.current = true; }, []);
 
-  useEffect(() => {
+  // Layout timing prevents the post-move board from flashing for one frame
+  // before the moving overlay is mounted at its source square.
+  useLayoutEffect(() => {
     if (!lastMove) return;
 
     if (skipRef.current) {
