@@ -74,6 +74,8 @@ export function MoveHistory() {
         <button
           className="flex items-center gap-2 lg:cursor-default"
           onClick={toggleMobileHistory}
+          aria-expanded={mobileHistoryOpen}
+          aria-controls="game-move-list"
           style={{ background: 'none', border: 'none', padding: 0 }}
         >
           <span className="text-sm font-semibold" style={{ color: theme.textPrimary }}>
@@ -82,6 +84,11 @@ export function MoveHistory() {
           <span className="text-xs lg:hidden" style={{ color: theme.textSecondary }}>
             {total}
           </span>
+          {!mobileHistoryOpen && total > 0 && (
+            <span className="move-history-preview lg:hidden" style={{ color: theme.textSecondary }}>
+              Last: {formatMoveHuman(moveHistory[total - 1])}
+            </span>
+          )}
           <svg
             className="lg:hidden"
             width="12"
@@ -92,6 +99,7 @@ export function MoveHistory() {
               transform: mobileHistoryOpen ? 'rotate(180deg)' : 'rotate(0deg)',
               transition: 'transform 300ms ease',
             }}
+            aria-hidden="true"
           >
             <path d="M2.5 4.5L6 8L9.5 4.5" stroke={theme.textSecondary} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
@@ -101,7 +109,7 @@ export function MoveHistory() {
         {total > 0 && <div className="flex items-center gap-1">
           {replayMode && (
             <button
-              className="text-xs px-2 py-0.5 rounded-md font-medium mr-1"
+              className="move-live-button text-xs px-2 rounded-md font-medium mr-1"
               style={{ backgroundColor: theme.accent + '22', color: theme.accent, border: `1px solid ${theme.accent}44` }}
               onClick={exitReplay}
             >
@@ -109,54 +117,67 @@ export function MoveHistory() {
             </button>
           )}
           <button
-            className="w-6 h-6 rounded flex items-center justify-center text-xs transition-colors"
+            className="move-nav-button rounded flex items-center justify-center transition-colors"
             style={{ backgroundColor: theme.btnSecondaryBg, color: theme.textSecondary }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = theme.btnSecondaryHover)}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = theme.btnSecondaryBg)}
             onClick={goFirst}
             disabled={total === 0}
             title="First position"
+            aria-label="Go to starting position"
           >
-            ⏮
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M3.2 2.5v9M11 3.2L5.5 7l5.5 3.8V3.2z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </button>
           <button
-            className="w-6 h-6 rounded flex items-center justify-center text-xs transition-colors"
+            className="move-nav-button rounded flex items-center justify-center transition-colors"
             style={{ backgroundColor: theme.btnSecondaryBg, color: theme.textSecondary }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = theme.btnSecondaryHover)}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = theme.btnSecondaryBg)}
             onClick={goPrev}
             disabled={total === 0 || (replayMode && replayStep === 0)}
             title="Previous move"
+            aria-label="Go to previous move"
           >
-            ◀
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M9.5 2.8L4.2 7l5.3 4.2V2.8z" fill="currentColor" />
+            </svg>
           </button>
           <button
-            className="w-6 h-6 rounded flex items-center justify-center text-xs transition-colors"
+            className="move-nav-button rounded flex items-center justify-center transition-colors"
             style={{ backgroundColor: theme.btnSecondaryBg, color: theme.textSecondary }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = theme.btnSecondaryHover)}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = theme.btnSecondaryBg)}
             onClick={goNext}
             disabled={total === 0 || (replayMode && replayStep === total)}
             title="Next move"
+            aria-label="Go to next move"
           >
-            ▶
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M4.5 2.8L9.8 7l-5.3 4.2V2.8z" fill="currentColor" />
+            </svg>
           </button>
           <button
-            className="w-6 h-6 rounded flex items-center justify-center text-xs transition-colors"
+            className="move-nav-button rounded flex items-center justify-center transition-colors"
             style={{ backgroundColor: theme.btnSecondaryBg, color: theme.textSecondary }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = theme.btnSecondaryHover)}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = theme.btnSecondaryBg)}
             onClick={goLast}
             disabled={total === 0 || (replayMode && replayStep === total)}
             title="Latest position"
+            aria-label="Go to latest position"
           >
-            ⏭
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M10.8 2.5v9M3 3.2L8.5 7 3 10.8V3.2z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </button>
         </div>}
       </div>
 
       {/* Move list */}
       <div
+        id="game-move-list"
         ref={scrollRef}
         className={[
           'custom-scroll px-2 py-1.5',
@@ -209,6 +230,7 @@ export function MoveHistory() {
                       backgroundColor: whiteActive ? theme.accent + '22' : 'transparent',
                     }}
                     onClick={() => handleMoveClick(whiteIdx)}
+                    aria-label={`Review move ${whiteIdx + 1}: ${formatMoveHuman(whiteMove)}`}
                   >
                     {formatMoveHuman(whiteMove)}
                   </button>
@@ -225,6 +247,7 @@ export function MoveHistory() {
                         backgroundColor: blackActive ? theme.accent + '22' : 'transparent',
                       }}
                       onClick={() => handleMoveClick(blackIdx)}
+                      aria-label={`Review move ${blackIdx + 1}: ${formatMoveHuman(blackMove)}`}
                     >
                       {formatMoveHuman(blackMove)}
                     </button>

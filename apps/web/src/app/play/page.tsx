@@ -10,6 +10,7 @@ import { Controls } from '../../components/panels/Controls';
 import { NewGameDialog } from '../../components/panels/NewGameDialog';
 import { GameResultModal } from '../../components/game/GameResultModal';
 import { PlayerBar } from '../../components/game/PlayerBar';
+import { GameCoach } from '../../components/game/GameCoach';
 import { useUIStore } from '../../store/ui-store';
 import { useGameStore } from '../../store/game-store';
 import { THEMES } from '../../lib/themes';
@@ -200,6 +201,7 @@ export default function PlayPage() {
               <div className="hidden lg:block">
                 <GameInfo />
               </div>
+              <GameCoach />
               <Controls />
               <MoveHistory />
             </div>
