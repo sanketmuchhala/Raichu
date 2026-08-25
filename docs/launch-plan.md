@@ -2,9 +2,10 @@
 
 Distribution plan for raichu.live. Written 20 August 2026.
 
-Unlike `seo.md`, which is a generic SEO template, this is specific to this site
-and built around each community's actual rules, read directly at the time of
-writing. Rules change — check the sidebar before posting.
+This is the channel and launch companion to the product-specific
+[SEO and content system](product/seo-and-content.md). It is built around each
+community's actual rules, read directly at the time of writing. Rules change —
+check the sidebar before posting.
 
 ---
 

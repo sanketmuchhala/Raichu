@@ -13,10 +13,12 @@ A single workflow called **CI** runs on every push to `main` and on all pull req
 **Steps:**
 1. Checkout code
 2. Install pnpm 9.15.0
-3. Setup Node.js 20 with dependency caching
+3. Setup Node.js 22 with dependency caching
 4. `pnpm install --frozen-lockfile`
 5. `pnpm build` — Turborepo builds all packages in dependency order
-6. `pnpm test` — runs vitest across game-engine, ai-engine, api, and web
+6. `pnpm test` — runs workspace test tasks
+7. `pnpm build:ios` — builds the JavaScriptCore engine bundle outside Turbo
+8. Upload `raichu-engine.js` as artifact `raichu-engine-js`
 
 **Not yet active:**
 - Lint step is commented out. No package defines a `lint` script yet. Uncomment the step in `ci.yml` once ESLint is configured.
@@ -55,6 +57,10 @@ All paths are owned by `@sanketmuchhala`. When collaborators are added, split ow
 | `/docs/` | @sanketmuchhala |
 
 CODEOWNERS only enforces required reviews if branch protection is enabled (see checklist below).
+
+The active native project is `/apps/Ios-app/`, while the current explicit
+CODEOWNERS entry names `/apps/ios/`. The catch-all still assigns ownership, but
+add an explicit `/apps/Ios-app/` rule when CODEOWNERS is next updated.
 
 ### PR Template (`.github/pull_request_template.md`)
 

@@ -1,31 +1,46 @@
-# REST API
+# REST API reference
 
-Base URL: `http://localhost:3001/api/v1` (development)
+**Status:** Canonical endpoint reference for the checked-in Express implementation.
 
-All authenticated endpoints require `Authorization: Bearer <supabase_access_token>`.
+Development base URL: `http://localhost:3001/api/v1`.
 
-All request and response bodies are JSON.
+Authenticated endpoints require:
 
----
+```http
+Authorization: Bearer <supabase-access-token>
+Content-Type: application/json
+```
 
-## Public Endpoints
+## Endpoint summary
 
-### GET /health
+| Method | Path | Auth | Success |
+|---|---|---|---:|
+| `GET` | `/health` | public | `200` |
+| `GET` | `/version` | public | `200` |
+| `POST` | `/bot/move` | public | `200` |
+| `POST` | `/games` | required | `201` |
+| `GET` | `/games/my` | required | `200` |
+| `GET` | `/games/:id` | required | `200` |
+| `GET` | `/games/:id/moves` | required | `200` |
+| `POST` | `/games/:id/move` | required | `200` |
+| `POST` | `/games/:id/resign` | required | `200` |
+| `POST` | `/games/join/:code` | required | `200` |
+| `POST` | `/matchmaking/queue` | required | `200` |
+| `DELETE` | `/matchmaking/queue` | required | `200` |
+| `GET` | `/matchmaking/status` | required | `200` |
 
-Server health check.
+## Public endpoints
 
-**Response 200**
+### `GET /health`
+
 ```json
 { "status": "ok" }
 ```
 
----
+This is process liveness only; it does not test Supabase connectivity.
 
-### GET /version
+### `GET /version`
 
-Server and engine version.
-
-**Response 200**
 ```json
 {
   "version": "1.0.0",
@@ -33,272 +48,277 @@ Server and engine version.
 }
 ```
 
----
+Values are currently constants in the route.
 
-### POST /bot/move
+### `POST /bot/move`
 
-Compute the best AI move for a given board position. No authentication required.
+Runs server-side AI search.
 
-**Request body**
+Request:
+
 ```json
 {
-  "board":      "64-character encoded board string",
-  "player":     "w",
-  "difficulty": "easy | medium | hard",
+  "board": "........W.W.W.W..w.w.w.w................b.b.b.b..B.B.B.B........",
+  "player": "w",
+  "difficulty": "medium",
   "timeBudget": 800
 }
 ```
 
-| Field | Type | Required | Notes |
-|-------|------|----------|-------|
-| `board` | string (64 chars) | Yes | Row-major piece encoding |
-| `player` | `"w"` or `"b"` | Yes | `"w"` = White's turn |
-| `difficulty` | enum | Yes | easy / medium / hard |
-| `timeBudget` | number (ms) | No | Overrides difficulty default |
+| Field | Validation |
+|---|---|
+| `board` | exactly 64 characters from `.wWbB@$` |
+| `player` | `w` or `b` |
+| `difficulty` | `easy`, `medium`, or `hard` |
+| `timeBudget` | optional positive number; currently has no route maximum |
 
-**Response 200**
+Move response:
+
 ```json
 {
   "move": {
-    "from":       { "row": 2, "col": 3 },
-    "to":         { "row": 3, "col": 4 },
-    "piece":      "w",
-    "captured":   null,
-    "promotion":  null
+    "from": { "row": 2, "col": 3 },
+    "to": { "row": 3, "col": 4 },
+    "piece": "w"
   },
-  "board":         "...updated 64-char string...",
-  "evaluation":    120,
+  "board": "...64-character result...",
+  "evaluation": 120,
   "nodesSearched": 42381,
-  "depth":         6,
-  "durationMs":    387
+  "depth": 6,
+  "durationMs": 387
 }
 ```
 
-**Response 400** — Invalid board, unknown player, or no legal moves
-```json
-{ "error": "No legal moves for player" }
-```
+No legal move is also a `200` in the current implementation:
 
----
-
-## Authenticated Endpoints
-
-### POST /games
-
-Create a new game.
-
-**Request body**
 ```json
 {
-  "gameType":   "friendly | ranked | bot",
-  "difficulty": "easy | medium | hard",
-  "playAs":     "white | black | random"
+  "error": "No legal moves available",
+  "board": "...unchanged board..."
 }
 ```
 
-`difficulty` is required only when `gameType = "bot"`.
-`playAs` defaults to `"random"` for ranked games.
+Malformed input returns `400` with Zod issues. Search exceptions return `500`.
 
-**Response 201**
+## Game endpoints
+
+All routes in this section pass through `requireAuth`.
+
+### `POST /games`
+
+Request:
+
 ```json
 {
-  "id":               "uuid",
-  "status":           "waiting",
-  "game_type":        "friendly",
-  "invite_code":      "AB3X7Z",
-  "board_state":      "...initial 64-char board...",
-  "current_player":   "white",
-  "white_player_id":  "uuid",
-  "black_player_id":  null,
-  "created_at":       "2026-05-12T10:00:00Z"
+  "gameType": "friendly",
+  "difficulty": "medium",
+  "playAs": "white"
 }
 ```
 
-Friendly games get a 6-character `invite_code`. Ranked games are matched via the matchmaking queue.
+| Field | Required | Values/current behavior |
+|---|---|---|
+| `gameType` | yes | `friendly`, `ranked`, `bot` |
+| `difficulty` | no | `easy`, `medium`, `hard`; stored only for bot, defaults to medium there |
+| `playAs` | no | `white`, `black`, `random`; defaults to white |
 
----
+The endpoint creates a raw `games` row with status `waiting`. Friendly games receive a six-character invite code. Normal ranked pairing is created through matchmaking rather than this endpoint.
 
-### GET /games/my
+Response `201` is the inserted game row:
 
-List the authenticated user's games.
+```json
+{
+  "id": "uuid",
+  "white_player_id": "uuid",
+  "black_player_id": null,
+  "status": "waiting",
+  "board_state": "...initial board...",
+  "current_player": "white",
+  "game_type": "friendly",
+  "difficulty": null,
+  "invite_code": "AB3X7Z",
+  "move_count": 0
+}
+```
 
-**Response 200**
+### `GET /games/my`
+
+Returns up to 20 raw game rows involving the authenticated user, newest `updated_at` first.
+
 ```json
 [
   {
-    "id":             "uuid",
-    "status":         "playing",
-    "game_type":      "ranked",
+    "id": "uuid",
+    "status": "playing",
+    "game_type": "ranked",
     "current_player": "black",
-    "white_player":   { "username": "alice", "elo_rating": 1240 },
-    "black_player":   { "username": "bob",   "elo_rating": 1195 },
-    "move_count":     14,
-    "created_at":     "2026-05-12T09:30:00Z"
+    "move_count": 14,
+    "white_player_id": "uuid",
+    "black_player_id": "uuid"
   }
 ]
 ```
 
----
+This endpoint does not join profile objects.
 
-### GET /games/:id
+### `GET /games/:id`
 
-Get full game details including player profiles.
+Returns one game plus `white_player` and `black_player` profile objects where present.
 
-**Response 200**
 ```json
 {
-  "id":               "uuid",
-  "status":           "playing",
-  "board_state":      "...64-char string...",
-  "current_player":   "white",
-  "game_type":        "ranked",
-  "move_count":       8,
-  "white_player_id":  "uuid",
-  "black_player_id":  "uuid",
-  "white_player":     { "id": "uuid", "username": "alice", "elo_rating": 1240, "display_name": "Alice" },
-  "black_player":     { "id": "uuid", "username": "bob",   "elo_rating": 1195, "display_name": null },
-  "winner_id":        null,
-  "invite_code":      null,
-  "created_at":       "2026-05-12T09:30:00Z",
-  "finished_at":      null
+  "id": "uuid",
+  "status": "playing",
+  "board_state": "...64-character board...",
+  "current_player": "white",
+  "white_player_id": "uuid",
+  "black_player_id": "uuid",
+  "white_player": { "id": "uuid", "username": "alice", "elo_rating": 1240 },
+  "black_player": { "id": "uuid", "username": "bob", "elo_rating": 1195 }
 }
 ```
 
-**Response 403** — Game belongs to another user
+Missing games return `404`.
 
----
+**Known authorization limitation:** the API uses the service role and currently checks only that the caller is authenticated, not that they participate in the requested game. Direct Supabase reads remain protected by RLS. Add participant authorization before treating game IDs as private capabilities.
 
-### GET /games/:id/moves
+### `GET /games/:id/moves`
 
-Full move history for a game.
+Returns move rows in ascending `move_number` order:
 
-**Response 200**
 ```json
 [
   {
-    "id":            "uuid",
-    "game_id":       "uuid",
-    "move_number":   1,
-    "player":        "white",
-    "from_row":      2, "from_col": 3,
-    "to_row":        3, "to_col":   4,
-    "piece":         "w",
+    "id": "uuid",
+    "game_id": "uuid",
+    "move_number": 1,
+    "player": "white",
+    "from_row": 2,
+    "from_col": 3,
+    "to_row": 3,
+    "to_col": 4,
+    "piece": "w",
     "captured_piece": null,
-    "promotion":     null,
-    "board_after":   "...64-char string...",
-    "created_at":    "2026-05-12T09:30:05Z"
+    "captured_row": null,
+    "captured_col": null,
+    "promotion": null,
+    "board_after": "...64-character board..."
   }
 ]
 ```
 
----
+The same service-role authorization limitation currently applies to this endpoint.
 
-### POST /games/:id/move
+### `POST /games/:id/move`
 
-Submit a move for the authenticated user.
+Request:
 
-**Request body**
 ```json
 {
-  "from":     { "row": 2, "col": 3 },
-  "to":       { "row": 3, "col": 4 },
-  "piece":    "w",
-  "captured": null,
-  "promotion": null
+  "from": { "row": 2, "col": 3 },
+  "to": { "row": 3, "col": 4 },
+  "piece": "w",
+  "captured": {
+    "position": { "row": 4, "col": 5 },
+    "piece": "b"
+  },
+  "promotion": "@"
 }
 ```
 
-The server validates the move against generated legal moves. If `promotion` is not provided but the move reaches the back rank, the server applies it automatically.
+`captured` and `promotion` are optional. Coordinates are integers from 0 through 7; piece fields are currently validated as one-character strings.
 
-**Response 200** — Updated game state (same shape as GET /games/:id)
+The service loads the game, checks status and turn ownership, generates legal moves, and matches the submitted origin/destination. It returns the updated raw game row.
 
-**Response 400** — Illegal move
-```json
-{ "error": "Illegal move" }
-```
+Current error mapping:
 
-**Response 403** — Not this player's turn, or game is over
+- malformed shape: `400`;
+- `Not your turn` or `Invalid move`: `400`;
+- other service failures, including some not-found/not-playing cases: `500`.
 
----
+**Known metadata limitation:** validation matches origin and destination, but the submitted `captured`, `piece`, and `promotion` metadata is then applied. Callers must currently send the canonical generated move. The service should be hardened to apply the matched server-generated move instead.
 
-### POST /games/:id/resign
+### `POST /games/:id/resign`
 
-Forfeit the game.
+Returns the updated raw game row. A participant resigning from a playing game gives the opponent a win; leaving a waiting game marks it `abandoned`. Any service error is currently returned as `400`.
 
-**Response 200**
-```json
-{ "winner_id": "uuid-of-opponent" }
-```
+### `POST /games/join/:code`
 
----
+Fills the empty color slot for a waiting invite-code game and changes status to `playing`. The invite code is normalized to uppercase.
 
-## Matchmaking
+The creator cannot join their own game again. Invalid, started, or self-join attempts return `400`.
 
-### POST /matchmaking/queue
+## Matchmaking endpoints
 
-Join the ranked matchmaking queue.
+### `POST /matchmaking/queue`
 
-**Response 200**
-```json
-{ "status": "queued", "queuedAt": "2026-05-12T09:30:00Z" }
-```
+Reads the authenticated profile's current ELO and upserts one queue row per player.
 
-**Response 409** — Already in queue
-
----
-
-### DELETE /matchmaking/queue
-
-Leave the queue.
-
-**Response 200**
-```json
-{ "status": "removed" }
-```
-
----
-
-### GET /matchmaking/status
-
-Check queue position or matched game.
-
-**Response 200 — Still queued**
 ```json
 {
-  "status":      "queued",
+  "status": "queued",
+  "queueCount": 4
+}
+```
+
+Rejoining refreshes ELO and `queued_at`; it does not return a duplicate-entry conflict.
+
+### `DELETE /matchmaking/queue`
+
+```json
+{ "status": "left" }
+```
+
+Deleting an absent row is effectively idempotent.
+
+### `GET /matchmaking/status`
+
+Queued:
+
+```json
+{
+  "status": "queued",
   "waitSeconds": 12,
-  "queueCount":  4
+  "queueCount": 4
 }
 ```
 
-**Response 200 — Matched**
+Matched:
+
 ```json
 {
-  "status":  "matched",
-  "gameId":  "uuid"
+  "status": "matched",
+  "gameId": "uuid"
 }
 ```
 
-**Response 200 — Not in queue**
+Idle:
+
 ```json
 { "status": "idle" }
 ```
 
----
+When a queue row is absent, the service searches the last five minutes for a waiting/playing ranked game involving the caller.
 
-## Error Responses
+## Error shapes
 
-All errors follow the same shape:
+Most errors include:
 
 ```json
-{ "error": "Human-readable error message" }
+{ "error": "Human-readable message" }
 ```
 
-| Status | Meaning |
-|--------|---------|
-| 400 | Bad request (invalid input, illegal move) |
-| 401 | Missing or invalid auth token |
-| 403 | Authenticated but not authorized for this resource |
-| 404 | Resource not found |
-| 409 | Conflict (duplicate queue entry, game already over) |
-| 500 | Internal server error |
+Zod errors also include `details`. The public bot route can include `message` on an internal failure. The global error handler includes `message` only in development.
+
+The current API does not use one fully normalized error envelope. Clients should rely primarily on status plus `error` and treat additional fields as diagnostic.
+
+## Consistency and security notes
+
+- Online move persistence spans separate move, game, statistics, and rating writes; it is not one transaction.
+- There is no move idempotency key or optimistic game version.
+- Online terminal status currently checks piece elimination but does not pass `nextPlayer` for immobility detection.
+- Persisted online status has no `draw` value.
+- The public bot endpoint is compute-expensive and has no authentication/rate limit.
+- Service-role reads must add explicit resource authorization because RLS is bypassed.
+
+See [API platform architecture](platforms/api.md), [data and Realtime](engineering/data-and-realtime.md), and [shared API contracts](api-contracts.md).

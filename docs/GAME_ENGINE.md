@@ -175,9 +175,11 @@ checkPromotion(row: number, piece: PieceChar): PieceChar | undefined
 
 ## Game Status
 
-```typescript
-type GameStatus = 'playing' | 'white_wins' | 'black_wins';
+The shared `GameStatus` type also contains `draw` for history-aware platform
+stores. The position-only engine function currently emits only `playing`,
+`white_wins`, or `black_wins`:
 
+```typescript
 getGameStatus(board: Board, nextPlayer?: Player): GameStatus
 ```
 
@@ -187,7 +189,9 @@ Checks in order:
 3. If `nextPlayer` is provided and has 0 legal moves: the other player wins
 4. Otherwise: `playing`
 
-The `nextPlayer` parameter is critical for detecting the "no legal moves = loss" condition. It is always passed by `game-store` and the API after computing the next player.
+The `nextPlayer` parameter is critical for detecting the "no legal moves =
+loss" condition. The web local store passes it. The current online API path
+does not, which is a documented consistency gap rather than intended rules.
 
 ---
 

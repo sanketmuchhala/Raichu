@@ -1,5 +1,11 @@
 # Raichu Game Context File
 
+> **Historical agent context:** This exhaustive prompt-oriented reference is
+> retained for provenance. Start with the canonical
+> [rules and notation](../docs/game/rules-and-notation.md) and
+> [game theory](../docs/game/game-theory.md) documents for current project
+> documentation.
+
 Source: `CS B551 - Assignment 2: Games and Bayesian Classifiers`, Part 1: **Raichu**. This context file is a faithful engineering summary of the rules and examples in the PDF, reorganized for implementation work in Claude Code. See the original assignment for the authoritative wording and diagrams. fileciteturn0file0L28-L87
 
 ---

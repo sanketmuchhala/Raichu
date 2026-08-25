@@ -2,8 +2,8 @@
 
 ## Prerequisites
 
-- Node.js 18+
-- pnpm 9+ (`npm install -g pnpm`)
+- Node.js 22 (matches CI)
+- pnpm 9.15 (matches `packageManager`)
 - A Supabase project (free tier works)
 - Git
 
@@ -51,10 +51,11 @@ raichu.py/
 │   │   ├── components/       # React components
 │   │   ├── store/            # Zustand stores
 │   │   └── lib/              # Utilities, Supabase client, themes
-│   └── api/src/
-│       ├── routes/           # Express route handlers
-│       ├── middleware/        # Auth, error handling
-│       └── lib/              # Game service, ELO, matchmaking
+│   ├── api/src/
+│   │   ├── routes/           # Express route handlers
+│   │   ├── middleware/       # Auth, error handling
+│   │   └── lib/              # Game service, ELO, matchmaking
+│   └── Ios-app/Raichu/       # Native Xcode project (outside Turbo)
 └── packages/
     ├── shared-types/src/     # All TypeScript types
     ├── game-engine/src/      # Board, moves, game logic
@@ -80,6 +81,12 @@ pnpm test                         # all test suites
 pnpm --filter @raichu/game-engine test
 pnpm --filter @raichu/api test
 
+# Documentation
+pnpm docs:check
+
+# iOS JavaScriptCore bundle (separate from Turbo)
+pnpm build:ios
+
 # Type checking
 pnpm --filter @raichu/web exec tsc --noEmit
 pnpm --filter @raichu/api exec tsc --noEmit
@@ -100,7 +107,7 @@ The game engine (`packages/game-engine`) is the most critical package. Any chang
 2. Run the full test suite: `pnpm --filter @raichu/game-engine test`
 3. Verify the AI engine still passes: `pnpm --filter @raichu/api test`
 
-The engine has 68 tests covering all piece types, edge cases, and game logic. All must pass.
+The engine has 72 tests covering all piece types, edge cases, and game logic. All must pass.
 
 ### AI Engine Changes
 
@@ -112,9 +119,9 @@ The AI engine (`packages/ai-engine`) uses the game engine internally. Changes to
 
 ### Frontend Changes
 
-1. The game board is an SVG component in `apps/web/src/components/board/Board.tsx`
+1. The game board component is `apps/web/src/components/board/Board.tsx`
 2. Animation is in `usePieceMoveAnimation` (same directory)
-3. All game state lives in Zustand stores, not component state
+3. Shared game/session state lives in Zustand; ephemeral visual state can remain local
 4. No direct Supabase calls from components: all DB operations go through stores or the API
 
 ### Database Changes
@@ -122,7 +129,7 @@ The AI engine (`packages/ai-engine`) uses the game engine internally. Changes to
 Add a new numbered migration file in `supabase/migrations/`:
 
 ```sql
--- supabase/migrations/005_my_change.sql
+-- supabase/migrations/009_my_change.sql
 ALTER TABLE profiles ADD COLUMN ...;
 ```
 
@@ -137,7 +144,7 @@ Never modify existing migration files. Always add a new one.
 - Prefer `const` over `let`
 - No comments explaining what code does. Comments should explain why when non-obvious
 - No trailing whitespace or unused imports
-- Prettier formatting (`pnpm format` if configured)
+- Preserve the surrounding formatter/style until a repository formatter is configured
 
 ---
 
@@ -149,7 +156,8 @@ Never modify existing migration files. Always add a new one.
 
 **ai-engine** depends on shared-types and game-engine only. Same rules apply.
 
-This isolation is what allows the engine to run in both browser and Node without modification.
+This isolation allows the engine to run in browser, Web Worker, Node, and the
+iOS JavaScriptCore bundle without separate rule implementations.
 
 ---
 
@@ -157,7 +165,7 @@ This isolation is what allows the engine to run in both browser and Node without
 
 1. Branch from `main`: `git checkout -b feature/my-feature`
 2. Make changes with tests
-3. Run `pnpm test` and `pnpm build` — both must pass
+3. Run `pnpm test`, `pnpm build`, `pnpm build:ios`, and `pnpm docs:check`
 4. Open a PR against `main`
 5. Describe what changed and why
 
@@ -167,7 +175,8 @@ This isolation is what allows the engine to run in both browser and Node without
 
 Open a GitHub issue or check the docs:
 
-- [ARCHITECTURE.md](ARCHITECTURE.md) — System design
+- [Documentation hub](README.md) — organized entry point
+- [Architecture](architecture.md) — system design index
 - [GAME_ENGINE.md](GAME_ENGINE.md) — Rules and move generation
 - [AI_ENGINE.md](AI_ENGINE.md) — AI algorithm
 - [API.md](API.md) — REST endpoints

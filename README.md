@@ -1,6 +1,6 @@
 # Raichu
 
-A chess-inspired abstract strategy game playable free in the browser. Two players, three piece types, zero luck, no draws.
+A chess-inspired abstract strategy game playable free in the browser. Two players, three piece types, zero luck.
 
 **Live:** [raichu.live](https://raichu.live)
 
@@ -10,13 +10,13 @@ A chess-inspired abstract strategy game playable free in the browser. Two player
 
 Raichu is a two-player abstract strategy board game on an 8x8 grid. Each side commands three piece types: **Pichu** (pawn-like), **Pikachu** (rook-like), and **Raichu** (queen-like). The capture hierarchy is the core mechanic: Pichus can only take Pichus, Pikachus can take Pichus and Pikachus, Raichus can take anything. Promote pieces to the back rank to turn them into Raichus. Capture every enemy piece to win.
 
-No king. No draws. Games in 5-15 minutes.
+No king and no forced captures. Local play includes repetition and no-progress draw protection; persisted online play currently uses decisive or abandoned results.
 
 ---
 
 ## Features
 
-- Play vs AI at three difficulty levels (runs entirely in-browser, no server round-trip)
+- Play vs AI at three difficulty levels using an in-browser Web Worker
 - Online multiplayer with Supabase Realtime sync
 - ELO-based ranked matchmaking
 - Click-to-move and drag-and-drop
@@ -31,13 +31,14 @@ No king. No draws. Games in 5-15 minutes.
 
 | Layer | Technology |
 |-------|------------|
-| Frontend | Next.js 15, React 18, TypeScript, Zustand, Framer Motion, Tailwind CSS |
+| Frontend | Next.js 16, React 19, TypeScript, Zustand, Framer Motion, Tailwind CSS |
 | Backend | Express 4, TypeScript, Zod |
 | Database | Supabase (PostgreSQL + Realtime + Auth) |
 | Game engine | Pure TypeScript, zero dependencies |
 | AI | Minimax + alpha-beta pruning + iterative deepening |
+| Native | SwiftUI (iOS 17+) + JavaScriptCore engine bridge |
 | Build | pnpm workspaces + Turborepo + esbuild |
-| Deploy | Vercel (web), Railway/Fly.io (api) |
+| Delivery | Vercel-compatible web, configurable Node API host, GitHub Actions |
 
 ---
 
@@ -46,8 +47,9 @@ No king. No draws. Games in 5-15 minutes.
 ```
 raichu.py/
 ├── apps/
-│   ├── web/                  # Next.js 15 frontend
-│   └── api/                  # Express REST API + matchmaking worker
+│   ├── web/                  # Next.js 16 frontend
+│   ├── api/                  # Express REST API + matchmaking worker
+│   └── Ios-app/Raichu/       # Native SwiftUI project (outside Turbo)
 ├── packages/
 │   ├── shared-types/         # TypeScript types shared across all packages
 │   ├── game-engine/          # Board, moves, validation, promotion (no deps)
@@ -56,14 +58,15 @@ raichu.py/
 │   └── config/               # Shared ESLint / TS config
 ├── supabase/
 │   └── migrations/           # SQL migrations (run in order)
-└── docs/                     # Architecture and API documentation
+├── scripts/                  # iOS engine bundle + documentation checks
+└── docs/                     # Canonical documentation hub
 ```
 
 ---
 
 ## Quick Start
 
-**Prerequisites:** Node 18+, pnpm 9+, a Supabase project
+**Prerequisites:** Node 22, pnpm 9.15, and a Supabase project for online features
 
 ```bash
 git clone https://github.com/sanketmuchhala/Raichu.git
@@ -102,8 +105,10 @@ NODE_ENV=development
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SERVICE_ROLE_KEY=eyJ...
 NEXT_PUBLIC_API_URL=http://localhost:3001
 NEXT_PUBLIC_SITE_URL=https://raichu.live
+ANALYTICS_IP_SALT=replace-with-a-private-random-value
 ```
 
 ---
@@ -114,7 +119,9 @@ NEXT_PUBLIC_SITE_URL=https://raichu.live
 pnpm dev              # start web + api in watch mode
 pnpm build            # build all packages and apps
 pnpm test             # run all test suites
-pnpm lint             # lint all packages
+pnpm build:ios        # build the JavaScriptCore engine bundle
+pnpm docs:check       # validate Markdown structure and local links
+pnpm lint             # reserved Turbo lint task; package lint scripts are not configured yet
 
 # Scope to a single package
 pnpm --filter @raichu/game-engine test
@@ -135,33 +142,31 @@ pnpm --filter @raichu/api         dev
 - White moves first. White pieces move **down** the board (increasing row), Black moves **up**.
 - Captures are optional. One capture per move. No chain captures.
 - Pichu or Pikachu reaching the far back rank promotes to Raichu immediately.
-- Win by capturing all opponent pieces. No stalemate, no draws.
+- Win by capturing all opponent pieces or leaving the next player with no legal move.
+- Web local/bot orchestration adds threefold repetition and a 100-half-move no-progress draw.
 
-Full rules: [docs/GAME_ENGINE.md](docs/GAME_ENGINE.md)
+Full rules: [rules and notation](docs/game/rules-and-notation.md). Implementation details: [game engine](docs/GAME_ENGINE.md).
 
 ---
 
 ## Tests
 
-```
-packages/game-engine/__tests__/   68 tests  (board, pieces, moves, game logic)
-apps/api/__tests__/               10 tests  (bot endpoint, ELO, matchmaking)
-```
-
-All passing. Run with `pnpm test`.
+Tests cover the game engine, API, web stores/utilities, and build contracts. Run the complete suite with `pnpm test`; CI also builds the monorepo and iOS JavaScriptCore bundle.
 
 ---
 
 ## Documentation
 
-| File | Contents |
-|------|----------|
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System design, component diagram, data flow |
-| [docs/GAME_ENGINE.md](docs/GAME_ENGINE.md) | Board encoding, move generation, capture rules |
-| [docs/AI_ENGINE.md](docs/AI_ENGINE.md) | Minimax, alpha-beta, evaluation function, difficulty |
-| [docs/API.md](docs/API.md) | All REST endpoints with request/response schemas |
-| [docs/DATABASE.md](docs/DATABASE.md) | Schema, indexes, RLS policies, realtime setup |
-| [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) | Local setup, code style, PR guide |
+Start at the **[documentation hub](docs/README.md)**.
+
+| Area | Contents |
+|---|---|
+| [Game](docs/game/rules-and-notation.md) | rules, notation, formal game theory, strategy, balance |
+| [System design](docs/architecture/system-design.md) | components, trust, deployment, scaling, limitations |
+| [Runtime flows](docs/architecture/runtime-flows.md) | local, AI, online, Realtime, auth, and matchmaking sequences |
+| [Platforms](docs/README.md#platforms) | detailed web, API, and iOS architecture |
+| [Engineering](docs/README.md#engineering) | data, testing, security, operations, contribution |
+| [References](docs/README.md#detailed-reference-manuals) | engine, AI, REST, database, glossary |
 
 ---
 
