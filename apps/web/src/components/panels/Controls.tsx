@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useGameStore } from '../../store/game-store';
 import { useUIStore } from '../../store/ui-store';
 import { THEMES, type ThemeName } from '../../lib/themes';
@@ -7,11 +8,32 @@ import { THEMES, type ThemeName } from '../../lib/themes';
 export function Controls() {
   const restart = useGameStore((s) => s.restart);
   const status = useGameStore((s) => s.status);
+  const moveCount = useGameStore((s) => s.moveHistory.length);
   const theme = useUIStore((s) => THEMES[s.theme]);
   const themeName = useUIStore((s) => s.theme);
   const setTheme = useUIStore((s) => s.setTheme);
   const flipBoard = useUIStore((s) => s.flipBoard);
   const setShowNewGameDialog = useUIStore((s) => s.setShowNewGameDialog);
+  const [restartArmed, setRestartArmed] = useState(false);
+
+  useEffect(() => {
+    if (!restartArmed) return;
+    const timeout = window.setTimeout(() => setRestartArmed(false), 3500);
+    return () => window.clearTimeout(timeout);
+  }, [restartArmed]);
+
+  useEffect(() => {
+    if (moveCount === 0) setRestartArmed(false);
+  }, [moveCount]);
+
+  const handleRestart = () => {
+    if (moveCount === 0 || restartArmed) {
+      restart();
+      setRestartArmed(false);
+      return;
+    }
+    setRestartArmed(true);
+  };
 
   return (
     <div
@@ -35,15 +57,23 @@ export function Controls() {
           <span>New game</span>
         </button>
         <button
-          className="game-action"
-          style={{ backgroundColor: theme.btnSecondaryBg, color: theme.textSecondary }}
-          onClick={restart}
+          className={`game-action${restartArmed ? ' is-confirming' : ''}`}
+          style={{ backgroundColor: restartArmed ? '#a84444' : theme.btnSecondaryBg, color: restartArmed ? '#fff' : theme.textSecondary }}
+          aria-label={restartArmed ? 'Confirm restart and erase current game' : 'Restart game'}
+          onClick={handleRestart}
         >
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-            <path d="M5.2 6.2A6 6 0 1110 16a5.98 5.98 0 01-5.65-4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-            <path d="M3.5 3.8v4h4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          <span>Restart</span>
+          {restartArmed ? (
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M10 4.2v7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              <circle cx="10" cy="14.7" r="1" fill="currentColor" />
+            </svg>
+          ) : (
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M5.2 6.2A6 6 0 1110 16a5.98 5.98 0 01-5.65-4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+              <path d="M3.5 3.8v4h4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+          <span>{restartArmed ? 'Confirm' : 'Restart'}</span>
         </button>
         <button
           className="game-action"
@@ -71,16 +101,17 @@ export function Controls() {
       </div>
       <div className="hidden lg:flex gap-2">
         <button
-          className="btn"
+          className={`btn${restartArmed ? ' is-confirming' : ''}`}
           style={{
-            backgroundColor: theme.btnSecondaryBg,
-            color: theme.textSecondary,
+            backgroundColor: restartArmed ? '#a84444' : theme.btnSecondaryBg,
+            color: restartArmed ? '#fff' : theme.textSecondary,
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = theme.btnSecondaryHover)}
-          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = theme.btnSecondaryBg)}
-          onClick={restart}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = restartArmed ? '#963b3b' : theme.btnSecondaryHover)}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = restartArmed ? '#a84444' : theme.btnSecondaryBg)}
+          aria-label={restartArmed ? 'Confirm restart and erase current game' : 'Restart game'}
+          onClick={handleRestart}
         >
-          Restart
+          {restartArmed ? 'Confirm restart' : 'Restart'}
         </button>
         <button
           className="btn"
