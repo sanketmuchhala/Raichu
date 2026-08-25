@@ -1,5 +1,8 @@
 # API Contracts
 
+**Status:** Compact public/bot contract reference. See [REST API](API.md) for
+authenticated game and matchmaking endpoints.
+
 Base URL: `http://localhost:3001/api/v1`
 
 ## Endpoints
@@ -35,7 +38,7 @@ Request the AI to compute the best move for a given board position.
   "board": "........W.W.W.W..w.w.w.w................b.b.b.b..B.B.B.B........",
   "player": "w",
   "difficulty": "medium",
-  "timeBudget": 3000
+  "timeBudget": 800
 }
 ```
 
@@ -72,6 +75,15 @@ Request the AI to compute the best move for a given board position.
 | `nodesSearched` | number | Number of positions evaluated |
 | `depth` | number | Search depth reached |
 | `durationMs` | number | Time spent computing in milliseconds |
+
+When the player has no legal move, the current endpoint also returns `200`:
+
+```json
+{
+  "error": "No legal moves available",
+  "board": "...unchanged 64-character board..."
+}
+```
 
 **Error Response** `400 Bad Request`
 ```json
@@ -121,6 +133,6 @@ Row 7: . . . . . . . .
 
 | Level | Max Depth | Time Budget | Description |
 |-------|-----------|-------------|-------------|
-| Easy | 2 | 1000ms | Quick, shallow search |
-| Medium | 4 | 3000ms | Balanced play |
-| Hard | 8 | 5000ms | Deep search, strongest play |
+| Easy | 6 | 400ms | Shortest time budget |
+| Medium | 8 | 800ms | Balanced time budget |
+| Hard | 12 | 1500ms | Deepest/time-largest preset |

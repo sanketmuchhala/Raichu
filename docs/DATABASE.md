@@ -90,7 +90,10 @@ Extended user information. One row per Supabase auth user.
 
 **Status values:** none (profiles don't have a status)
 
-**Auto-created:** The `on_auth_user_created` trigger creates a profile row automatically when a user signs up. Username defaults to `user_<8-char-id>` if not provided in metadata.
+**Auto-created:** The `on_auth_user_created` trigger creates a profile row
+automatically when a user signs up. It prefers a non-empty metadata username,
+then the email prefix, then `user_<8-char-id>`, and appends a short UUID suffix
+when the chosen username already exists.
 
 **ELO starting value:** 1200 for all new users.
 
@@ -183,11 +186,12 @@ Transient table for ranked matchmaking. Rows are deleted when a match is found.
 
 Fires on INSERT into `auth.users`. Creates a corresponding row in `profiles` with:
 - `id` = new user's UUID
-- `username` = `raw_user_meta_data->>'username'` if provided, else `user_<first-8-chars-of-id>`
+- `username` = metadata username, then email prefix, then `user_<first-8-chars-of-id>`, with a short UUID suffix on collision
+- `display_name` and `avatar_url` = the first matching common OAuth metadata fields
 
 ### profiles_updated_at / games_updated_at
 
-Fire on INSERT or UPDATE of their respective tables. Set `updated_at = now()` automatically.
+Fire before UPDATE of their respective tables and set `updated_at = now()`.
 
 ---
 
@@ -215,8 +219,8 @@ Starting ELO: 1200 for all players.
 K-factor by experience:
 ```
 games_played < 30:   K = 32   (high volatility for new players)
-games_played 30-100: K = 24
-games_played > 100:  K = 16   (stable for experienced players)
+games_played 30-99:  K = 24
+games_played >= 100: K = 16   (stable for experienced players)
 ```
 
 Formula:
@@ -228,7 +232,10 @@ actual_score = 1.0 for win, 0.0 for loss
 
 Minimum ELO floor: 100 (cannot drop below this).
 
-Both players' ELO is updated atomically after the game result is written.
+Current ELO/profile/game writes are coordinated by the API but span multiple
+database calls; they are not one database transaction. See
+[Data and Realtime](engineering/data-and-realtime.md) for the consistency model
+and transaction improvement path.
 
 
 ---

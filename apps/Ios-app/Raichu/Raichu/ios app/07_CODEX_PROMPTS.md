@@ -751,7 +751,7 @@ Note: The backend notification endpoint doesn't exist yet. Create the registrati
 
 ### Prompt 7.1 — Unit Tests (Engine Bridge + GameStore)
 
-```
+````
 Write a complete unit test suite for the Raichu iOS app in `RaichuTests/RaichuTests.swift`.
 
 Framework: Swift Testing (iOS 17+) — use `@Suite`, `@Test`, `#expect(...)`, `#require(...)`.
@@ -812,7 +812,7 @@ private let PIKACHU_QUIET_BOARD = "........W....................................
 For GameStore tests that need a Move, construct synthetic Move objects directly (do not rely on engine output) so tests pass even without JS bundle.
 
 Full specification: `ios app/08_TESTING.md` sections 4 and 5.
-```
+````
 
 ### Prompt 7.2 — UI Tests
 
