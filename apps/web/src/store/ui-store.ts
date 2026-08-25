@@ -10,8 +10,6 @@ interface UIStore {
     piece: string;
     fromRow: number;
     fromCol: number;
-    x: number;
-    y: number;
   } | null;
   boardFlipped: boolean;
   showNewGameDialog: boolean;
@@ -21,8 +19,7 @@ interface UIStore {
   replayStep: number;
 
   setTheme: (theme: ThemeName) => void;
-  startDrag: (piece: string, fromRow: number, fromCol: number, x: number, y: number) => void;
-  updateDrag: (x: number, y: number) => void;
+  startDrag: (piece: string, fromRow: number, fromCol: number) => void;
   endDrag: () => void;
   flipBoard: () => void;
   setShowNewGameDialog: (show: boolean) => void;
@@ -44,13 +41,8 @@ export const useUIStore = create<UIStore>((set) => ({
 
   setTheme: (theme) => set({ theme }),
 
-  startDrag: (piece, fromRow, fromCol, x, y) =>
-    set({ isDragging: true, dragPiece: { piece, fromRow, fromCol, x, y } }),
-
-  updateDrag: (x, y) =>
-    set((state) => ({
-      dragPiece: state.dragPiece ? { ...state.dragPiece, x, y } : null,
-    })),
+  startDrag: (piece, fromRow, fromCol) =>
+    set({ isDragging: true, dragPiece: { piece, fromRow, fromCol } }),
 
   endDrag: () =>
     set({ isDragging: false, dragPiece: null }),

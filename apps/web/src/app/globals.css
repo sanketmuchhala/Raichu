@@ -52,8 +52,17 @@ svg { -webkit-user-select: none; user-select: none; }
 }
 
 .drag-piece {
-  filter: drop-shadow(0 8px 8px rgba(0,0,0,0.32));
+  filter: drop-shadow(0 10px 8px rgba(0,0,0,0.36));
+  will-change: transform, opacity;
 }
+
+.drag-piece-visual {
+  transform-box: fill-box;
+  transform-origin: center;
+  will-change: transform;
+}
+
+.game-board-svg.is-piece-dragging { cursor: grabbing; }
 
 .moving-piece,
 .captured-piece-exit { will-change: transform, opacity; }
@@ -66,7 +75,7 @@ svg { -webkit-user-select: none; user-select: none; }
 }
 
 .capture-ring { animation-name: capture-target-in; }
-.selected-square { animation: selected-breathe 1.5s ease-in-out infinite; }
+.selected-square { animation: selected-in 140ms ease-out both; }
 .last-move-square { animation: last-move-in 180ms ease-out both; }
 
 /* ─── Button Base ───────────────────────────────────────── */
@@ -140,9 +149,9 @@ svg { -webkit-user-select: none; user-select: none; }
   to { opacity: 1; transform: scale(1); stroke-width: 3; }
 }
 
-@keyframes selected-breathe {
-  0%, 100% { opacity: 0.78; }
-  50% { opacity: 1; }
+@keyframes selected-in {
+  from { opacity: 0.35; }
+  to { opacity: 1; }
 }
 
 @keyframes last-move-in {

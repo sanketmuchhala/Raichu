@@ -10,9 +10,11 @@ import {
   getGameStatus,
   encodeBoard,
 } from '@raichu/game-engine';
-import { findBestMove } from '@raichu/ai-engine';
 import { analytics } from '../lib/analytics';
 import { computeGameSummary } from '../lib/play-style';
+import { findBestMoveOffThread } from '../lib/ai-worker-client';
+
+let botSearchId = 0;
 
 interface GameStore {
   // Game state
@@ -191,6 +193,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   newGame: (config) => {
+    botSearchId += 1;
     const initial = createInitialBoard();
     analytics.gameStarted({
       mode:        config.mode,
@@ -229,8 +232,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   requestBotMove: async () => {
-    const { status } = get();
-    if (status !== 'playing') return;
+    const initial = get();
+    if (
+      initial.status !== 'playing' ||
+      initial.gameMode !== 'bot' ||
+      initial.currentPlayer === initial.playerColor ||
+      initial.isThinking
+    ) return;
+
+    const requestId = ++botSearchId;
 
     set({ isThinking: true });
 
@@ -242,7 +252,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const { board, currentPlayer, difficulty, status: currentStatus } = get();
       if (currentStatus !== 'playing') return;
 
-      const result = findBestMove(board, currentPlayer, difficulty);
+      const position = encodeBoard(board);
+      const result = await findBestMoveOffThread(board, currentPlayer, difficulty);
+
+      const latest = get();
+      if (
+        requestId !== botSearchId ||
+        latest.status !== 'playing' ||
+        latest.currentPlayer !== currentPlayer ||
+        encodeBoard(latest.board) !== position
+      ) return;
 
       if (result.move) {
         get().makeMove(result.move);
@@ -250,12 +269,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
     } catch {
       // Last-resort: pick any legal move so the game never deadlocks
       const { board, currentPlayer } = get();
-      const moves = generateAllMoves(board, currentPlayer);
-      if (moves.length > 0) {
-        get().makeMove(moves[0]);
+      if (requestId === botSearchId) {
+        const moves = generateAllMoves(board, currentPlayer);
+        if (moves.length > 0) {
+          get().makeMove(moves[0]);
+        }
       }
     } finally {
-      set({ isThinking: false });
+      if (requestId === botSearchId) set({ isThinking: false });
     }
   },
 }));

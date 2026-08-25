@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { useCallback, useEffect, useRef } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { BOARD_SIZE } from '@raichu/shared-types';
 import type { Move, PieceChar } from '@raichu/shared-types';
 import { useBoardContext } from './BoardContext';
@@ -9,14 +9,13 @@ import { useUIStore } from '../../store/ui-store';
 import { THEMES } from '../../lib/themes';
 import { PieceSVG } from '../pieces/PieceSVG';
 import { usePieceMoveAnimation, SQUARE_SIZE, COORD_SIZE } from './usePieceMoveAnimation';
+import { useSmoothPieceDrag } from './useSmoothPieceDrag';
+import { PieceMoveOverlay } from './PieceMoveOverlay';
 
 const BOARD_PX    = SQUARE_SIZE * BOARD_SIZE;
 const TOTAL_WIDTH  = BOARD_PX + COORD_SIZE;
 const TOTAL_HEIGHT = BOARD_PX + COORD_SIZE * 2;
 const COL_LABELS   = 'abcdefgh';
-const ANIM_MS      = 260;
-
-const SLIDE_EASE = [0.25, 0.46, 0.45, 0.94] as const;
 
 interface OnlineBoardProps {
   flipped?: boolean;
@@ -26,15 +25,27 @@ interface OnlineBoardProps {
 
 export function OnlineBoard({ flipped = false, overrideBoard, overrideLastMove }: OnlineBoardProps) {
   const boardRef = useRef<SVGSVGElement>(null);
+  const pendingDragRef = useRef<{
+    piece: PieceChar;
+    row: number;
+    col: number;
+    pointerId: number;
+    clientX: number;
+    clientY: number;
+  } | null>(null);
+  const dragActivatedRef = useRef(false);
+  const settlingRef = useRef(false);
+  const suppressClickRef = useRef(false);
+  const reduceMotion = useReducedMotion();
   const theme      = useUIStore((s) => THEMES[s.theme]);
   const isDragging = useUIStore((s) => s.isDragging);
   const dragPiece  = useUIStore((s) => s.dragPiece);
   const startDrag  = useUIStore((s) => s.startDrag);
-  const updateDrag = useUIStore((s) => s.updateDrag);
   const endDrag    = useUIStore((s) => s.endDrag);
 
   const {
     board: liveBoard,
+    currentPlayer,
     selectedPiece,
     legalMoves,
     lastMove: liveLastMove,
@@ -48,13 +59,23 @@ export function OnlineBoard({ flipped = false, overrideBoard, overrideLastMove }
   const board = overrideBoard ?? liveBoard;
   const lastMove = overrideLastMove !== undefined ? overrideLastMove : liveLastMove;
   const canInteract = overrideBoard ? false : liveCanInteract;
+  const dragMotion = useSmoothPieceDrag(boardRef, TOTAL_WIDTH, reduceMotion ?? false);
 
   const toDisplayRow = useCallback((row: number) => flipped ? BOARD_SIZE - 1 - row : row, [flipped]);
   const toDisplayCol = useCallback((col: number) => flipped ? BOARD_SIZE - 1 - col : col, [flipped]);
 
   const { animState, markDragMove } = usePieceMoveAnimation(lastMove, toDisplayRow, toDisplayCol);
 
+  useEffect(() => () => {
+    pendingDragRef.current = null;
+    dragActivatedRef.current = false;
+    settlingRef.current = false;
+    dragMotion.stopAnimations();
+    endDrag();
+  }, [dragMotion.stopAnimations, endDrag]);
+
   const handleSquareClick = useCallback((row: number, col: number) => {
+    if (suppressClickRef.current) return;
     if (!canInteract) return;
 
     if (selectedPiece) {
@@ -75,56 +96,127 @@ export function OnlineBoard({ flipped = false, overrideBoard, overrideLastMove }
   }, [board, selectedPiece, legalMoves, canInteract, selectPiece, makeMove, clearSelection]);
 
   const handlePointerDown = useCallback((e: React.PointerEvent, row: number, col: number) => {
+    if (pendingDragRef.current || settlingRef.current) return;
     const cell = board[row][col];
     if (cell === '.' || !canInteract) return;
 
+    const isWhite = cell === 'w' || cell === 'W' || cell === '@';
+    const isCurrentPlayerPiece = currentPlayer === 'white' ? isWhite : !isWhite;
+    if (!isCurrentPlayerPiece) return;
+
     selectPiece(row, col);
 
-    if (boardRef.current) {
-      const rect  = boardRef.current.getBoundingClientRect();
-      const scale = rect.width / TOTAL_WIDTH;
-      const x = (e.clientX - rect.left) / scale - COORD_SIZE;
-      const y = (e.clientY - rect.top)  / scale - COORD_SIZE;
-      startDrag(cell, row, col, x, y);
-    }
-  }, [board, canInteract, selectPiece, startDrag]);
+    const point = dragMotion.begin(e);
+    if (!point) return;
+
+    pendingDragRef.current = {
+      piece: cell as PieceChar,
+      row,
+      col,
+      pointerId: e.pointerId,
+      clientX: e.clientX,
+      clientY: e.clientY,
+    };
+    dragActivatedRef.current = false;
+  }, [board, canInteract, currentPlayer, dragMotion.begin, selectPiece]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
-    if (!isDragging || !boardRef.current) return;
-    const rect  = boardRef.current.getBoundingClientRect();
-    const scale = rect.width / TOTAL_WIDTH;
-    const x = (e.clientX - rect.left) / scale - COORD_SIZE;
-    const y = (e.clientY - rect.top)  / scale - COORD_SIZE;
-    updateDrag(x, y);
-  }, [isDragging, updateDrag]);
+    const pending = pendingDragRef.current;
+    if (!pending || pending.pointerId !== e.pointerId || settlingRef.current) return;
 
-  const handlePointerUp = useCallback((e: React.PointerEvent) => {
-    if (!isDragging || !boardRef.current || !dragPiece) {
-      endDrag();
+    if (!dragActivatedRef.current) {
+      const distance = Math.hypot(e.clientX - pending.clientX, e.clientY - pending.clientY);
+      if (distance < 5) return;
+
+      dragActivatedRef.current = true;
+      suppressClickRef.current = true;
+      startDrag(pending.piece, pending.row, pending.col);
+    }
+
+    dragMotion.update(e);
+  }, [dragMotion.update, startDrag]);
+
+  const finishPointerDrag = useCallback((e: React.PointerEvent, cancelled: boolean) => {
+    const pending = pendingDragRef.current;
+    if (!pending || pending.pointerId !== e.pointerId) return;
+
+    const point = dragMotion.pointFromPointer(e);
+    dragMotion.releasePointer(e);
+    pendingDragRef.current = null;
+
+    if (!dragActivatedRef.current) {
+      dragMotion.stopAnimations();
       return;
     }
 
-    const rect  = boardRef.current.getBoundingClientRect();
-    const scale = rect.width / TOTAL_WIDTH;
-    const x = (e.clientX - rect.left) / scale - COORD_SIZE;
-    const y = (e.clientY - rect.top)  / scale - COORD_SIZE;
-
-    let dropCol = Math.floor(x / SQUARE_SIZE);
-    let dropRow = Math.floor(y / SQUARE_SIZE);
-
-    if (flipped) {
-      dropRow = BOARD_SIZE - 1 - dropRow;
-      dropCol = BOARD_SIZE - 1 - dropCol;
+    if (cancelled) {
+      suppressClickRef.current = false;
+    } else {
+      window.setTimeout(() => { suppressClickRef.current = false; }, 0);
     }
 
-    const move = legalMoves.find((m) => m.to.row === dropRow && m.to.col === dropCol);
+    let move: Move | undefined;
+    if (!cancelled && point) {
+      let dropCol = Math.floor(point.x / SQUARE_SIZE);
+      let dropRow = Math.floor(point.y / SQUARE_SIZE);
+
+      if (flipped) {
+        dropRow = BOARD_SIZE - 1 - dropRow;
+        dropCol = BOARD_SIZE - 1 - dropCol;
+      }
+
+      move = legalMoves.find((candidate) =>
+        candidate.to.row === dropRow && candidate.to.col === dropCol
+      );
+    }
+
+    settlingRef.current = true;
+    const complete = () => {
+      if (move) {
+        markDragMove();
+        makeMove(move);
+      }
+      settlingRef.current = false;
+      dragActivatedRef.current = false;
+      endDrag();
+    };
+
     if (move) {
-      markDragMove();
-      makeMove(move);
+      dragMotion.settleTo(
+        dragMotion.squareOrigin(toDisplayRow(move.to.row), toDisplayCol(move.to.col)),
+        0.085,
+        complete,
+      );
+      return;
     }
 
-    endDrag();
-  }, [isDragging, dragPiece, flipped, legalMoves, makeMove, endDrag, markDragMove]);
+    dragMotion.settleTo(
+      dragMotion.squareOrigin(toDisplayRow(pending.row), toDisplayCol(pending.col)),
+      0.16,
+      complete,
+    );
+  }, [
+    dragMotion.pointFromPointer,
+    dragMotion.releasePointer,
+    dragMotion.settleTo,
+    dragMotion.squareOrigin,
+    dragMotion.stopAnimations,
+    endDrag,
+    flipped,
+    legalMoves,
+    makeMove,
+    markDragMove,
+    toDisplayCol,
+    toDisplayRow,
+  ]);
+
+  const handlePointerUp = useCallback((e: React.PointerEvent) => {
+    finishPointerDrag(e, false);
+  }, [finishPointerDrag]);
+
+  const handlePointerCancel = useCallback((e: React.PointerEvent) => {
+    finishPointerDrag(e, true);
+  }, [finishPointerDrag]);
 
   const isLegalMoveTarget = (row: number, col: number): Move | undefined =>
     legalMoves.find((m) => m.to.row === row && m.to.col === col);
@@ -141,10 +233,10 @@ export function OnlineBoard({ flipped = false, overrideBoard, overrideLastMove }
     <svg
       ref={boardRef}
       viewBox={`0 0 ${TOTAL_WIDTH} ${TOTAL_HEIGHT}`}
-      className="w-full h-full select-none touch-none"
+      className={`game-board-svg w-full h-full select-none touch-none${isDragging ? ' is-piece-dragging' : ''}`}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
-      onPointerLeave={handlePointerUp}
+      onPointerCancel={handlePointerCancel}
     >
       <rect width={TOTAL_WIDTH} height={TOTAL_HEIGHT} fill={theme.bgSecondary} rx="4" />
 
@@ -210,6 +302,7 @@ export function OnlineBoard({ flipped = false, overrideBoard, overrideLastMove }
 
               {isLastMove && (
                 <rect
+                  className="last-move-square"
                   x={COORD_SIZE + displayCol * SQUARE_SIZE}
                   y={COORD_SIZE + displayRow * SQUARE_SIZE}
                   width={SQUARE_SIZE} height={SQUARE_SIZE}
@@ -220,6 +313,7 @@ export function OnlineBoard({ flipped = false, overrideBoard, overrideLastMove }
 
               {isSelected && (
                 <rect
+                  className="selected-square"
                   x={COORD_SIZE + displayCol * SQUARE_SIZE}
                   y={COORD_SIZE + displayRow * SQUARE_SIZE}
                   width={SQUARE_SIZE} height={SQUARE_SIZE}
@@ -231,6 +325,7 @@ export function OnlineBoard({ flipped = false, overrideBoard, overrideLastMove }
               {legalMove && !isSelected && (
                 legalMove.captured ? (
                   <circle
+                    className="capture-ring"
                     cx={COORD_SIZE + displayCol * SQUARE_SIZE + SQUARE_SIZE / 2}
                     cy={COORD_SIZE + displayRow * SQUARE_SIZE + SQUARE_SIZE / 2}
                     r={SQUARE_SIZE / 2 - 4}
@@ -241,6 +336,7 @@ export function OnlineBoard({ flipped = false, overrideBoard, overrideLastMove }
                   />
                 ) : (
                   <circle
+                    className="legal-move-dot"
                     cx={COORD_SIZE + displayCol * SQUARE_SIZE + SQUARE_SIZE / 2}
                     cy={COORD_SIZE + displayRow * SQUARE_SIZE + SQUARE_SIZE / 2}
                     r={SQUARE_SIZE / 6}
@@ -270,6 +366,7 @@ export function OnlineBoard({ flipped = false, overrideBoard, overrideLastMove }
           return (
             <g
               key={`piece-${row}-${col}`}
+              className={`board-piece${canInteract ? ' is-interactive' : ''}`}
               transform={`translate(${pieceX}, ${pieceY})`}
               onClick={() => handleSquareClick(row, col)}
               onPointerDown={(e) => handlePointerDown(e, row, col)}
@@ -283,42 +380,20 @@ export function OnlineBoard({ flipped = false, overrideBoard, overrideLastMove }
 
       {/* Move animation overlay */}
       {animState && !isDragging && (
-        <>
-          {animState.capturedPiece !== undefined &&
-           animState.capturedX    !== undefined &&
-           animState.capturedY    !== undefined && (
-            <motion.g
-              key={`cap-${animState.moveId}`}
-              initial={{ x: animState.capturedX, y: animState.capturedY, opacity: 1 }}
-              animate={{ x: animState.capturedX, y: animState.capturedY, opacity: 0 }}
-              transition={{ duration: 0.18, ease: 'easeOut' }}
-              pointerEvents="none"
-            >
-              <PieceSVG piece={animState.capturedPiece} size={SQUARE_SIZE - 4} />
-            </motion.g>
-          )}
-
-          <motion.g
-            key={`mv-${animState.moveId}`}
-            initial={{ x: animState.fromX, y: animState.fromY }}
-            animate={{ x: animState.toX,   y: animState.toY   }}
-            transition={{ duration: ANIM_MS / 1000, ease: SLIDE_EASE }}
-            pointerEvents="none"
-          >
-            <PieceSVG piece={animState.landingPiece} size={SQUARE_SIZE - 4} />
-          </motion.g>
-        </>
+        <PieceMoveOverlay animation={animState} reduceMotion={reduceMotion ?? false} />
       )}
 
       {/* Drag overlay */}
       {isDragging && dragPiece && (
-        <g
-          transform={`translate(${dragPiece.x - SQUARE_SIZE / 2 + 2}, ${dragPiece.y - SQUARE_SIZE / 2 + 2})`}
+        <motion.g
+          className="drag-piece"
+          style={{ x: dragMotion.x, y: dragMotion.y, opacity: dragMotion.opacity }}
           pointerEvents="none"
-          opacity={0.85}
         >
-          <PieceSVG piece={dragPiece.piece as PieceChar} size={SQUARE_SIZE - 4} />
-        </g>
+          <motion.g className="drag-piece-visual" style={{ scale: dragMotion.scale }}>
+            <PieceSVG piece={dragPiece.piece as PieceChar} size={SQUARE_SIZE - 4} />
+          </motion.g>
+        </motion.g>
       )}
     </svg>
   );
