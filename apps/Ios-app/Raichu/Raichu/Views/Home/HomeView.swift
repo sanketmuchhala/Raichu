@@ -6,9 +6,9 @@ import SwiftUI
 
 struct HomeView: View {
     @Environment(\.theme) var theme
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var uiStore: UIStore
     @State private var appeared = false
-    @State private var navigateToPlay = false
-    @State private var navigateToLobby = false
 
     var body: some View {
         NavigationStack {
@@ -51,7 +51,7 @@ struct HomeView: View {
                         .animation(.easeOut(duration: 0.5).delay(0.75), value: appeared)
 
                     // 7. Final CTA
-                    Button(action: { navigateToPlay = true }) {
+                    Button(action: goToPlay) {
                         Text("Start Playing")
                             .font(.headline)
                             .foregroundColor(.white)
@@ -67,15 +67,28 @@ struct HomeView: View {
                 .padding(.vertical, 24)
             }
             .background(theme.bgPrimary.ignoresSafeArea())
-            .navigationBarHidden(true)
-            .navigationDestination(isPresented: $navigateToPlay) {
-                PlayView()
+            .navigationTitle("")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                        .foregroundColor(theme.accent)
+                }
             }
-            .navigationDestination(isPresented: $navigateToLobby) {
-                LobbyView()
-            }
+            .toolbarBackground(theme.bgPrimary, for: .navigationBar)
         }
         .onAppear { appeared = true }
+    }
+
+    private func goToPlay() {
+        HapticManager.shared.buttonTap()
+        uiStore.selectedTab = UIStore.Tab.play
+        dismiss()
+    }
+
+    private func goToLobby() {
+        HapticManager.shared.buttonTap()
+        uiStore.selectedTab = UIStore.Tab.online
+        dismiss()
     }
 
     // MARK: - Logo
@@ -105,8 +118,7 @@ struct HomeView: View {
     private var ctaSection: some View {
         HStack(spacing: 12) {
             Button(action: {
-                HapticManager.shared.buttonTap()
-                navigateToPlay = true
+                goToPlay()
             }) {
                 Text("Play vs AI")
                     .font(.headline)
@@ -118,8 +130,7 @@ struct HomeView: View {
             }
 
             Button(action: {
-                HapticManager.shared.buttonTap()
-                navigateToLobby = true
+                goToLobby()
             }) {
                 Text("Play Online")
                     .font(.headline)

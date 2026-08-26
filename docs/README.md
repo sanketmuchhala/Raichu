@@ -10,7 +10,7 @@ This directory is the canonical documentation home for the Raichu monorepo. Star
 | Understand the whole system | [System design](architecture/system-design.md) | [Runtime flows](architecture/runtime-flows.md), [monorepo architecture](architecture/monorepo.md) |
 | Work on the web app | [Web platform](platforms/web.md) | [Game engine](GAME_ENGINE.md), [API](API.md) |
 | Work on the backend | [API platform](platforms/api.md) | [Database](DATABASE.md), [data and realtime](engineering/data-and-realtime.md) |
-| Work on iOS | [iOS platform](platforms/ios.md) | [iOS implementation workbook](../apps/Ios-app/Raichu/Raichu/ios%20app/00_PROJECT_OVERVIEW.md) |
+| Work on iOS | [iOS platform](platforms/ios.md), [redesign master prompt](platforms/ios-redesign-master-prompt.md) | [iOS implementation workbook](ios-workbook/00_PROJECT_OVERVIEW.md) |
 | Change the AI | [AI engine](AI_ENGINE.md) | [Game theory](game/game-theory.md), [testing and operations](engineering/testing-security-operations.md) |
 | Contribute code | [Contributing](CONTRIBUTING.md) | [Testing, security, and operations](engineering/testing-security-operations.md) |
 | Look up a term | [Glossary](reference/glossary.md) | [API contracts](api-contracts.md) |
@@ -125,7 +125,7 @@ Use these labels near the top of specialized documents when needed:
 - **Workbook** — phase-oriented implementation notes local to one platform.
 - **Historical** — retained for provenance and explicitly superseded.
 
-The files in `apps/Ios-app/Raichu/Raichu/ios app/` are an iOS implementation workbook. The large file in `Game Theory/` is an agent-oriented historical rules context. They are linked for traceability but are not the documentation entry point.
+The files in `docs/ios-workbook/` are an iOS implementation workbook. The large file in `Game Theory/` is an agent-oriented historical rules context. They are linked for traceability but are not the documentation entry point.
 
 ## Keeping documentation healthy
 

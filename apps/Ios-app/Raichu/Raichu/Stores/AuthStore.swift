@@ -49,11 +49,16 @@ final class AuthStore: ObservableObject {
         error = nil
         defer { loading = false }
 
-        let result = try await supabase.auth.signIn(email: email, password: password)
-        session = result
-        await fetchProfile()
-        // Request push notification permission on first sign-in (spec 6.4 item 1)
-        NotificationManager.shared.requestPermission()
+        do {
+            let result = try await supabase.auth.signIn(email: email, password: password)
+            session = result
+            await fetchProfile()
+            // Request push notification permission on first sign-in (spec 6.4 item 1)
+            NotificationManager.shared.requestPermission()
+        } catch {
+            self.error = Self.message(for: error)
+            throw error
+        }
     }
 
     func signUp(email: String, password: String, username: String) async throws {
@@ -61,25 +66,56 @@ final class AuthStore: ObservableObject {
         error = nil
         defer { loading = false }
 
-        let result = try await supabase.auth.signUp(
-            email: email,
-            password: password,
-            data: ["username": .string(username)]
-        )
-        session = result.session
-        if result.session != nil {
-            await fetchProfile()
-            // Request push notification permission on first sign-up (spec 6.4 item 1)
-            NotificationManager.shared.requestPermission()
+        do {
+            let result = try await supabase.auth.signUp(
+                email: email,
+                password: password,
+                data: ["username": .string(username)]
+            )
+            session = result.session
+            if result.session != nil {
+                await fetchProfile()
+                // Request push notification permission on first sign-up (spec 6.4 item 1)
+                NotificationManager.shared.requestPermission()
+            }
+        } catch {
+            self.error = Self.message(for: error)
+            throw error
         }
     }
 
     func signInWithGoogle() async throws {
-        // Use in-app browser so user stays in the app during OAuth flow
-        try await supabase.auth.signInWithOAuth(
-            provider: .google,
-            redirectTo: URL(string: "com.raichugame.ios://login-callback")
-        )
+        error = nil
+        do {
+            // Use in-app browser so the user stays in the app during OAuth.
+            try await supabase.auth.signInWithOAuth(
+                provider: .google,
+                redirectTo: AppConfig.oauthCallbackURL
+            )
+        } catch {
+            self.error = Self.message(for: error)
+            throw error
+        }
+    }
+
+    /// Completes an OAuth sign-in from the redirect back into the app. Called
+    /// from `RaichuApp`'s `onOpenURL`; without it the callback is dropped and
+    /// the user never gets signed in.
+    func handleOpenURL(_ url: URL) async {
+        guard url.scheme == AppConfig.urlScheme else { return }
+        do {
+            session = try await supabase.auth.session(from: url)
+            await fetchProfile()
+        } catch {
+            self.error = Self.message(for: error)
+        }
+    }
+
+    /// Supabase surfaces most failures as opaque decoding or API errors; this
+    /// keeps the user-facing copy readable without swallowing the detail.
+    private static func message(for error: Error) -> String {
+        let described = (error as NSError).localizedDescription
+        return described.isEmpty ? "Something went wrong. Please try again." : described
     }
 
     func signOut() async {

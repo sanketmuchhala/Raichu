@@ -26,8 +26,8 @@ final class GameStore: ObservableObject {
     @Published var drawReason: String? = nil
 
     // Config
-    @Published var gameMode: String = "pvp"        // pvp | bot
-    @Published var difficulty: String = "medium"   // easy | medium | hard
+    @Published var gameMode: String = "bot"        // pvp | bot
+    @Published var difficulty: String = "easy"     // easy | medium | hard
     @Published var playerColor: String = "white"   // which color the human plays (bot mode)
 
     init() {
@@ -138,7 +138,7 @@ final class GameStore: ObservableObject {
 
     // MARK: - Game Control
 
-    func newGame(mode: String = "pvp", difficulty: String = "medium", playerColor: String = "white") {
+    func newGame(mode: String = "bot", difficulty: String = "easy", playerColor: String = "white") {
         self.gameMode = mode
         self.difficulty = difficulty
         self.playerColor = playerColor

@@ -8,7 +8,7 @@
 
 The Raichu logo is a stylized chess queen crown on a dark background.
 
-- Source file: `ios app/assets/raichu logo.png` (13.5 KB)
+- Source file: `docs/ios-workbook/assets/raichu logo.png` (13.5 KB)
 - Used in: HomeView title area, app icon, splash screen
 
 ---

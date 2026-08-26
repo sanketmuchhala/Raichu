@@ -71,7 +71,7 @@ The agent cannot do this for you — it requires Xcode UI.
 ### Prompt format tips
 
 - Each prompt is **self-contained** — you do not need to explain what Raichu is or paste prior context.
-- The prompts reference docs like `ios app/04_GAME_ENGINE_AND_AI.md`. Claude Code reads those automatically. In other tools, you may need to paste the relevant doc section if the agent misses detail.
+- The prompts reference docs like `04_GAME_ENGINE_AND_AI.md`. Claude Code reads those automatically. In other tools, you may need to paste the relevant doc section if the agent misses detail.
 - If the agent stops early or asks a question, just reply: *"Continue. Follow the spec in the referenced doc exactly."*
 - If a file already exists from a previous phase, the agent will edit it rather than overwrite — that's correct.
 
@@ -144,7 +144,7 @@ Requirements:
 - RaichuApp.swift should inject all stores as @StateObject + .environmentObject
 - ContentView should have a TabView with 4 tabs: Play, Online, History, Profile
 
-See `ios app/06_STATE_ARCHITECTURE.md` section 9 for the exact environment injection pattern.
+See `06_STATE_ARCHITECTURE.md` section 9 for the exact environment injection pattern.
 ```
 
 ### Prompt 0.2 — Build JS Engine Bundle
@@ -276,7 +276,7 @@ bundle is present, then do a Xcode build to confirm no compile errors.
 ```
 VERIFY (do not recreate) `Raichu/Raichu/Stores/GameStore.swift`.
 
-Read the file. Confirm against `apps/web/src/store/game-store.ts` and `ios app/06_STATE_ARCHITECTURE.md` section 2:
+Read the file. Confirm against `apps/web/src/store/game-store.ts` and `06_STATE_ARCHITECTURE.md` section 2:
 
 1. @MainActor final class, ObservableObject, import Combine
 2. All @Published properties present with correct types:
@@ -376,7 +376,7 @@ Create three more store files in `apps/ios-app/Sources/Stores/`:
    - Actions: setTheme(), flipBoard(), enterReplay(), exitReplay(), setReplayStep()
    - Persist theme preference in UserDefaults
 
-Full specifications in `ios app/06_STATE_ARCHITECTURE.md` sections 4-6.
+Full specifications in `06_STATE_ARCHITECTURE.md` sections 4-6.
 ```
 
 ---
@@ -429,7 +429,7 @@ Create two files:
    - matchmakingApi.leaveQueue()
    - matchmakingApi.status()
 
-See `ios app/03_API_REFERENCE.md` for all endpoint details and response schemas.
+See `03_API_REFERENCE.md` for all endpoint details and response schemas.
 ```
 
 ---
@@ -441,7 +441,7 @@ See `ios app/03_API_REFERENCE.md` for all endpoint details and response schemas.
 ```
 Create `BoardView.swift` in `apps/ios-app/Sources/Views/Shared/` — the core game board component used everywhere.
 
-Full specification in `ios app/05_UI_AND_DESIGN_SYSTEM.md` section 4.3.
+Full specification in `05_UI_AND_DESIGN_SYSTEM.md` section 4.3.
 
 Requirements:
 1. Parameters: board, selectedPiece, legalMoves, lastMove, flipped, canInteract, onTap, onDrop
@@ -492,7 +492,7 @@ Create supporting board components:
    - Display: HStack, 22pt pieces, 78% opacity, 1pt spacing
    - Min height: 26pt, horizontal padding 4pt
 
-See `ios app/05_UI_AND_DESIGN_SYSTEM.md` section 7 for specs.
+See `05_UI_AND_DESIGN_SYSTEM.md` section 7 for specs.
 ```
 
 ---
@@ -504,7 +504,7 @@ See `ios app/05_UI_AND_DESIGN_SYSTEM.md` section 7 for specs.
 ```
 Create `PlayView.swift` — the offline game screen (vs AI or local PvP).
 
-Layout (from `ios app/05_UI_AND_DESIGN_SYSTEM.md` section 4.2):
+Layout (from `05_UI_AND_DESIGN_SYSTEM.md` section 4.2):
 ```
 VStack {
   NavBar (back + "Raichu" title + settings gear)
@@ -530,7 +530,7 @@ Requirements:
 - NewGameSheet: modal bottom sheet with mode/difficulty/color pickers
 - Replay mode: show historical board state from boardHistory[replayStep]
 
-Include all haptics from `ios app/05_UI_AND_DESIGN_SYSTEM.md` section 6.
+Include all haptics from `05_UI_AND_DESIGN_SYSTEM.md` section 6.
 ```
 
 ### Prompt 5.2 — OnlineGameView
@@ -538,7 +538,7 @@ Include all haptics from `ios app/05_UI_AND_DESIGN_SYSTEM.md` section 6.
 ```
 Create `OnlineGameView.swift` — the live multiplayer game screen.
 
-Layout (from `ios app/05_UI_AND_DESIGN_SYSTEM.md` section 4.4):
+Layout (from `05_UI_AND_DESIGN_SYSTEM.md` section 4.4):
 ```
 VStack {
   NavBar ("← Lobby" back button)
@@ -567,7 +567,7 @@ Set myColor based on comparing auth user ID with white_player_id/black_player_id
 ```
 Create `HomeView.swift` — the landing/marketing screen shown on first launch.
 
-Layout (from `ios app/05_UI_AND_DESIGN_SYSTEM.md` section 4.1):
+Layout (from `05_UI_AND_DESIGN_SYSTEM.md` section 4.1):
 
 ScrollView, vertical:
 1. Logo image (from Assets) + "Raichu" title (large, bold, accent color)
@@ -613,7 +613,7 @@ Create three online feature screens:
    - Current user row: accent highlight
    - Pull-to-refresh
 
-See `ios app/05_UI_AND_DESIGN_SYSTEM.md` sections 4.5-4.7.
+See `05_UI_AND_DESIGN_SYSTEM.md` sections 4.5-4.7.
 Dark theme backgrounds, themed accent colors throughout.
 ```
 
@@ -647,7 +647,7 @@ Create auth and profile screens:
    - Push notifications: permission prompt button
    - App version in footer
 
-See `ios app/05_UI_AND_DESIGN_SYSTEM.md` sections 4.8-4.10.
+See `05_UI_AND_DESIGN_SYSTEM.md` sections 4.8-4.10.
 ```
 
 ---
@@ -662,7 +662,7 @@ Create `ThemeConfig.swift` with the complete theme system.
 Requirements:
 1. ThemeConfig struct with all color properties (board colors, UI colors, accent, text, etc.)
 2. Three static instances: .classic, .slate, .walnut
-3. All hex values from `ios app/05_UI_AND_DESIGN_SYSTEM.md` section 3
+3. All hex values from `05_UI_AND_DESIGN_SYSTEM.md` section 3
 4. Color(hex:) extension for initializing from hex strings
 5. Make ThemeConfig available via SwiftUI Environment
 6. UIStore.theme should drive which ThemeConfig is active
@@ -673,7 +673,7 @@ Apply theme colors throughout all views using @EnvironmentObject UIStore.
 ### Prompt 6.2 — Animations & Haptics
 
 ```
-Implement all animations and haptics specified in `ios app/05_UI_AND_DESIGN_SYSTEM.md` sections 5-6.
+Implement all animations and haptics specified in `05_UI_AND_DESIGN_SYSTEM.md` sections 5-6.
 
 Animations checklist:
 - Piece slide: 260ms, timingCurve(0.25, 0.46, 0.45, 0.94)
@@ -811,7 +811,7 @@ private let PIKACHU_QUIET_BOARD = "........W....................................
 
 For GameStore tests that need a Move, construct synthetic Move objects directly (do not rely on engine output) so tests pass even without JS bundle.
 
-Full specification: `ios app/08_TESTING.md` sections 4 and 5.
+Full specification: `08_TESTING.md` sections 4 and 5.
 ````
 
 ### Prompt 7.2 — UI Tests
@@ -842,7 +842,7 @@ Important:
 - Use `waitForExistence(timeout:)` — never hard `sleep()`
 - Prefer `XCTAssert(condition, message)` over bare `XCTAssert(condition)` so failures are readable
 
-Full specification: `ios app/08_TESTING.md` section 7.
+Full specification: `08_TESTING.md` section 7.
 ```
 
 ### Prompt 7.3 — Xcode Setup Verification
@@ -862,7 +862,7 @@ If any engine bridge tests fail with "stub engine":
 - The JS bundle is not being loaded — check Copy Bundle Resources and target membership
 - Tests that rely on real move generation will fail until bundle is present
 
-See `ios app/08_TESTING.md` section 8 for the full pre-commit checklist.
+See `08_TESTING.md` section 8 for the full pre-commit checklist.
 ```
 
 ---
@@ -905,7 +905,7 @@ Chess.com-style board with piece images, move animations (260ms slide), drag-and
 Haptic feedback on all interactions
 Turn glow, game over overlay, staggered animations
 
-For complete specifications, reference the documentation in the `ios app/` directory:
+For complete specifications, reference the documentation in `docs/ios-workbook/`:
 - 00_PROJECT_OVERVIEW.md — what Raichu is
 - 01_ENVIRONMENT_AND_CONFIG.md — env vars, API keys, Supabase setup
 - 02_SUPABASE_COMPLETE.md — database schema, RLS, Realtime, auth

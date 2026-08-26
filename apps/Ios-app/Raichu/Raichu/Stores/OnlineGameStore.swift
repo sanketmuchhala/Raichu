@@ -12,7 +12,12 @@ final class OnlineGameStore: ObservableObject {
     @Published var board: [[String]] = []
     @Published var currentPlayer: String = "white"
     @Published var status: String = "playing"
-    @Published var moves: [GameMove] = []
+    @Published var moves: [GameMove] = [] {
+        didSet { rebuildBoardHistory() }
+    }
+    /// Board after each ply, index 0 being the starting position. Derived from
+    /// each move's `board_after`, so replay needs no re-simulation.
+    @Published private(set) var boardHistory: [[[String]]] = []
     @Published var lastMove: Move? = nil
     @Published var myColor: String? = nil
     @Published var loading: Bool = false
@@ -215,6 +220,11 @@ final class OnlineGameStore: ObservableObject {
         do {
             let g = try await gamesAPI.get(id: gameId, accessToken: token)
             applyGameDetail(g, userId: userId)
+            // Without this the move list and both captured-piece rows keep
+            // showing whatever loadGame fetched at open time.
+            if let refreshed = try? await gamesAPI.getMoves(id: gameId, accessToken: token) {
+                moves = refreshed
+            }
         } catch { /* silent */ }
     }
 
@@ -256,6 +266,15 @@ final class OnlineGameStore: ObservableObject {
     }
 
     // MARK: - Reset
+
+    private func rebuildBoardHistory() {
+        var history: [[[String]]] = [RaichuEngine.shared.createInitialBoard()]
+        history.append(contentsOf: moves.map { RaichuEngine.shared.decodeBoard($0.board_after) })
+        boardHistory = history
+    }
+
+    /// Move list in engine form, for the shared move-history panel.
+    var moveList: [Move] { moves.map(Move.init) }
 
     func reset() {
         unsubscribe()

@@ -1,17 +1,26 @@
 // PlayView.swift
 // Raichu
-// Offline game screen: play vs AI or local PvP (pass-and-play).
+//
+// Offline game screen: play vs the computer or local pass-and-play.
+//
+// Layout follows the web's mobile game surface rather than a shrunk desktop
+// sidebar (see docs/platforms/web.md): player bar, full-bleed board, player
+// bar, coach strip, action dock, collapsible move list.
 
 import SwiftUI
 
 struct PlayView: View {
-    @EnvironmentObject var gameStore: GameStore
-    @EnvironmentObject var uiStore: UIStore
-    @Environment(\.theme) var theme
+    @EnvironmentObject private var gameStore: GameStore
+    @EnvironmentObject private var uiStore: UIStore
+    @Environment(\.theme) private var theme
 
     @State private var showNewGameSheet = false
-    @State private var showMoveHistory = false
-    @State private var gameOverHandled = false
+    @State private var showGuide = false
+    @State private var coachDismissed = false
+    @State private var restartArmed = false
+    @State private var restartDisarmTask: Task<Void, Never>?
+    @State private var resultDismissed = false
+    @State private var gameOverAnnounced = false
 
     var body: some View {
         ZStack {
@@ -19,52 +28,88 @@ struct PlayView: View {
 
             VStack(spacing: 0) {
                 navBar
-                CapturedPiecesRow(pieces: topCaptured)
-                    .padding(.horizontal, 8)
-                    .padding(.top, 4)
+                PlayerBar(
+                    name: name(forWhite: !bottomIsWhite),
+                    subtitle: subtitle(forWhite: !bottomIsWhite),
+                    isWhite: !bottomIsWhite,
+                    isCurrentTurn: isTurn(ofWhite: !bottomIsWhite),
+                    isThinking: isThinking(forWhite: !bottomIsWhite),
+                    capturedPieces: captured(forWhite: !bottomIsWhite)
+                )
 
-                boardSection
+                BoardView(
+                    board: displayBoard,
+                    selectedPiece: gameStore.selectedPiece,
+                    legalMoves: uiStore.replayMode ? [] : gameStore.legalMoves,
+                    lastMove: uiStore.replayMode ? nil : gameStore.lastMove,
+                    flipped: uiStore.boardFlipped,
+                    canInteract: canInteract,
+                    onTap: handleTap,
+                    onDrop: handleDrop
+                )
+                .frame(maxHeight: .infinity)
 
-                CapturedPiecesRow(pieces: bottomCaptured)
-                    .padding(.horizontal, 8)
-                    .padding(.bottom, 4)
+                PlayerBar(
+                    name: name(forWhite: bottomIsWhite),
+                    subtitle: subtitle(forWhite: bottomIsWhite),
+                    isWhite: bottomIsWhite,
+                    isCurrentTurn: isTurn(ofWhite: bottomIsWhite),
+                    isThinking: isThinking(forWhite: bottomIsWhite),
+                    capturedPieces: captured(forWhite: bottomIsWhite)
+                )
 
-                gameInfoRow
-                    .padding(.horizontal, 12)
-                    .padding(.top, 8)
-
-                if !gameStore.moveHistory.isEmpty {
-                    replayControls
-                        .padding(.horizontal, 12)
+                VStack(spacing: Spacing.sm) {
+                    if showCoach {
+                        GameCoach(
+                            moveCount: gameStore.moveHistory.count,
+                            isThinking: gameStore.isThinking,
+                            isYourTurn: isYourTurn,
+                            selectedLegalMoves: gameStore.selectedPiece == nil ? nil : gameStore.legalMoves,
+                            isLocalPvP: gameStore.gameMode == "pvp",
+                            botName: BotIdentity.name,
+                            onDismiss: { withAnimation(Motion.press(0.2)) { coachDismissed = true } }
+                        )
+                    }
+                    actionDock
+                    if !gameStore.moveHistory.isEmpty {
+                        MoveHistoryPanel(
+                            moves: gameStore.moveHistory,
+                            replayMode: uiStore.replayMode,
+                            replayStep: uiStore.replayMode ? uiStore.replayStep : gameStore.moveHistory.count,
+                            onSelectStep: selectReplayStep,
+                            onExitReplay: uiStore.exitReplay
+                        )
+                    }
                 }
-
-                controlsPanel
-                    .padding(.horizontal, 12)
-                    .padding(.top, 8)
-                    .padding(.bottom, 16)
+                .padding(.horizontal, Spacing.sm)
+                .padding(.top, Spacing.sm)
+                .padding(.bottom, Spacing.xs)
             }
 
-            // Bot thinking overlay
-            if gameStore.isThinking {
-                Color.black.opacity(0.4)
-                    .ignoresSafeArea()
-                    .allowsHitTesting(true)
-                VStack(spacing: 12) {
-                    ProgressView()
-                        .tint(.white)
-                    Text("Thinking...")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                }
-            }
-
-            // Game over overlay
-            if gameStore.status != "playing" && !showNewGameSheet {
-                gameOverOverlay
+            if showResult, let outcome {
+                GameResultModal(
+                    outcome: outcome,
+                    primaryTitle: "Play Again",
+                    onPrimary: {
+                        resultDismissed = false
+                        gameStore.restart()
+                    },
+                    onSecondary: { resultDismissed = true; showNewGameSheet = true },
+                    onReplay: gameStore.moveHistory.isEmpty ? nil : {
+                        resultDismissed = true
+                        uiStore.enterReplay(step: 0)
+                    },
+                    onClose: { resultDismissed = true }
+                )
+                .transition(.opacity)
             }
         }
-        .navigationTitle("")
         .navigationBarHidden(true)
+        .sheet(isPresented: $showGuide) {
+            HomeView()
+                .environmentObject(uiStore)
+                .environment(\.theme, theme)
+        }
         .sheet(isPresented: $showNewGameSheet) {
             NewGameSheet(isPresented: $showNewGameSheet)
                 .environmentObject(gameStore)
@@ -72,348 +117,262 @@ struct PlayView: View {
                 .environment(\.theme, theme)
         }
         .onAppear {
-            if gameStore.board.isEmpty {
-                gameStore.newGame()
-            }
+            if gameStore.board.isEmpty { gameStore.newGame() }
+            HapticManager.shared.prepare()
         }
+        .onChange(of: gameStore.status) { _, status in
+            guard status != "playing" else {
+                gameOverAnnounced = false
+                resultDismissed = false
+                return
+            }
+            announceGameOver()
+        }
+        .onDisappear { restartDisarmTask?.cancel() }
+        .animation(Motion.press(0.3), value: showResult)
     }
 
-    // MARK: - Nav Bar
+    // MARK: - Nav bar
 
     private var navBar: some View {
         HStack {
             Text("Raichu")
-                .font(.title2.bold())
+                .font(.system(.title3, design: .default, weight: .bold))
                 .foregroundColor(theme.accent)
             Spacer()
-            Button(action: { showNewGameSheet = true }) {
-                Image(systemName: "gearshape.fill")
-                    .foregroundColor(theme.textSecondary)
-                    .font(.title3)
-            }
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .background(theme.bgPanel)
-    }
-
-    // MARK: - Board
-
-    private var boardSection: some View {
-        let boardFlipped = uiStore.boardFlipped
-        let displayBoard: [[String]] = {
-            if uiStore.replayMode, uiStore.replayStep < gameStore.boardHistory.count {
-                return gameStore.boardHistory[uiStore.replayStep]
-            }
-            return gameStore.board
-        }()
-        let canInteract = !gameStore.isThinking && gameStore.status == "playing" && !uiStore.replayMode
-
-        return BoardView(
-            board: displayBoard,
-            selectedPiece: gameStore.selectedPiece,
-            legalMoves: gameStore.legalMoves,
-            lastMove: gameStore.lastMove,
-            flipped: boardFlipped,
-            canInteract: canInteract,
-            onTap: { pos in
+            Button {
                 HapticManager.shared.buttonTap()
-                gameStore.selectPiece(at: pos)
-            },
-            onDrop: { from, to in
-                if let move = gameStore.legalMoves.first(where: { $0.from == from && $0.to == to }) {
-                    if move.captured != nil { HapticManager.shared.capture() }
-                    else { HapticManager.shared.validMove() }
-                    gameStore.makeMove(move)
-                } else {
-                    HapticManager.shared.invalidDrop()
-                    gameStore.clearSelection()
-                }
+                showGuide = true
+            } label: {
+                Image(systemName: "questionmark.circle")
+                    .font(.system(size: 17, weight: .medium))
+                    .foregroundColor(theme.textSecondary)
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
             }
+            .accessibilityLabel("How to play")
+
+            Button {
+                HapticManager.shared.buttonTap()
+                showNewGameSheet = true
+            } label: {
+                Image(systemName: "gearshape.fill")
+                    .font(.system(size: 17, weight: .medium))
+                    .foregroundColor(theme.textSecondary)
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
+            }
+            .accessibilityLabel("Game settings")
+        }
+        .padding(.leading, Spacing.lg)
+        .padding(.trailing, Spacing.xs)
+        .frame(height: 52)
+        .background(theme.bgPanel)
+    }
+
+    // MARK: - Action dock
+
+    private var actionDock: some View {
+        HStack(spacing: Spacing.sm) {
+            Button {
+                HapticManager.shared.buttonTap()
+                showNewGameSheet = true
+            } label: {
+                DockLabel(systemImage: "plus", title: "New game")
+            }
+            .raichuButton(.primary, theme: theme)
+
+            Button(action: handleRestart) {
+                DockLabel(
+                    systemImage: restartArmed ? "exclamationmark.triangle.fill" : "arrow.counterclockwise",
+                    title: restartArmed ? "Confirm" : "Restart"
+                )
+            }
+            // Two-step confirm: the first tap arms, matching the web's
+            // restartArmed state and its 3.5s auto-disarm.
+            .raichuButton(.dock, theme: theme, fill: restartArmed ? Color(hex: "a84444") : nil)
+            .accessibilityLabel(restartArmed ? "Confirm restart" : "Restart game")
+
+            Button {
+                HapticManager.shared.buttonTap()
+                withAnimation(Motion.arrive(0.4)) { uiStore.flipBoard() }
+            } label: {
+                DockLabel(systemImage: "arrow.up.arrow.down", title: "Flip")
+            }
+            .raichuButton(.dock, theme: theme)
+            .accessibilityLabel("Flip board")
+        }
+        .animation(Motion.press(0.18), value: restartArmed)
+    }
+
+    private func handleRestart() {
+        restartDisarmTask?.cancel()
+
+        guard restartArmed || gameStore.moveHistory.isEmpty else {
+            HapticManager.shared.buttonTap()
+            restartArmed = true
+            restartDisarmTask = Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(3500))
+                guard !Task.isCancelled else { return }
+                withAnimation(Motion.press(0.18)) { restartArmed = false }
+            }
+            return
+        }
+
+        HapticManager.shared.validMove()
+        restartArmed = false
+        resultDismissed = false
+        uiStore.exitReplay()
+        gameStore.restart()
+    }
+
+    // MARK: - Board wiring
+
+    private var displayBoard: [[String]] {
+        if uiStore.replayMode, gameStore.boardHistory.indices.contains(uiStore.replayStep) {
+            return gameStore.boardHistory[uiStore.replayStep]
+        }
+        return gameStore.board
+    }
+
+    private var canInteract: Bool {
+        !gameStore.isThinking && gameStore.status == "playing" && !uiStore.replayMode
+    }
+
+    // GameStore.selectPiece already commits when the tap lands on a legal
+    // destination, so the view only decides which haptic to fire — one owner
+    // for the move, one for the feedback.
+    private func handleTap(_ pos: Position) {
+        let landing = gameStore.selectedPiece != nil
+            ? gameStore.legalMoves.first(where: { $0.to == pos })
+            : nil
+
+        if let landing {
+            fireMoveHaptic(for: landing)
+        } else {
+            HapticManager.shared.buttonTap()
+        }
+        gameStore.selectPiece(at: pos)
+    }
+
+    private func handleDrop(_ from: Position, _ to: Position) {
+        guard let move = gameStore.legalMoves.first(where: { $0.from == from && $0.to == to }) else {
+            HapticManager.shared.invalidDrop()
+            gameStore.clearSelection()
+            return
+        }
+        fireMoveHaptic(for: move)
+        gameStore.makeMove(move)
+    }
+
+    private func fireMoveHaptic(for move: Move) {
+        if move.captured != nil {
+            HapticManager.shared.capture()
+        } else {
+            HapticManager.shared.validMove()
+        }
+    }
+
+    private func selectReplayStep(_ step: Int) {
+        let total = gameStore.moveHistory.count
+        let clamped = max(0, min(step, total))
+        if clamped >= total {
+            uiStore.exitReplay()
+        } else {
+            uiStore.enterReplay(step: clamped)
+        }
+    }
+
+    // MARK: - Player bars
+
+    private var bottomIsWhite: Bool { uiStore.boardFlipped }
+
+    private func name(forWhite isWhite: Bool) -> String {
+        guard gameStore.gameMode == "bot" else { return isWhite ? "White" : "Black" }
+        return (gameStore.playerColor == "white") == isWhite ? "You" : BotIdentity.name
+    }
+
+    private func subtitle(forWhite isWhite: Bool) -> String {
+        guard gameStore.gameMode == "bot",
+              (gameStore.playerColor == "white") != isWhite else {
+            return isWhite ? "White" : "Black"
+        }
+        return gameStore.difficulty.capitalized
+    }
+
+    private func captured(forWhite isWhite: Bool) -> [String] {
+        isWhite ? gameStore.capturedByWhite : gameStore.capturedByBlack
+    }
+
+    private func isTurn(ofWhite isWhite: Bool) -> Bool {
+        gameStore.status == "playing" && (gameStore.currentPlayer == "white") == isWhite
+    }
+
+    private func isThinking(forWhite isWhite: Bool) -> Bool {
+        gameStore.isThinking && (gameStore.currentPlayer == "white") == isWhite
+    }
+
+    private var isYourTurn: Bool {
+        guard gameStore.gameMode == "bot" else { return true }
+        return gameStore.currentPlayer == gameStore.playerColor
+    }
+
+    // MARK: - Coach
+
+    private var showCoach: Bool {
+        !coachDismissed
+            && gameStore.moveHistory.count < 2
+            && gameStore.status == "playing"
+            && !uiStore.replayMode
+    }
+
+    // MARK: - Result
+
+    private var showResult: Bool {
+        gameStore.status != "playing" && !resultDismissed && !showNewGameSheet
+    }
+
+    private var outcome: GameResultOutcome? {
+        guard gameStore.status != "playing" else { return nil }
+
+        let whiteWon = gameStore.status == "white_wins"
+        let kind: GameResultOutcome.Kind
+        let title: String
+
+        if gameStore.status == "draw" {
+            kind = .draw
+            title = "Draw"
+        } else if gameStore.gameMode == "bot" {
+            let playerWon = whiteWon ? gameStore.playerColor == "white" : gameStore.playerColor == "black"
+            kind = playerWon ? .won : .lost
+            title = playerWon ? "You Won!" : "You Lost"
+        } else {
+            kind = .won
+            title = whiteWon ? "White Wins!" : "Black Wins!"
+        }
+
+        return GameResultOutcome(
+            kind: kind,
+            title: title,
+            detail: gameStore.drawReason,
+            whiteName: name(forWhite: true),
+            blackName: name(forWhite: false),
+            whiteScore: gameStore.capturedByWhite.count,
+            blackScore: gameStore.capturedByBlack.count,
+            moveCount: gameStore.moveHistory.count,
+            eloDelta: nil
         )
-        // Replay step: 100ms easeInOut fade on board transition (spec 6.2)
-        .animation(.easeInOut(duration: 0.1), value: uiStore.replayStep)
-        .padding(8)
     }
 
-    // MARK: - Captured Pieces (perspective-aware)
+    private func announceGameOver() {
+        guard !gameOverAnnounced else { return }
+        gameOverAnnounced = true
 
-    private var topCaptured: [String] {
-        uiStore.boardFlipped ? gameStore.capturedByBlack : gameStore.capturedByWhite
-    }
-
-    private var bottomCaptured: [String] {
-        uiStore.boardFlipped ? gameStore.capturedByWhite : gameStore.capturedByBlack
-    }
-
-    // MARK: - Game Info Row
-
-    private var gameInfoRow: some View {
-        HStack {
-            // Color indicator + turn text
-            HStack(spacing: 8) {
-                Circle()
-                    .fill(gameStore.currentPlayer == "white" ? Color.white : Color.black)
-                    .frame(width: 12, height: 12)
-                    .overlay(Circle().stroke(theme.border, lineWidth: 1))
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(gameStore.isThinking ? "Bot thinking..." : "\(gameStore.currentPlayer.capitalized) to move")
-                        .font(.subheadline.bold())
-                        .foregroundColor(theme.textPrimary)
-                    Text(gameModeLabel)
-                        .font(.caption)
-                        .foregroundColor(theme.textSecondary)
-                }
-            }
-            Spacer()
-            Text("Move \(gameStore.moveHistory.count)")
-                .font(.caption)
-                .foregroundColor(theme.textSecondary)
+        switch outcome?.kind {
+        case .won: HapticManager.shared.gameWon()
+        case .lost: HapticManager.shared.gameLost()
+        default: HapticManager.shared.buttonTap()
         }
-        .padding(10)
-        .background(theme.bgPanel)
-        .cornerRadius(10)
-    }
-
-    private var gameModeLabel: String {
-        switch gameStore.gameMode {
-        case "bot": return "vs AI (\(gameStore.difficulty.capitalized))"
-        case "pvp": return "Local PvP"
-        default: return ""
-        }
-    }
-
-    // MARK: - Replay Controls
-
-    private var replayControls: some View {
-        HStack(spacing: 16) {
-            if uiStore.replayMode {
-                Text("Reviewing")
-                    .font(.caption)
-                    .foregroundColor(theme.accent)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(theme.accent.opacity(0.15))
-                    .cornerRadius(6)
-            }
-            Spacer()
-            Group {
-                replayButton(icon: "backward.end.fill") {
-                    uiStore.enterReplay(step: 0)
-                }
-                replayButton(icon: "backward.fill") {
-                    if uiStore.replayMode {
-                        uiStore.setReplayStep(max(0, uiStore.replayStep - 1))
-                    } else {
-                        uiStore.enterReplay(step: gameStore.boardHistory.count - 1)
-                    }
-                }
-                replayButton(icon: "forward.fill") {
-                    let next = uiStore.replayStep + 1
-                    if next >= gameStore.boardHistory.count {
-                        uiStore.exitReplay()
-                    } else {
-                        uiStore.setReplayStep(next)
-                    }
-                }
-                replayButton(icon: "forward.end.fill") {
-                    uiStore.exitReplay()
-                }
-            }
-            if uiStore.replayMode {
-                Button("Live") { uiStore.exitReplay() }
-                    .font(.caption.bold())
-                    .foregroundColor(theme.accent)
-            }
-        }
-        .padding(8)
-        .background(theme.bgPanel)
-        .cornerRadius(10)
-        .padding(.top, 4)
-    }
-
-    private func replayButton(icon: String, action: @escaping () -> Void) -> some View {
-        Button(action: { HapticManager.shared.buttonTap(); action() }) {
-            Image(systemName: icon)
-                .foregroundColor(theme.textSecondary)
-                .font(.callout)
-        }
-    }
-
-    // MARK: - Controls Panel
-
-    private var controlsPanel: some View {
-        VStack(spacing: 8) {
-            HStack(spacing: 8) {
-                Button(action: { HapticManager.shared.buttonTap(); showNewGameSheet = true }) {
-                    Label("New Game", systemImage: "plus.circle.fill")
-                        .font(.subheadline.bold())
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                        .background(theme.accent)
-                        .cornerRadius(10)
-                }
-
-                Button(action: { HapticManager.shared.buttonTap(); gameStore.restart() }) {
-                    Label("Restart", systemImage: "arrow.counterclockwise")
-                        .font(.subheadline)
-                        .foregroundColor(theme.textPrimary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                        .background(theme.btnSecondaryBg)
-                        .cornerRadius(10)
-                }
-            }
-
-            Button(action: { HapticManager.shared.buttonTap(); uiStore.flipBoard() }) {
-                Label("Flip Board", systemImage: "arrow.up.arrow.down")
-                    .font(.subheadline)
-                    .foregroundColor(theme.textPrimary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(theme.btnSecondaryBg)
-                    .cornerRadius(10)
-            }
-        }
-    }
-
-    // MARK: - Game Over Overlay
-
-    private var gameOverOverlay: some View {
-        ZStack {
-            Color.black.opacity(0.6).ignoresSafeArea()
-            VStack(spacing: 20) {
-                Text(gameOverTitle)
-                    .font(.system(size: 36, weight: .black))
-                    .foregroundColor(gameOverColor)
-
-                if let reason = gameStore.drawReason {
-                    Text(reason)
-                        .font(.subheadline)
-                        .foregroundColor(theme.textSecondary)
-                }
-
-                HStack(spacing: 12) {
-                    Button(action: { gameStore.restart() }) {
-                        Text("Play Again")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(theme.accent)
-                            .cornerRadius(12)
-                    }
-                    Button(action: { showNewGameSheet = true }) {
-                        Text("New Game")
-                            .font(.headline)
-                            .foregroundColor(theme.textPrimary)
-                            .padding()
-                            .background(theme.btnSecondaryBg)
-                            .cornerRadius(12)
-                    }
-                }
-            }
-            .padding(32)
-            .background(theme.bgPanel)
-            .cornerRadius(24)
-            .shadow(color: theme.shadow, radius: 20)
-        }
-        .transition(.opacity)
-        .animation(.easeOut(duration: 0.3), value: gameStore.status)
-        .onAppear {
-            // Distinguish win vs loss based on player color (spec 6.2)
-            if gameStore.status == "white_wins" || gameStore.status == "black_wins" {
-                let playerWon = gameStore.status == "white_wins"
-                    ? gameStore.playerColor == "white"
-                    : gameStore.playerColor == "black"
-                if gameStore.gameMode == "pvp" || playerWon {
-                    HapticManager.shared.gameWon()
-                } else {
-                    HapticManager.shared.gameLost()
-                }
-            }
-        }
-    }
-
-    private var gameOverTitle: String {
-        switch gameStore.status {
-        case "white_wins": return "White Wins!"
-        case "black_wins": return "Black Wins!"
-        case "draw": return "Draw"
-        default: return ""
-        }
-    }
-
-    private var gameOverColor: Color {
-        switch gameStore.status {
-        case "white_wins": return theme.accent
-        case "black_wins": return theme.captureIndicator
-        case "draw": return theme.textSecondary
-        default: return theme.textPrimary
-        }
-    }
-}
-
-// MARK: - New Game Sheet
-
-struct NewGameSheet: View {
-    @Binding var isPresented: Bool
-    @EnvironmentObject var gameStore: GameStore
-    @Environment(\.theme) var theme
-
-    @State private var selectedMode: String = "bot"
-    @State private var selectedDifficulty: String = "medium"
-    @State private var selectedColor: String = "white"
-
-    var body: some View {
-        NavigationStack {
-            Form {
-                Section("Game Mode") {
-                    Picker("Mode", selection: $selectedMode) {
-                        Text("vs AI").tag("bot")
-                        Text("Local PvP").tag("pvp")
-                    }
-                    .pickerStyle(.segmented)
-                }
-
-                if selectedMode == "bot" {
-                    Section("Difficulty") {
-                        Picker("Difficulty", selection: $selectedDifficulty) {
-                            Text("Easy").tag("easy")
-                            Text("Medium").tag("medium")
-                            Text("Hard").tag("hard")
-                        }
-                        .pickerStyle(.segmented)
-                    }
-
-                    Section("Play As") {
-                        Picker("Color", selection: $selectedColor) {
-                            Text("White").tag("white")
-                            Text("Black").tag("black")
-                            Text("Random").tag("random")
-                        }
-                        .pickerStyle(.segmented)
-                    }
-                }
-            }
-            .scrollContentBackground(.hidden)
-            .background(theme.bgPrimary)
-            .navigationTitle("New Game")
-            .navigationBarItems(
-                leading: Button("Cancel") { isPresented = false },
-                trailing: Button("Start") {
-                    let color = selectedColor == "random"
-                        ? (Bool.random() ? "white" : "black")
-                        : selectedColor
-                    gameStore.newGame(mode: selectedMode, difficulty: selectedDifficulty, playerColor: color)
-                    isPresented = false
-                }
-                .fontWeight(.bold)
-                .foregroundColor(theme.accent)
-            )
-        }
-        .presentationDetents([.medium])
-        .presentationDragIndicator(.visible)
     }
 }
 

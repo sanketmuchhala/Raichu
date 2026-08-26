@@ -1,6 +1,6 @@
 # Raichu iOS app
 
-This is the active native iOS 17+ SwiftUI application.
+This is the active native iOS 26.2+ SwiftUI application.
 
 ## Architecture
 
@@ -54,6 +54,6 @@ Do not modify the iOS bundle script, entry point, global name, format, or export
 
 - [Canonical iOS platform guide](../../../docs/platforms/ios.md)
 - [Documentation hub](../../../docs/README.md)
-- [Implementation workbook](Raichu/ios%20app/00_PROJECT_OVERVIEW.md)
-- [Testing workbook](Raichu/ios%20app/08_TESTING.md)
-- [Xcode setup](Raichu/ios%20app/09_XCODE_SETUP.md)
+- [Implementation workbook](../../../docs/ios-workbook/00_PROJECT_OVERVIEW.md) (historical)
+- [Testing workbook](../../../docs/ios-workbook/08_TESTING.md) (historical)
+- [Xcode setup](../../../docs/ios-workbook/09_XCODE_SETUP.md) (historical)

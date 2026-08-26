@@ -46,14 +46,8 @@ struct SettingsView: View {
                 }
                 .listRowBackground(theme.bgPanel)
 
-                // Sound & Haptics
+                // Haptics
                 Section {
-                    Toggle(isOn: $uiStore.soundEnabled) {
-                        Label("Sound Effects", systemImage: "speaker.wave.2.fill")
-                            .foregroundColor(theme.textPrimary)
-                    }
-                    .tint(theme.accent)
-
                     Toggle(isOn: $uiStore.hapticsEnabled) {
                         Label("Haptic Feedback", systemImage: "hand.tap.fill")
                             .foregroundColor(theme.textPrimary)
@@ -96,9 +90,11 @@ struct SettingsView: View {
                             .foregroundColor(theme.textSecondary)
                     }
 
-                    Link(destination: URL(string: "https://raichu.live")!) {
-                        Label("raichu.live", systemImage: "globe")
-                            .foregroundColor(theme.accent)
+                    if let site = URL(string: "https://raichu.live") {
+                        Link(destination: site) {
+                            Label("raichu.live", systemImage: "globe")
+                                .foregroundColor(theme.accent)
+                        }
                     }
                 }
                 .listRowBackground(theme.bgPanel)

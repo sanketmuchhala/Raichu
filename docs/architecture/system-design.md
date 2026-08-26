@@ -38,7 +38,7 @@ flowchart TB
             Next --> Stores
             Stores --> Worker
         end
-        subgraph Native[iOS 17+]
+        subgraph Native[iOS 26.2+]
             SwiftUI[SwiftUI views]
             SwiftStores[Observable stores]
             JSCore[JavaScriptCore engine]

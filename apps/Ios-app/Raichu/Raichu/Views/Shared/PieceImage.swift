@@ -2,74 +2,86 @@
 // Raichu
 //
 // Renders a game piece image matching the web app exactly.
-// Web app source: apps/web/src/components/pieces/PieceSVG.tsx
+// Web source: apps/web/src/components/pieces/PieceSVG.tsx
 //
-// Piece mapping (identical to web PieceSVG.tsx):
-//   w  → wp.png  (White Pichu  — pawn)
-//   b  → bp.png  (Black Pichu  — pawn)
-//   W  → wr.png  (White Pikachu — rook)
-//   B  → br.png  (Black Pikachu — rook)
-//   @  → wq.png  (White Raichu — queen)
-//   $  → bq.png  (Black Raichu — queen)
-//
-// Images are the Chess.com Neo/150 set, bundled in Assets.xcassets.
-// CDN source: https://images.chesscomfiles.com/chess-themes/pieces/neo/150/
-//
-// Fallback chain:
-//   1. Bundled asset (Assets.xcassets) — used after first build
-//   2. AsyncImage from Chess.com CDN  — identical to web app source
+// Images are the Chess.com Neo/150 set, bundled in Assets.xcassets. The CDN
+// fallback exists so a missing asset degrades to the web's own source rather
+// than to a blank square.
 
 import SwiftUI
 
-// Chess.com Neo/150 CDN — same base URL as apps/web/src/components/pieces/PieceSVG.tsx
 private let CDN = "https://images.chesscomfiles.com/chess-themes/pieces/neo/150"
 
-// Maps piece character to image asset name.
-// Identical mapping to web app PIECE_IMG in PieceSVG.tsx.
-private let pieceImageName: [String: String] = [
-    "w": "wp",   // White Pichu  (pawn)
-    "b": "bp",   // Black Pichu  (pawn)
-    "W": "wr",   // White Pikachu (rook)
-    "B": "br",   // Black Pikachu (rook)
-    "@": "wq",   // White Raichu (queen)
-    "$": "bq",   // Black Raichu (queen)
-]
+/// Piece character metadata. Single source of truth for the char -> asset and
+/// char -> spoken-name mappings.
+enum PieceCatalog {
+    /// Identical mapping to `PIECE_IMG` in PieceSVG.tsx.
+    static let assetName: [String: String] = [
+        "w": "wp",   // White Pichu   (pawn)
+        "b": "bp",   // Black Pichu
+        "W": "wr",   // White Pikachu (rook)
+        "B": "br",   // Black Pikachu
+        "@": "wq",   // White Raichu  (queen)
+        "$": "bq",   // Black Raichu
+    ]
+
+    private static let pieceName: [String: String] = [
+        "w": "White Pichu",  "b": "Black Pichu",
+        "W": "White Pikachu", "B": "Black Pikachu",
+        "@": "White Raichu",  "$": "Black Raichu",
+    ]
+
+    /// Spoken description for VoiceOver.
+    static func name(of piece: String) -> String {
+        pieceName[piece] ?? "Empty square"
+    }
+
+    /// Capture-hierarchy rank, used to sort captured-piece rows the way the
+    /// web's CapturedPieces does (Pichu, then Pikachu, then Raichu).
+    static func rank(of piece: String) -> Int {
+        switch piece {
+        case "w", "b": return 0
+        case "W", "B": return 1
+        case "@", "$": return 2
+        default: return 3
+        }
+    }
+
+    /// Asset-catalog membership, resolved once. `UIImage(named:)` is a
+    /// synchronous catalog hit, and the board asks for it on every update.
+    static let bundledAssets: Set<String> = {
+        Set(assetName.values.filter { UIImage(named: $0) != nil })
+    }()
+}
 
 struct PieceImage: View {
     let piece: String
     let size: CGFloat
 
-    private var imageName: String { pieceImageName[piece] ?? "" }
-    private var cdnURL: URL? { imageName.isEmpty ? nil : URL(string: "\(CDN)/\(imageName).png") }
+    private var assetName: String? { PieceCatalog.assetName[piece] }
 
     var body: some View {
-        if imageName.isEmpty {
-            Color.clear.frame(width: size, height: size)
-        } else if UIImage(named: imageName) != nil {
-            // Bundled asset — fast, no network
-            Image(imageName)
-                .resizable()
-                .scaledToFit()
-                .frame(width: size, height: size)
-        } else if let url = cdnURL {
-            // CDN fallback — same source as web app PieceSVG.tsx
-            AsyncImage(url: url) { phase in
-                switch phase {
-                case .success(let image):
-                    image
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: size, height: size)
-                case .failure:
-                    // Network failed — transparent placeholder, never show chess unicode
-                    Color.clear.frame(width: size, height: size)
-                case .empty:
-                    Color.clear.frame(width: size, height: size)
-                @unknown default:
-                    Color.clear.frame(width: size, height: size)
+        if let name = assetName {
+            if PieceCatalog.bundledAssets.contains(name) {
+                Image(name)
+                    .resizable()
+                    .interpolation(.high)
+                    .scaledToFit()
+                    .frame(width: size, height: size)
+            } else if let url = URL(string: "\(CDN)/\(name).png") {
+                AsyncImage(url: url) { phase in
+                    if case .success(let image) = phase {
+                        image.resizable().interpolation(.high).scaledToFit()
+                    } else {
+                        // Never fall back to chess unicode — a transparent
+                        // square is better than the wrong glyph set.
+                        Color.clear
+                    }
                 }
+                .frame(width: size, height: size)
             }
-            .frame(width: size, height: size)
+        } else {
+            Color.clear.frame(width: size, height: size)
         }
     }
 }

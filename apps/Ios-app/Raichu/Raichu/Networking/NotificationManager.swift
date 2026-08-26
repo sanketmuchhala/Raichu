@@ -61,11 +61,12 @@ final class NotificationManager: NSObject, ObservableObject {
     /// Called from AppDelegate.application(_:didRegisterForRemoteNotificationsWithDeviceToken:)
     func didRegisterForRemoteNotifications(deviceToken: Data) {
         let token = deviceToken.map { String(format: "%02x", $0) }.joined()
-        // POST /api/v1/notifications/register — endpoint not yet implemented on backend (spec 6.4 note)
+        // POST {apiBaseURL}/notifications/register — endpoint not yet implemented on
+        // the backend (spec 6.4 note), so the failure is deliberately swallowed.
         // Structure is defined in NotificationRegisterRequest above for future wiring.
         Task {
             _ = try? await APIClient.shared.fetch(
-                path: "/api/v1/notifications/register",
+                path: "/notifications/register",
                 method: "POST",
                 body: NotificationRegisterRequest(token: token)
             ) as EmptyResponse

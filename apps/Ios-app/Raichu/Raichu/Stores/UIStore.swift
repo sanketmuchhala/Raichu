@@ -12,14 +12,21 @@ final class UIStore: ObservableObject {
             UserDefaults.standard.set(themeName, forKey: "raichuTheme")
         }
     }
-    @Published var boardFlipped: Bool = true   // white at bottom by default
+    @Published var boardFlipped: Bool = true {  // white at bottom by default
+        didSet {
+            UserDefaults.standard.set(boardFlipped, forKey: "raichuBoardFlipped")
+        }
+    }
+    /// Selected root tab. Lives here so screens like AuthView can navigate
+    /// without threading a binding through the view tree.
+    @Published var selectedTab: Int = Tab.play
     @Published var replayMode: Bool = false
     @Published var replayStep: Int = 0
-    @Published var soundEnabled: Bool = true {
-        didSet { UserDefaults.standard.set(soundEnabled, forKey: "raichuSound") }
-    }
     @Published var hapticsEnabled: Bool = true {
-        didSet { UserDefaults.standard.set(hapticsEnabled, forKey: "raichuHaptics") }
+        didSet {
+            UserDefaults.standard.set(hapticsEnabled, forKey: "raichuHaptics")
+            HapticManager.shared.isEnabled = hapticsEnabled
+        }
     }
 
     var currentTheme: ThemeConfig {
@@ -27,13 +34,23 @@ final class UIStore: ObservableObject {
     }
 
     init() {
+        // `object(forKey:) as? Bool` rather than `bool(forKey:)`: the latter
+        // returns false for an unset key, which would invert both defaults.
         themeName = UserDefaults.standard.string(forKey: "raichuTheme") ?? "classic"
-        soundEnabled = UserDefaults.standard.object(forKey: "raichuSound") as? Bool ?? true
+        boardFlipped = UserDefaults.standard.object(forKey: "raichuBoardFlipped") as? Bool ?? true
         hapticsEnabled = UserDefaults.standard.object(forKey: "raichuHaptics") as? Bool ?? true
+        HapticManager.shared.isEnabled = hapticsEnabled
     }
 
     func setTheme(_ name: String) {
         themeName = name
+    }
+
+    enum Tab {
+        static let play = 0
+        static let online = 1
+        static let history = 2
+        static let profile = 3
     }
 
     func flipBoard() {

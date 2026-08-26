@@ -8,12 +8,12 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLIconFile</key>
-			<string>raichu logo</string>
+			<string>RaichuLogo</string>
 			<key>CFBundleURLName</key>
-			<string>com​.raichugame​.ios</string>
+			<string>com.raichugame.ios</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com​.raichugame​.ios</string>
+				<string>com.raichugame.ios</string>
 			</array>
 		</dict>
 	</array>

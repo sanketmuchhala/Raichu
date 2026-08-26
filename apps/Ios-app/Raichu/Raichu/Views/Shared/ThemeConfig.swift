@@ -36,6 +36,8 @@ extension Color {
 
 struct ThemeConfig {
     let name: String
+    /// Human-readable name shown in the theme picker (web: `Theme.label`).
+    let label: String
     let boardLight: Color
     let boardDark: Color
     let selected: Color
@@ -60,17 +62,18 @@ struct ThemeConfig {
 extension ThemeConfig {
     static let classic = ThemeConfig(
         name: "classic",
+        label: "Classic",
         boardLight:        Color(hex: "F0D9B5"),
         boardDark:         Color(hex: "B58863"),
-        selected:          Color.yellow.opacity(0.4),
+        selected:          Color(hex: "FFD700").opacity(0.4),
         legalMove:         Color.black.opacity(0.2),
         captureIndicator:  Color(hex: "DC3232").opacity(0.45),
-        lastMove:          Color.yellow.opacity(0.2),
+        lastMove:          Color(hex: "FFD700").opacity(0.2),
         bgPrimary:         Color(hex: "1a1a1a"),
         bgSecondary:       Color(hex: "111111"),
         bgPanel:           Color(hex: "242424"),
         textPrimary:       Color(hex: "f0ece8"),
-        textSecondary:     Color(hex: "7a7a7a"),
+        textSecondary:     Color(hex: "9a9a9a"),
         accent:            Color(hex: "769656"),
         accentHover:       Color(hex: "638048"),
         border:            Color(hex: "333333"),
@@ -81,6 +84,7 @@ extension ThemeConfig {
 
     static let slate = ThemeConfig(
         name: "slate",
+        label: "Slate",
         boardLight:        Color(hex: "DEE3E6"),
         boardDark:         Color(hex: "8CA2AD"),
         selected:          Color(hex: "64B4FF").opacity(0.4),
@@ -102,6 +106,7 @@ extension ThemeConfig {
 
     static let walnut = ThemeConfig(
         name: "walnut",
+        label: "Walnut",
         boardLight:        Color(hex: "EDE0C8"),
         boardDark:         Color(hex: "A67B5B"),
         selected:          Color(hex: "FFC832").opacity(0.4),
@@ -120,6 +125,9 @@ extension ThemeConfig {
         btnSecondaryBg:    Color(hex: "3e2e23"),
         btnSecondaryHover: Color(hex: "5d4037")
     )
+
+    /// All themes in the order the web picker shows them.
+    static let all: [ThemeConfig] = [.classic, .slate, .walnut]
 
     static func theme(named name: String) -> ThemeConfig {
         switch name {

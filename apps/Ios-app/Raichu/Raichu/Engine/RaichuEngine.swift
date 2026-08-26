@@ -13,7 +13,10 @@ final class RaichuEngine {
     private let context: JSContext
 
     private init() {
-        context = JSContext()!
+        guard let context = JSContext() else {
+            preconditionFailure("Unable to create a JSContext for the Raichu engine")
+        }
+        self.context = context
         context.exceptionHandler = { _, exception in
             print("[JSEngine] \(exception?.toString() ?? "unknown JS error")")
         }

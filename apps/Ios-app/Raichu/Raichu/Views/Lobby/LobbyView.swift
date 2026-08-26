@@ -34,6 +34,17 @@ struct LobbyView: View {
             }
         }
         .navigationTitle("Online")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink {
+                    LeaderboardView()
+                } label: {
+                    Image(systemName: "trophy.fill")
+                        .foregroundColor(theme.accent)
+                }
+                .accessibilityLabel("Leaderboard")
+            }
+        }
         .toolbarBackground(theme.bgPanel, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
         .navigationDestination(item: $navigateToGameId) { id in
@@ -283,11 +294,7 @@ struct ActiveGameRow: View {
 
 private extension View {
     func panelStyle(theme: ThemeConfig) -> some View {
-        self
-            .padding()
-            .background(theme.bgPanel)
-            .cornerRadius(16)
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(theme.border, lineWidth: 0.5))
+        panelCard(theme: theme, radius: Radius.dialog, padding: Spacing.lg)
     }
 }
 

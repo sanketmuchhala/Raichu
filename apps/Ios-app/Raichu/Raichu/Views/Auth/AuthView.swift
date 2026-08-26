@@ -6,6 +6,7 @@ import SwiftUI
 
 struct AuthView: View {
     @EnvironmentObject var authStore: AuthStore
+    @EnvironmentObject var uiStore: UIStore
     @Environment(\.theme) var theme
 
     @State private var tab = 0   // 0 = Sign In, 1 = Sign Up
@@ -25,8 +26,11 @@ struct AuthView: View {
                         Image(systemName: "crown.fill")
                             .font(.system(size: 48))
                             .foregroundColor(theme.accent)
+                            // Decorative: the wordmark below carries the name.
+                            // Without this VoiceOver reads "crown dot fill".
+                            .accessibilityHidden(true)
                         Text("Raichu")
-                            .font(.system(size: 32, weight: .black))
+                            .font(Typography.displayTitle)
                             .foregroundColor(theme.textPrimary)
                     }
                     .padding(.top, 32)
@@ -64,7 +68,10 @@ struct AuthView: View {
                             Button(action: { showPassword.toggle() }) {
                                 Image(systemName: showPassword ? "eye.slash" : "eye")
                                     .foregroundColor(theme.textSecondary)
+                                    .frame(width: 44, height: 44)   // 44pt HIG minimum
+                                    .contentShape(Rectangle())
                             }
+                            .accessibilityLabel(showPassword ? "Hide password" : "Show password")
                         }
                         .padding(14)
                         .background(theme.bgPanel)
@@ -122,10 +129,15 @@ struct AuthView: View {
                     // Guest option
                     if tab == 0 {
                         Button("Continue as Guest") {
-                            // Guest mode — no auth, offline play only
+                            // Offline play needs no account, so send the user
+                            // to the board rather than leaving the button inert.
+                            HapticManager.shared.buttonTap()
+                            uiStore.selectedTab = UIStore.Tab.play
                         }
                         .font(.subheadline)
                         .foregroundColor(theme.textSecondary)
+                        .frame(maxWidth: .infinity, minHeight: 44)   // 44pt HIG minimum
+                        .contentShape(Rectangle())
                     }
 
                     Spacer(minLength: 32)
@@ -169,7 +181,11 @@ struct AuthView: View {
                     try await authStore.signUp(email: email, password: password, username: username)
                 }
             } catch {
-                // authStore.error is already set inside the store
+                // The store sets `error` for us; this is a backstop for any
+                // failure path that does not.
+                if authStore.error == nil {
+                    authStore.error = error.localizedDescription
+                }
             }
         }
     }

@@ -53,6 +53,10 @@ struct RaichuApp: App {
                 .environmentObject(uiStore)
                 .environment(\.theme, uiStore.currentTheme)
                 .task { await authStore.initialize() }
+                // Completes the Google OAuth redirect back into the app.
+                .onOpenURL { url in
+                    Task { await authStore.handleOpenURL(url) }
+                }
         }
     }
 }

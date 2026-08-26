@@ -15,12 +15,11 @@ struct ContentView: View {
     @ObservedObject private var notifications = NotificationManager.shared
 
     // Deep link state (spec 6.4 item 4)
-    @State private var selectedTab: Int = 0
     @State private var deepLinkGameId: IdentifiableString? = nil
 
     var body: some View {
         ZStack(alignment: .top) {
-        TabView(selection: $selectedTab) {
+        TabView(selection: $uiStore.selectedTab) {
             NavigationStack {
                 PlayView()
             }
@@ -65,9 +64,9 @@ struct ContentView: View {
             switch link {
             case .game(let id):
                 deepLinkGameId = IdentifiableString(id)
-                selectedTab = 1   // switch to Online tab
+                uiStore.selectedTab = UIStore.Tab.online
             case .history:
-                selectedTab = 2   // switch to History tab
+                uiStore.selectedTab = UIStore.Tab.history
             }
             notifications.pendingDeepLink = nil
         }

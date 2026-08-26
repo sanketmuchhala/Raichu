@@ -11,12 +11,12 @@ struct Position: Codable, Hashable, Equatable {
     let col: Int
 }
 
-struct CapturedInfo: Codable {
+struct CapturedInfo: Codable, Equatable {
     let position: Position
     let piece: String
 }
 
-struct Move: Codable, Identifiable {
+struct Move: Codable, Identifiable, Equatable {
     var id: String { "\(from.row)\(from.col)\(to.row)\(to.col)\(piece)" }
     let from: Position
     let to: Position
@@ -126,6 +126,27 @@ struct OnlineGameDetail: Codable, Identifiable {
     let finished_at: String?
     let white_player: Profile?
     let black_player: Profile?
+}
+
+extension Move {
+    /// Converts a persisted online move into the engine's in-memory shape.
+    init(_ gameMove: GameMove) {
+        let captured: CapturedInfo?
+        if let piece = gameMove.captured_piece,
+           let row = gameMove.captured_row,
+           let col = gameMove.captured_col {
+            captured = CapturedInfo(position: Position(row: row, col: col), piece: piece)
+        } else {
+            captured = nil
+        }
+        self.init(
+            from: Position(row: gameMove.from_row, col: gameMove.from_col),
+            to: Position(row: gameMove.to_row, col: gameMove.to_col),
+            piece: gameMove.piece,
+            captured: captured,
+            promotion: gameMove.promotion
+        )
+    }
 }
 
 struct GameMove: Codable, Identifiable {

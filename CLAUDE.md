@@ -12,7 +12,7 @@ raichu.py/
 ├── apps/
 │   ├── web/          Next.js 15 frontend (React, Zustand, Tailwind, Framer Motion)
 │   ├── api/          Express 4 REST API + matchmaking worker
-│   └── Ios-app/      Xcode project — SwiftUI iOS 17+, JavaScriptCore engine bridge
+│   └── Ios-app/      Xcode project — SwiftUI iOS 26.2+, JavaScriptCore engine bridge
 ├── packages/
 │   ├── shared-types/ TypeScript types shared across all packages
 │   ├── game-engine/  Pure TS board logic, move generation, promotion (no deps)
@@ -66,9 +66,43 @@ The 8 contract functions (must always be present on `RaichuEngine` global):
 ## iOS app — Xcode project
 
 **Path:** `apps/Ios-app/Raichu/`
-**Bundle ID:** `com.raichugame.ios`
-**Minimum deployment:** iOS 17.0
-**Language:** Swift 5.9, SwiftUI lifecycle
+**Bundle ID:** `Sanket-Muchhala-s-Org.Raichu`
+**URL scheme:** `com.raichugame.ios` (OAuth redirect; defined once in `AppConfig.urlScheme`
+and mirrored in `Info.plist` — they must stay identical)
+**Minimum deployment:** iOS 26.2
+**Language:** Swift 5, SwiftUI lifecycle
+
+### Building from the CLI
+
+`xcode-select` points at CommandLineTools on this machine, so every Xcode command
+needs the developer dir passed explicitly — no `sudo` required:
+
+```bash
+cd apps/Ios-app/Raichu
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
+  xcodebuild build -project Raichu.xcodeproj -scheme Raichu \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
+```
+
+The project uses `PBXFileSystemSynchronizedRootGroup`, so **any file added under
+`Raichu/` is compiled and bundled automatically** — no pbxproj edit needed, and
+nothing under that folder can be excluded. Keep non-source files out of it.
+
+### Design system
+
+`Views/Shared/DesignSystem.swift` holds the spacing, radius, elevation, motion and
+type scales; `ThemeConfig.swift` holds colour. Both mirror the web
+(`apps/web/src/lib/themes.ts`, `apps/web/src/app/globals.css`) — treat the web as
+canonical when they drift. `Components.swift` has the shared button styles and card
+chrome. Do NOT re-declare padding, corner radius, or backgrounds inline in a screen.
+
+Motion uses two bespoke curves and **no springs**, matching the web:
+`Motion.arrive` (`cubic-bezier(0.16, 1, 0.3, 1)`) and `Motion.press`
+(`cubic-bezier(0.2, 0.8, 0.2, 1)`). Where the web's own keyframes use a plain CSS
+easing (`.last-move-square` is `180ms ease-out`, the turn/thinking pulses are
+`ease-in-out`), iOS matches that easing — do NOT "correct" those to `Motion.arrive`
+/ `Motion.press`. The rule is: no springs, and no curve the web does not also use
+for that animation.
 
 ### Architecture
 
@@ -198,6 +232,10 @@ pnpm --filter @raichu/game-engine test # single package
 - `packages/game-engine/__tests__/` — 68 tests (board, pieces, moves, game logic)
 - `apps/api/__tests__/` — 10 tests (bot, ELO, matchmaking)
 - iOS: `RaichuTests/` (Swift Testing framework), `RaichuUITests/` (XCUIAutomation)
+- iOS accessibility: `RaichuUITests/AccessibilityAuditUITests.swift` runs one
+  `performAccessibilityAudit` per screen. Accepted findings are filtered
+  individually with reasons — never disable an audit type to reach green.
+  Board screens must name their audit types or the audit times out.
 
 All tests must pass before committing. Do NOT skip or comment out failing tests.
 
@@ -216,15 +254,22 @@ The workflow must stay green. Do NOT modify turbo task order.
 
 ---
 
-## Current build status (as of Phase 0.2)
+## Current build status
 
 | Component | Status |
 |---|---|
 | Monorepo build (`pnpm build`) | Passing |
 | Tests (`pnpm test`) | Passing |
-| iOS engine bundle (`pnpm build:ios`) | Passing — 17.5kb |
-| Xcode build | Compiles clean |
-| Supabase integration | Stubbed — needs supabase-swift package added |
-| Online multiplayer | Stubbed — needs supabase-swift package added |
+| iOS engine bundle (`pnpm build:ios`) | Passing |
+| Xcode build | Compiles clean, no warnings |
+| Supabase integration | Live — supabase-swift 2.47.0 linked |
+| Online multiplayer | Live — REST + Realtime wired |
 
-**Next phase:** Phase 1 — verify `EngineTypes.swift` and `RaichuEngine.swift` are complete and correct. See `apps/Ios-app/Raichu/Raichu/ios app/07_CODEX_PROMPTS.md` Phase 1.
+**To run the app or a device against Supabase**, set `SUPABASE_ANON_KEY` in the
+Xcode scheme's environment. Without it every auth and Realtime call sends the
+literal placeholder and fails. `AppConfig.isConfigured` reports this.
+In `DEBUG`, `apiBaseURL` points at `http://localhost:3001/api/v1`, so online
+features need the local API running.
+
+The phase workbook in `docs/ios-workbook/` is historical; `docs/platforms/ios.md`
+is the canonical architecture entry point.

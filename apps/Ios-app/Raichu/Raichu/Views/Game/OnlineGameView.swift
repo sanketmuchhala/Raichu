@@ -14,9 +14,12 @@ struct OnlineGameView: View {
     @Environment(\.dismiss) var dismiss
 
     @State private var showResignAlert = false
+    @State private var resultDismissed = false
 
     private var myColor: String { onlineGameStore.myColor ?? "white" }
-    private var boardFlipped: Bool { myColor == "black" }
+    /// `true` renders White at the bottom (BoardView.flipped, web boardFlipped).
+    /// A black player sees their own side at the bottom; everyone else sees White.
+    private var whiteAtBottom: Bool { myColor != "black" }
 
     var body: some View {
         ZStack {
@@ -33,9 +36,19 @@ struct OnlineGameView: View {
                 }
             }
 
-            // Game over overlay
-            if onlineGameStore.status != "playing" && onlineGameStore.status != "waiting" {
-                gameOverOverlay
+            // Game over
+            if isFinished && !resultDismissed && !uiStore.replayMode {
+                GameResultModal(
+                    outcome: resultOutcome,
+                    primaryTitle: "Back to Lobby",
+                    onPrimary: { dismiss() },
+                    onReplay: onlineGameStore.moves.isEmpty ? nil : {
+                        resultDismissed = true
+                        uiStore.enterReplay(step: 0)
+                    },
+                    onClose: { resultDismissed = true }
+                )
+                .transition(.opacity)
             }
         }
         .navigationBarHidden(true)
@@ -45,6 +58,7 @@ struct OnlineGameView: View {
         }
         .onDisappear {
             onlineGameStore.unsubscribe()
+            uiStore.exitReplay()
         }
         .alert("Resign?", isPresented: $showResignAlert) {
             Button("Resign", role: .destructive) {
@@ -143,18 +157,20 @@ struct OnlineGameView: View {
         VStack(spacing: 0) {
             // Top player
             PlayerBar(
-                player: topPlayer,
+                name: topPlayer?.username ?? "Opponent",
+                elo: topPlayer?.elo_rating ?? 1200,
+                isWhite: topColor == "white",
                 isCurrentTurn: onlineGameStore.currentPlayer == topColor,
                 capturedPieces: topCaptured
             )
 
             // Board
             BoardView(
-                board: onlineGameStore.board,
+                board: displayBoard,
                 selectedPiece: onlineGameStore.selectedPiece,
-                legalMoves: onlineGameStore.legalMoves,
-                lastMove: onlineGameStore.lastMove,
-                flipped: boardFlipped,
+                legalMoves: uiStore.replayMode ? [] : onlineGameStore.legalMoves,
+                lastMove: uiStore.replayMode ? nil : onlineGameStore.lastMove,
+                flipped: whiteAtBottom,
                 canInteract: canInteract,
                 onTap: { pos in
                     HapticManager.shared.buttonTap()
@@ -171,21 +187,36 @@ struct OnlineGameView: View {
                     }
                 }
             )
-            .padding(8)
+            .frame(maxHeight: .infinity)
 
             // Bottom player
             PlayerBar(
-                player: bottomPlayer,
+                name: bottomPlayer?.username ?? "You",
+                elo: bottomPlayer?.elo_rating ?? 1200,
+                isWhite: bottomColor == "white",
                 isCurrentTurn: onlineGameStore.currentPlayer == bottomColor,
                 capturedPieces: bottomCaptured
             )
+
+            if !onlineGameStore.moves.isEmpty {
+                MoveHistoryPanel(
+                    moves: onlineGameStore.moveList,
+                    replayMode: uiStore.replayMode,
+                    replayStep: uiStore.replayMode ? uiStore.replayStep : onlineGameStore.moves.count,
+                    onSelectStep: selectReplayStep,
+                    onExitReplay: uiStore.exitReplay
+                )
+                .padding(.horizontal, Spacing.sm)
+                .padding(.top, Spacing.sm)
+                .padding(.bottom, Spacing.xs)
+            }
         }
     }
 
     // MARK: - Player Helpers
 
-    private var topColor: String { boardFlipped ? "white" : "black" }
-    private var bottomColor: String { boardFlipped ? "black" : "white" }
+    private var topColor: String { whiteAtBottom ? "black" : "white" }
+    private var bottomColor: String { whiteAtBottom ? "white" : "black" }
 
     private var topPlayer: Profile? {
         topColor == "white" ? onlineGameStore.game?.white_player : onlineGameStore.game?.black_player
@@ -201,47 +232,58 @@ struct OnlineGameView: View {
     }
 
     private var canInteract: Bool {
-        onlineGameStore.status == "playing" && onlineGameStore.currentPlayer == myColor && !onlineGameStore.isThinking
+        onlineGameStore.status == "playing"
+            && onlineGameStore.currentPlayer == myColor
+            && !onlineGameStore.isThinking
+            && !uiStore.replayMode
     }
 
     // MARK: - Game Over Overlay
 
-    private var gameOverOverlay: some View {
-        ZStack {
-            Color.black.opacity(0.6).ignoresSafeArea()
-            VStack(spacing: 20) {
-                Text(gameOverTitle)
-                    .font(.system(size: 36, weight: .black))
-                    .foregroundColor(gameOverColor)
-
-                HStack(spacing: 12) {
-                    Button(action: {
-                        // Enter replay from the beginning
-                        uiStore.enterReplay(step: 0)
-                    }) {
-                        Text("Replay")
-                            .font(.headline)
-                            .foregroundColor(theme.textPrimary)
-                            .padding()
-                            .background(theme.btnSecondaryBg)
-                            .cornerRadius(12)
-                    }
-                    Button(action: { dismiss() }) {
-                        Text("Back to Lobby")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(theme.accent)
-                            .cornerRadius(12)
-                    }
-                }
-            }
-            .padding(32)
-            .background(theme.bgPanel)
-            .cornerRadius(24)
+    private var displayBoard: [[String]] {
+        if uiStore.replayMode, onlineGameStore.boardHistory.indices.contains(uiStore.replayStep) {
+            return onlineGameStore.boardHistory[uiStore.replayStep]
         }
-        .transition(.opacity)
-        .animation(.easeOut(duration: 0.3), value: onlineGameStore.status)
+        return onlineGameStore.board
+    }
+
+    private var resultOutcome: GameResultOutcome {
+        let status = onlineGameStore.status
+        let winnerId = onlineGameStore.game?.winner_id
+        let myId = authStore.userId
+
+        let kind: GameResultOutcome.Kind
+        if status == "draw" || winnerId == nil {
+            kind = .draw
+        } else {
+            kind = winnerId == myId ? .won : .lost
+        }
+
+        return GameResultOutcome(
+            kind: kind,
+            title: gameOverTitle,
+            detail: status == "abandoned" ? "Opponent resigned" : onlineGameStore.drawReason,
+            whiteName: onlineGameStore.game?.white_player?.username ?? "White",
+            blackName: onlineGameStore.game?.black_player?.username ?? "Black",
+            whiteScore: onlineGameStore.capturedByWhite.count,
+            blackScore: onlineGameStore.capturedByBlack.count,
+            moveCount: onlineGameStore.moves.count,
+            eloDelta: nil
+        )
+    }
+
+    private func selectReplayStep(_ step: Int) {
+        let total = onlineGameStore.moves.count
+        let clamped = max(0, min(step, total))
+        if clamped >= total {
+            uiStore.exitReplay()
+        } else {
+            uiStore.enterReplay(step: clamped)
+        }
+    }
+
+    private var isFinished: Bool {
+        onlineGameStore.status != "playing" && onlineGameStore.status != "waiting"
     }
 
     private var gameOverTitle: String {
@@ -254,74 +296,6 @@ struct OnlineGameView: View {
         return status == "draw" ? "Draw" : "Game Over"
     }
 
-    private var gameOverColor: Color {
-        let winnerId = onlineGameStore.game?.winner_id
-        let myId = authStore.userId
-        if winnerId == myId { return theme.accent }
-        return theme.captureIndicator
-    }
-}
-
-// MARK: - Player Bar
-
-struct PlayerBar: View {
-    @Environment(\.theme) var theme
-    let player: Profile?
-    let isCurrentTurn: Bool
-    let capturedPieces: [String]
-
-    @State private var glowOpacity: Double = 1.0
-
-    var body: some View {
-        HStack(spacing: 10) {
-            // Avatar circle
-            ZStack {
-                Circle()
-                    .fill(theme.accent.opacity(0.2))
-                    .frame(width: 36, height: 36)
-                Text(String((player?.username ?? "?").prefix(1)).uppercased())
-                    .font(.headline.bold())
-                    .foregroundColor(theme.accent)
-            }
-            .overlay(
-                Circle()
-                    .stroke(theme.accent, lineWidth: isCurrentTurn ? 2 : 0)
-                    .opacity(isCurrentTurn ? glowOpacity : 0)
-            )
-            .onAppear {
-                if isCurrentTurn {
-                    withAnimation(.easeInOut(duration: 1).repeatForever(autoreverses: true)) {
-                        glowOpacity = 0.3
-                    }
-                }
-            }
-            .onChange(of: isCurrentTurn) { _, newValue in
-                if newValue {
-                    glowOpacity = 1.0
-                    withAnimation(.easeInOut(duration: 1).repeatForever(autoreverses: true)) {
-                        glowOpacity = 0.3
-                    }
-                } else {
-                    glowOpacity = 1.0
-                }
-            }
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(player?.username ?? "Opponent")
-                    .font(.subheadline.bold())
-                    .foregroundColor(theme.textPrimary)
-                Text("\(player?.elo_rating ?? 1200) ELO")
-                    .font(.caption)
-                    .foregroundColor(theme.textSecondary)
-            }
-
-            Spacer()
-            CapturedPiecesRow(pieces: capturedPieces)
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(isCurrentTurn ? theme.accent.opacity(0.08) : theme.bgPanel)
-    }
 }
 
 #Preview {
