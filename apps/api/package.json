@@ -13,7 +13,7 @@
     "@raichu/ai-engine": "workspace:*",
     "@raichu/game-engine": "workspace:*",
     "@raichu/shared-types": "workspace:*",
-    "@supabase/supabase-js": "^2.112.3",
+    "@supabase/supabase-js": "^2.112.4",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/node": "^25.7.0",
